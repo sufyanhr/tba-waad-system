@@ -27,16 +27,16 @@ interface MainLayoutProps {
 }
 
 const modules = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: SquaresFour, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'EMPLOYER', 'MEMBER'] },
-  { id: 'users', labelKey: 'nav.users', icon: Users, roles: ['ADMIN', 'INSURANCE'] },
-  { id: 'organizations', labelKey: 'nav.organizations', icon: Buildings, roles: ['ADMIN', 'INSURANCE'] },
-  { id: 'members', labelKey: 'nav.members', icon: UsersFour, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
-  { id: 'providers', labelKey: 'nav.providers', icon: Hospital, roles: ['ADMIN', 'INSURANCE'] },
-  { id: 'claims', labelKey: 'nav.claims', icon: FileText, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'MEMBER'] },
-  { id: 'approvals', labelKey: 'nav.approvals', icon: CheckCircle, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
-  { id: 'finance', labelKey: 'nav.finance', icon: CurrencyDollar, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
-  { id: 'reports', labelKey: 'nav.reports', icon: ChartBar, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
-  { id: 'settings', labelKey: 'nav.settings', icon: Gear, roles: ['ADMIN'] },
+  { id: 'dashboard', labelKey: 'nav.dashboard' as const, icon: SquaresFour, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'EMPLOYER', 'MEMBER'] },
+  { id: 'users', labelKey: 'nav.users' as const, icon: Users, roles: ['ADMIN', 'INSURANCE'] },
+  { id: 'organizations', labelKey: 'nav.organizations' as const, icon: Buildings, roles: ['ADMIN', 'INSURANCE'] },
+  { id: 'members', labelKey: 'nav.members' as const, icon: UsersFour, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
+  { id: 'providers', labelKey: 'nav.providers' as const, icon: Hospital, roles: ['ADMIN', 'INSURANCE'] },
+  { id: 'claims', labelKey: 'nav.claims' as const, icon: FileText, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'MEMBER'] },
+  { id: 'approvals', labelKey: 'nav.approvals' as const, icon: CheckCircle, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
+  { id: 'finance', labelKey: 'nav.finance' as const, icon: CurrencyDollar, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
+  { id: 'reports', labelKey: 'nav.reports' as const, icon: ChartBar, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
+  { id: 'settings', labelKey: 'nav.settings' as const, icon: Gear, roles: ['ADMIN'] },
 ]
 
 export function MainLayout({ children, activeModule, onModuleChange }: MainLayoutProps) {

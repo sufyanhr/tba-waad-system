@@ -1,11 +1,11 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
 import enTranslation from './locales/en/translation.json'
 import arTranslation from './locales/ar/translation.json'
 
-const savedLanguage = localStorage.getItem('language') || 'en'
-
 i18n
+  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
@@ -16,20 +16,24 @@ i18n
         translation: arTranslation
       }
     },
-    lng: savedLanguage,
     fallbackLng: 'en',
+    debug: false,
     interpolation: {
       escapeValue: false
+    },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage']
     }
   })
 
 i18n.on('languageChanged', (lng) => {
-  localStorage.setItem('language', lng)
   document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr'
   document.documentElement.lang = lng
 })
 
-document.documentElement.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'
-document.documentElement.lang = savedLanguage
+const currentLang = i18n.language || 'en'
+document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'
+document.documentElement.lang = currentLang
 
 export default i18n
