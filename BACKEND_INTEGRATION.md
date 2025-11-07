@@ -146,9 +146,24 @@ setUser(null)
 - Provides toast notifications for auth events
 
 ### 2. Dashboard (`/src/components/modules/Dashboard.tsx`)
-- Fetches stats from `/api/dashboard/stats`
-- Displays error messages on API failure
-- Shows loading state while fetching
+- **Primary Data Source**: Fetches comprehensive stats from `/api/dashboard/stats`
+- **Fallback Data Source**: If dashboard stats endpoint fails, aggregates data from:
+  - `/api/claims` - Total claims, pending, approved counts
+  - `/api/approvals` - Pending approvals count
+  - `/api/members` - Total members count
+  - `/api/providers` - Active providers count
+- **Visualizations**: 
+  - Displays 8 stat cards (Total Claims, Pending Claims, Approved Claims, Pending Approvals, Active Members, Active Providers, Total Amount, Overdue Invoices)
+  - Shows pie chart of Claims Distribution (Pending, Approved, Rejected) using Recharts
+  - Role-based visibility for stats and charts
+- **Error Handling**:
+  - Displays error messages on API failure
+  - Automatically redirects to login on 401 (invalid JWT token)
+  - Shows loading state with skeleton cards while fetching
+- **Features**:
+  - Currency formatting for financial data
+  - Color-coded status indicators
+  - Responsive grid layout (4 columns on desktop, 2 on tablet, 1 on mobile)
 
 ### 3. Claims (`/src/components/modules/Claims.tsx`)
 - Fetches claims from `/api/claims`
@@ -214,6 +229,9 @@ public class WebConfig implements WebMvcConfigurer {
 ```
 
 ### Claims List Response
+The dashboard now supports both array and paginated response formats:
+
+**Option 1: Simple Array**
 ```json
 [
   {
@@ -236,7 +254,7 @@ public class WebConfig implements WebMvcConfigurer {
 ]
 ```
 
-Or paginated:
+**Option 2: Paginated Response**
 ```json
 {
   "content": [...],

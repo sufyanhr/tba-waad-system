@@ -12,6 +12,13 @@ This is a multi-tenant enterprise system requiring sophisticated role-based acce
 
 ## Essential Features
 
+### Dashboard Analytics
+- **Functionality**: Real-time visualization of system metrics and claim statistics
+- **Purpose**: Provide at-a-glance insights into operational performance and claim processing status
+- **Trigger**: User logs in or navigates to Dashboard module
+- **Progression**: Login → Dashboard load → API data fetch → Stats display → Chart rendering → Interactive exploration
+- **Success criteria**: Stats cards display accurate counts, pie chart shows claim distribution, data refreshes correctly, 401 errors trigger re-authentication
+
 ### User Authentication & Authorization
 - **Functionality**: JWT-based authentication with role-based access control (ADMIN, INSURANCE, PROVIDER, EMPLOYER, MEMBER)
 - **Purpose**: Ensure data security and appropriate access levels for different user types
