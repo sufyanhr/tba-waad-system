@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +28,7 @@ import { claimsApi } from '@/services/api'
 import { toast } from 'sonner'
 
 export function Claims() {
+  const { t } = useTranslation()
   const { user, hasRole } = useAuth()
   const [claims, setClaims] = useState<Claim[]>([])
   const [filteredClaims, setFilteredClaims] = useState<Claim[]>([])
@@ -139,8 +141,8 @@ export function Claims() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Claims</h1>
-            <p className="text-muted-foreground mt-1">Loading claims...</p>
+            <h1 className="text-3xl font-semibold tracking-tight">{t('claims.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('common.loading')}</p>
           </div>
         </div>
       </div>
@@ -151,29 +153,29 @@ export function Claims() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Claims</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{t('claims.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            Manage medical insurance claims
+            {t('claims.title')}
           </p>
         </div>
         {canCreateClaim && (
           <Button onClick={() => setDialogOpen(true)}>
             <Plus size={18} className="mr-2" />
-            New Claim
+            {t('claims.newClaim')}
           </Button>
         )}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Claims</CardTitle>
+          <CardTitle>{t('claims.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-4">
             <div className="relative flex-1">
               <MagnifyingGlass className="absolute left-3 top-3 text-muted-foreground" size={18} />
               <Input
-                placeholder="Search by claim number, member, or provider..."
+                placeholder={t('claims.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -181,14 +183,14 @@ export function Claims() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t('claims.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="ALL">{t('claims.status')}</SelectItem>
+                <SelectItem value="PENDING">{t('claims.pending')}</SelectItem>
                 <SelectItem value="IN_REVIEW">In Review</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
+                <SelectItem value="APPROVED">{t('claims.approved')}</SelectItem>
+                <SelectItem value="REJECTED">{t('claims.rejected')}</SelectItem>
                 <SelectItem value="PAID">Paid</SelectItem>
                 <SelectItem value="CLOSED">Closed</SelectItem>
               </SelectContent>

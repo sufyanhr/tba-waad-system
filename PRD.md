@@ -82,6 +82,13 @@ This is a multi-tenant enterprise system requiring sophisticated role-based acce
 - **Progression**: Settings panel → Configuration changes → Save → Audit log entry / Audit log → Filter/search → View details → Export
 - **Success criteria**: All significant actions logged with timestamp and user, settings persisted correctly
 
+### Internationalization (i18n)
+- **Functionality**: Bilingual support with English and Arabic language switching and RTL layout
+- **Purpose**: Provide accessible interface for Arabic and English-speaking users with proper text direction
+- **Trigger**: User clicks language switcher in navbar or selects preferred language on login
+- **Progression**: Language selection → i18n state update → UI re-render → Layout direction change (RTL/LTR) → localStorage persistence
+- **Success criteria**: All UI text translates instantly, Arabic displays with RTL layout, language preference persists across sessions, no page reload required for language switching
+
 ## Edge Case Handling
 - **Expired Sessions**: Automatically redirect to login with clear message and return-to-original-page after re-authentication
 - **Concurrent Edits**: Show warning when record was modified by another user, allow review before overwrite

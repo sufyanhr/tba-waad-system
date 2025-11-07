@@ -1,16 +1,19 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Hospital, Lock, Envelope } from '@phosphor-icons/react'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<boolean>
 }
 
 export function LoginPage({ onLogin }: LoginPageProps) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -35,15 +38,18 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center">
             <Hospital size={32} weight="bold" className="text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-3xl font-semibold tracking-tight">TBA-WAAD</CardTitle>
+            <CardTitle className="text-3xl font-semibold tracking-tight">{t('login.welcome')}</CardTitle>
             <CardDescription className="text-base mt-2">
-              Health Insurance Platform
+              {t('login.subtitle')}
             </CardDescription>
           </div>
         </CardHeader>
@@ -56,7 +62,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('login.email')}</Label>
               <div className="relative">
                 <Envelope className="absolute left-3 top-3 text-muted-foreground" size={18} />
                 <Input
@@ -72,7 +78,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('login.password')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 text-muted-foreground" size={18} />
                 <Input
@@ -88,13 +94,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? `${t('common.loading')}` : t('login.button')}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Enter your credentials to access the platform</p>
-          </div>
+
         </CardContent>
       </Card>
     </div>

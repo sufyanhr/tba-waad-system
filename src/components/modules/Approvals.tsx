@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import { ApprovalViewDialog } from './ApprovalViewDialog'
 import { MagnifyingGlass } from '@phosphor-icons/react'
 
 export function Approvals() {
+  const { t } = useTranslation()
   const [approvals, setApprovals] = useState<Approval[]>([])
   const [filteredApprovals, setFilteredApprovals] = useState<Approval[]>([])
   const [searchTerm, setSearchTerm] = useState('')

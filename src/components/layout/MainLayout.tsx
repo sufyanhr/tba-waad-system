@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -17,6 +18,7 @@ import {
 } from '@phosphor-icons/react'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
+import { LanguageSwitcher } from './LanguageSwitcher'
 
 interface MainLayoutProps {
   children: ReactNode
@@ -25,19 +27,20 @@ interface MainLayoutProps {
 }
 
 const modules = [
-  { id: 'dashboard', label: 'Dashboard', icon: SquaresFour, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'EMPLOYER', 'MEMBER'] },
-  { id: 'users', label: 'Users', icon: Users, roles: ['ADMIN', 'INSURANCE'] },
-  { id: 'organizations', label: 'Organizations', icon: Buildings, roles: ['ADMIN', 'INSURANCE'] },
-  { id: 'members', label: 'Members', icon: UsersFour, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
-  { id: 'providers', label: 'Providers', icon: Hospital, roles: ['ADMIN', 'INSURANCE'] },
-  { id: 'claims', label: 'Claims', icon: FileText, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'MEMBER'] },
-  { id: 'approvals', label: 'Approvals', icon: CheckCircle, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
-  { id: 'finance', label: 'Finance', icon: CurrencyDollar, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
-  { id: 'reports', label: 'Reports', icon: ChartBar, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
-  { id: 'settings', label: 'Settings', icon: Gear, roles: ['ADMIN'] },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: SquaresFour, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'EMPLOYER', 'MEMBER'] },
+  { id: 'users', labelKey: 'nav.users', icon: Users, roles: ['ADMIN', 'INSURANCE'] },
+  { id: 'organizations', labelKey: 'nav.organizations', icon: Buildings, roles: ['ADMIN', 'INSURANCE'] },
+  { id: 'members', labelKey: 'nav.members', icon: UsersFour, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
+  { id: 'providers', labelKey: 'nav.providers', icon: Hospital, roles: ['ADMIN', 'INSURANCE'] },
+  { id: 'claims', labelKey: 'nav.claims', icon: FileText, roles: ['ADMIN', 'INSURANCE', 'PROVIDER', 'MEMBER'] },
+  { id: 'approvals', labelKey: 'nav.approvals', icon: CheckCircle, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
+  { id: 'finance', labelKey: 'nav.finance', icon: CurrencyDollar, roles: ['ADMIN', 'INSURANCE', 'PROVIDER'] },
+  { id: 'reports', labelKey: 'nav.reports', icon: ChartBar, roles: ['ADMIN', 'INSURANCE', 'EMPLOYER'] },
+  { id: 'settings', labelKey: 'nav.settings', icon: Gear, roles: ['ADMIN'] },
 ]
 
 export function MainLayout({ children, activeModule, onModuleChange }: MainLayoutProps) {
+  const { t } = useTranslation()
   const { user, logout, hasRole } = useAuth()
 
   const visibleModules = modules.filter(module => 
@@ -63,7 +66,7 @@ export function MainLayout({ children, activeModule, onModuleChange }: MainLayou
             </div>
             <div>
               <h1 className="font-semibold text-lg tracking-tight">TBA-WAAD</h1>
-              <p className="text-xs text-muted-foreground">Health Insurance</p>
+              <p className="text-xs text-muted-foreground">{t('login.subtitle')}</p>
             </div>
           </div>
         </div>
@@ -85,7 +88,7 @@ export function MainLayout({ children, activeModule, onModuleChange }: MainLayou
                   onClick={() => onModuleChange(module.id)}
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="font-medium">{module.label}</span>
+                  <span className="font-medium">{t(module.labelKey)}</span>
                 </Button>
               )
             })}
@@ -110,13 +113,16 @@ export function MainLayout({ children, activeModule, onModuleChange }: MainLayou
             onClick={logout}
           >
             <SignOut size={18} />
-            <span>Sign Out</span>
+            <span>{t('nav.logout')}</span>
           </Button>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
+      <main className="flex-1 overflow-hidden flex flex-col">
+        <header className="border-b border-border bg-card px-6 py-3 flex items-center justify-end">
+          <LanguageSwitcher />
+        </header>
+        <ScrollArea className="flex-1">
           <div className="p-6">
             {children}
           </div>

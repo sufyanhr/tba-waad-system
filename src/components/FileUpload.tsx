@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +25,7 @@ export function FileUpload({
   maxSizeMB = 10,
   acceptedTypes = ['.pdf', '.xlsx', '.xls', '.doc', '.docx'],
 }: FileUploadProps) {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
