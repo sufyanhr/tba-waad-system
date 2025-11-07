@@ -51,6 +51,10 @@ public class Member {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
     
+    @ManyToOne
+    @JoinColumn(name = "policy_id")
+    private Policy policy;
+    
     @Column(name = "policy_number")
     private String policyNumber;
     

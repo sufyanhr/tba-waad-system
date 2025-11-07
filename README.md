@@ -1,20 +1,28 @@
-# TBA-WAAD Frontend - Spring Boot Integration
+# TBA-WAAD Health Insurance Platform
 
-## Quick Start
+A comprehensive Third Party Administrator (TPA) health insurance management system with a React frontend and Spring Boot backend.
 
-This React frontend is now integrated with your Java Spring Boot backend.
+## 🏗️ Architecture
 
-### Prerequisites
+This project consists of two main components:
 
-1. **Backend Running**: Ensure your Spring Boot backend is running on `localhost:8080`
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
+### Frontend (React + TypeScript)
+- Modern React 19 with TypeScript
+- Tailwind CSS for styling
+- shadcn/ui component library
+- JWT authentication
+- Role-based UI rendering
 
-2. **Node.js**: Version 18 or higher
+### Backend (Spring Boot + Java 21)
+- Spring Boot 3.2.5 with Java 21
+- PostgreSQL database
+- JWT authentication & authorization
+- RESTful API with Swagger documentation
+- Role-based access control (RBAC)
 
-### Installation & Running
+## 🚀 Quick Start
+
+### Frontend Setup
 
 ```bash
 # Install dependencies
@@ -24,267 +32,199 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+The frontend will be available at `http://localhost:5173`
 
-## What Changed
+### Backend Setup
 
-### ✅ Backend Integration Complete
+1. **Setup PostgreSQL Database:**
+```bash
+# Create database
+createdb tba_waad
+```
 
-1. **API Service Layer** (`/src/services/api.ts`)
-   - All API endpoints configured
-   - JWT authentication with Bearer tokens
-   - Automatic token management
-   - Error handling with toast notifications
+2. **Configure Database:**
+Edit `backend/src/main/resources/application.yml` if needed (default credentials: postgres/12345)
 
-2. **Authentication** (`/src/contexts/AuthContext.tsx`)
-   - Real JWT authentication via `/api/auth/login`
-   - Token stored in `localStorage`
-   - Automatic token refresh on app load
-   - Protected routes
+3. **Run Backend:**
+```bash
+cd backend
+mvn spring-boot:run
+```
 
-3. **Dashboard** (`/src/components/modules/Dashboard.tsx`)
-   - Fetches real data from `/api/dashboard/stats`
-   - Displays claims, members, providers stats
+The backend API will be available at `http://localhost:8080`
 
-4. **Claims Module** (`/src/components/modules/Claims.tsx`)
-   - Connected to `/api/claims`
-   - Create, read, update operations
-   - Status filtering
+4. **Access API Documentation:**
+Open `http://localhost:8080/swagger-ui.html` in your browser
 
-5. **Environment Configuration** (`.env`)
-   - `VITE_API_BASE_URL=http://localhost:8080/api`
+## 📖 Documentation
 
-## API Endpoints Used
+- **Backend API Guide:** See [backend/README.md](backend/README.md)
+- **Quick Start Guide:** See [backend/QUICKSTART.md](backend/QUICKSTART.md)
+- **Product Requirements:** See [PRD.md](PRD.md)
+
+## 🔐 Default Users
+
+The backend automatically creates test users on first run:
+
+| Username  | Password     | Role      |
+|-----------|--------------|-----------|
+| admin     | admin123     | ADMIN     |
+| insurance | insurance123 | INSURANCE |
+| provider  | provider123  | PROVIDER  |
+| employer  | employer123  | EMPLOYER  |
+| member    | member123    | MEMBER    |
+
+## 🛠️ Technology Stack
+
+### Frontend
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui components
+- Framer Motion
+- React Hook Form
+- Zustand (state management)
+
+### Backend
+- Java 21
+- Spring Boot 3.2.5
+- Spring Security with JWT
+- PostgreSQL
+- JPA/Hibernate
+- Swagger/OpenAPI
+- Maven
+
+## 📋 Features
+
+- ✅ User Authentication & Authorization
+- ✅ Organization Management
+- ✅ Member Management
+- ✅ Provider Network Management
+- ✅ Claims Processing Workflow
+- ✅ Pre-Authorization Approvals
+- ✅ Finance & Settlement Tracking
+- ✅ Reporting & Analytics
+- ✅ Audit Logging
+- ✅ Role-Based Access Control
+
+## 🎯 User Roles
+
+- **ADMIN**: Full system access
+- **INSURANCE**: Insurance company staff - manage claims, approvals, members
+- **PROVIDER**: Healthcare provider - submit claims, view approvals
+- **EMPLOYER**: Organization/employer - view members and reports
+- **MEMBER**: Insured member - view own claims and approvals
+
+## 📊 API Endpoints
 
 ### Authentication
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
-- `GET /api/auth/me` - Get current user
 
-### Dashboard
-- `GET /api/dashboard/stats` - Dashboard statistics
-- `GET /api/dashboard/activity` - Recent activity
+### Core Resources
+- `/api/users` - User management
+- `/api/organizations` - Organization management
+- `/api/members` - Member management
+- `/api/providers` - Provider management
+- `/api/claims` - Claims processing
+- `/api/approvals` - Pre-authorization requests
+- `/api/finance` - Financial records
+- `/api/reports` - Analytics and reporting
 
-### Claims
-- `GET /api/claims` - List all claims
-- `GET /api/claims/{id}` - Get claim details
-- `POST /api/claims` - Create new claim
-- `PUT /api/claims/{id}` - Update claim
-- `DELETE /api/claims/{id}` - Delete claim
-- `PATCH /api/claims/{id}/status` - Update claim status
+Full API documentation available at `http://localhost:8080/swagger-ui.html`
 
-### Members
-- `GET /api/members` - List all members
-- `POST /api/members` - Create new member
-- (Full CRUD operations)
+## 🔧 Development
 
-### Providers
-- `GET /api/providers` - List all providers
-- `POST /api/providers` - Create new provider
-- (Full CRUD operations)
+### Running Tests
+```bash
+# Frontend tests
+npm test
 
-### Organizations
-- `GET /api/organizations` - List all organizations
-- `POST /api/organizations` - Create new organization
-- (Full CRUD operations)
-
-### Approvals
-- `GET /api/approvals` - List all approvals
-- `PATCH /api/approvals/{id}/approve` - Approve request
-- `PATCH /api/approvals/{id}/reject` - Reject request
-- (Full CRUD operations)
-
-### Finance
-- `GET /api/finance/invoices` - List invoices
-- `GET /api/finance/settlements` - List settlements
-- `POST /api/finance/invoices/{id}/payment` - Process payment
-
-### Reports
-- `POST /api/reports/generate` - Generate report
-- `GET /api/reports/{id}/export` - Export report
-
-### Settings
-- `GET /api/settings` - Get system settings
-- `PUT /api/settings` - Update settings
-- `GET /api/settings/audit-logs` - Get audit logs
-
-## Backend Requirements
-
-Your Spring Boot backend must implement:
-
-### 1. CORS Configuration
-
-```java
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173", "http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
-}
+# Backend tests
+cd backend
+mvn test
 ```
 
-### 2. JWT Authentication
+### Building for Production
 
-- Accept `Authorization: Bearer <token>` header
-- Return token in login response
-- Validate token on protected endpoints
-- Implement `/api/auth/me` endpoint
-
-### 3. Response Format
-
-**Login Response:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "user-123",
-    "email": "admin@waad.com",
-    "name": "Admin User",
-    "role": "ADMIN",
-    "active": true,
-    "createdAt": "2024-01-01T00:00:00Z"
-  }
-}
+**Frontend:**
+```bash
+npm run build
 ```
 
-**Dashboard Stats Response:**
-```json
-{
-  "totalClaims": 150,
-  "pendingClaims": 25,
-  "approvedClaims": 100,
-  "totalAmount": 500000,
-  "totalMembers": 500,
-  "activeProviders": 50,
-  "pendingApprovals": 15,
-  "overdueInvoices": 5
-}
+**Backend:**
+```bash
+cd backend
+mvn clean package
 ```
 
-## Testing
-
-### 1. Check Backend Connection
-Open browser console and try logging in. You should see:
-- `POST http://localhost:8080/api/auth/login` with status 200
-- Token stored in localStorage under key `auth_token`
-
-### 2. Check API Calls
-Navigate to Dashboard. You should see:
-- `GET http://localhost:8080/api/dashboard/stats` with status 200
-- Stats displayed on dashboard cards
-
-### 3. Check Claims
-Navigate to Claims module. You should see:
-- `GET http://localhost:8080/api/claims` with status 200
-- Claims list populated from backend
-
-## Troubleshooting
-
-### "Network Error" or "Failed to fetch"
-- Verify backend is running on port 8080
-- Check CORS is enabled in Spring Boot
-- Check browser console for detailed error
-
-### "401 Unauthorized"
-- Check JWT token is being sent in Authorization header
-- Verify token validation in backend
-- Check token hasn't expired
-
-### "404 Not Found"
-- Verify API endpoints exist in backend
-- Check endpoint URLs match between frontend and backend
-- Verify Spring Boot controllers are correctly mapped
-
-### Login works but dashboard shows no data
-- Check backend returns data in expected format
-- Verify `/api/dashboard/stats` endpoint exists
-- Check browser console for errors
-
-## File Structure
+## 📁 Project Structure
 
 ```
-src/
-├── services/
-│   └── api.ts                 # API service layer (NEW)
-├── contexts/
-│   └── AuthContext.tsx        # Authentication context (UPDATED)
-├── components/
-│   ├── auth/
-│   │   └── LoginPage.tsx      # Login page (UPDATED)
-│   ├── modules/
-│   │   ├── Dashboard.tsx      # Dashboard (UPDATED)
-│   │   └── Claims.tsx         # Claims module (UPDATED)
-│   └── layout/
-│       └── MainLayout.tsx     # Main layout with sidebar
-└── types/
-    └── index.ts               # TypeScript types
-
-.env                            # Environment variables (NEW)
-BACKEND_INTEGRATION.md          # Detailed integration docs (NEW)
+.
+├── backend/                    # Spring Boot backend
+│   ├── src/main/java/com/waad/tba/
+│   │   ├── controller/        # REST controllers
+│   │   ├── service/           # Business logic
+│   │   ├── repository/        # Data access
+│   │   ├── model/             # JPA entities
+│   │   ├── security/          # JWT & security
+│   │   ├── config/            # Configuration
+│   │   └── dto/               # Data transfer objects
+│   ├── src/main/resources/
+│   │   └── application.yml    # App configuration
+│   └── pom.xml               # Maven dependencies
+├── src/                       # React frontend
+│   ├── components/           # React components
+│   ├── contexts/             # React contexts
+│   ├── hooks/                # Custom hooks
+│   └── App.tsx              # Main app component
+├── PRD.md                    # Product requirements
+└── README.md                 # This file
 ```
 
-## Next Steps
+## 🚀 Deployment
 
-1. **Test Login**: Try logging in with valid backend credentials
-2. **Verify Dashboard**: Check that dashboard stats load from backend
-3. **Test Claims**: Try viewing and creating claims
-4. **Integrate Other Modules**: Update Members, Providers, Organizations components to use API
-5. **Error Handling**: Test error scenarios (invalid credentials, network errors, etc.)
-6. **Production Build**: Update `.env` for production API URL
+### Backend Deployment
 
-## Development Workflow
-
-When developing new features:
-
-1. **Add API function** in `/src/services/api.ts`
-2. **Update component** to use the API function
-3. **Add error handling** with try-catch and toast
-4. **Test with backend** running
-
-Example:
-```typescript
-// In api.ts
-export const membersApi = {
-  async getAll() {
-    const response = await fetchWithAuth('/members')
-    return response.json()
-  }
-}
-
-// In component
-import { membersApi } from '@/services/api'
-import { toast } from 'sonner'
-
-const loadMembers = async () => {
-  try {
-    const data = await membersApi.getAll()
-    setMembers(data)
-  } catch (error) {
-    toast.error('Failed to load members')
-  }
-}
+1. Set production database credentials
+2. Configure JWT secret via environment variable
+3. Build and run:
+```bash
+mvn clean package -DskipTests
+java -jar target/tba-backend-1.0.0.jar
 ```
 
-## Documentation
+### Frontend Deployment
 
-- **Detailed Integration Guide**: See `BACKEND_INTEGRATION.md`
-- **API Service Documentation**: See inline comments in `/src/services/api.ts`
-- **Backend Setup**: See `/backend/README.md` (if exists)
+1. Build production bundle:
+```bash
+npm run build
+```
 
-## Support
+2. Deploy the `dist/` folder to your hosting service
 
-If you encounter issues:
-1. Check browser console for errors
-2. Check backend logs for errors
-3. Review `BACKEND_INTEGRATION.md` for troubleshooting
-4. Verify CORS configuration
-5. Test API endpoints directly with Postman/curl
+## 🐛 Troubleshooting
+
+### Database Connection Issues
+- Verify PostgreSQL is running
+- Check credentials in `application.yml`
+- Ensure database `tba_waad` exists
+
+### CORS Errors
+- Backend is configured for `localhost:5173` and `localhost:3000`
+- Update `CorsConfig.java` for production domains
+
+### JWT Token Issues
+- Tokens expire after 24 hours by default
+- Use the `/api/auth/login` endpoint to get a new token
+- Ensure token is sent as `Authorization: Bearer <token>`
+
+## 📄 License
+
+The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
 
 ---
 
-**Status**: ✅ Backend integration complete and ready for testing
+**Built with ❤️ for healthcare administration**
