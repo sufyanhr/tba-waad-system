@@ -23,6 +23,8 @@ import { Claim, ClaimStatus } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { ClaimDialog } from './ClaimDialog'
 import { ClaimViewDialog } from './ClaimViewDialog'
+import { claimsApi } from '@/services/api'
+import { toast } from 'sonner'
 
 export function Claims() {
   const { user, hasRole } = useAuth()
@@ -45,16 +47,12 @@ export function Claims() {
 
   const loadClaims = async () => {
     try {
-      const data = await window.spark.kv.get<Claim[]>('claims') || []
-      let userClaims = data
-      
-      if (user?.role === 'PROVIDER' && user.providerId) {
-        userClaims = data.filter(c => c.providerId === user.providerId)
-      } else if (user?.role === 'MEMBER') {
-        userClaims = data.filter(c => c.memberId === user.id)
-      }
-      
-      setClaims(userClaims)
+      const params = statusFilter !== 'ALL' ? { status: statusFilter } : {}
+      const data = await claimsApi.getAll(params)
+      setClaims(Array.isArray(data) ? data : data.content || [])
+    } catch (error: any) {
+      console.error('Failed to load claims:', error)
+      toast.error('Failed to load claims')
     } finally {
       setLoading(false)
     }
@@ -80,19 +78,21 @@ export function Claims() {
   }
 
   const handleSave = async (claim: Claim) => {
-    const allClaims = await window.spark.kv.get<Claim[]>('claims') || []
-    const existing = allClaims.findIndex(c => c.id === claim.id)
-    
-    if (existing >= 0) {
-      allClaims[existing] = claim
-    } else {
-      allClaims.push(claim)
+    try {
+      if (claim.id && claim.id.startsWith('temp-')) {
+        await claimsApi.create(claim)
+        toast.success('Claim created successfully')
+      } else {
+        await claimsApi.update(claim.id, claim)
+        toast.success('Claim updated successfully')
+      }
+      await loadClaims()
+      setDialogOpen(false)
+      setSelectedClaim(undefined)
+    } catch (error: any) {
+      console.error('Failed to save claim:', error)
+      toast.error('Failed to save claim')
     }
-    
-    await window.spark.kv.set('claims', allClaims)
-    await loadClaims()
-    setDialogOpen(false)
-    setSelectedClaim(undefined)
   }
 
   const getStatusColor = (status: ClaimStatus) => {

@@ -92,18 +92,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <p className="text-xs font-medium text-muted-foreground mb-3">Demo Accounts:</p>
-            <div className="space-y-2 text-xs text-muted-foreground">
-              <div><span className="font-medium">Admin:</span> admin@waad.com</div>
-              <div><span className="font-medium">Insurance:</span> insurance@waad.com</div>
-              <div><span className="font-medium">Provider:</span> provider@waad.com</div>
-              <div><span className="font-medium">Employer:</span> employer@waad.com</div>
-              <div><span className="font-medium">Member:</span> member@waad.com</div>
-              <div className="pt-2 border-t border-border/50">
-                <span className="font-medium">Password:</span> (any password works)
-              </div>
-            </div>
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p>Enter your credentials to access the platform</p>
           </div>
         </CardContent>
       </Card>

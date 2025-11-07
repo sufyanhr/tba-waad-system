@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, CheckCircle, CurrencyDollar, UsersFour, Hospital, Clock, TrendUp } from '@phosphor-icons/react'
 import { DashboardStats } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
+import { dashboardApi } from '@/services/api'
+import { toast } from 'sonner'
 
 export function Dashboard() {
   const { user } = useAuth()
@@ -21,22 +23,11 @@ export function Dashboard() {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const claims = await window.spark.kv.get<any[]>('claims') || []
-        const members = await window.spark.kv.get<any[]>('members') || []
-        const providers = await window.spark.kv.get<any[]>('providers') || []
-        const approvals = await window.spark.kv.get<any[]>('approvals') || []
-        const invoices = await window.spark.kv.get<any[]>('invoices') || []
-
-        setStats({
-          totalClaims: claims.length,
-          pendingClaims: claims.filter(c => c.status === 'PENDING' || c.status === 'IN_REVIEW').length,
-          approvedClaims: claims.filter(c => c.status === 'APPROVED' || c.status === 'PAID').length,
-          totalAmount: claims.reduce((sum, c) => sum + (c.approvedAmount || c.amount), 0),
-          totalMembers: members.filter(m => m.status === 'ACTIVE').length,
-          activeProviders: providers.filter(p => p.status === 'ACTIVE').length,
-          pendingApprovals: approvals.filter(a => a.status === 'PENDING').length,
-          overdueInvoices: invoices.filter(i => i.status === 'OVERDUE').length,
-        })
+        const data = await dashboardApi.getStats()
+        setStats(data)
+      } catch (error: any) {
+        console.error('Failed to load dashboard stats:', error)
+        toast.error('Failed to load dashboard data')
       } finally {
         setLoading(false)
       }

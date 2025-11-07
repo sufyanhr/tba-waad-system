@@ -1,11 +1,13 @@
-import { createContext, useContext, ReactNode } from 'react'
-import { User, AuthState } from '@/types'
-import { useKV } from '@github/spark/hooks'
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react'
+import { User } from '@/types'
+import { authApi } from '@/services/api'
+import { toast } from 'sonner'
 
 interface AuthContextType {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+  loading: boolean
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
   hasRole: (roles: string | string[]) => boolean
@@ -14,67 +16,73 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [authState, setAuthState] = useKV<AuthState>('auth-state', {
-    user: null,
-    token: null,
-    isAuthenticated: false,
-  })
+  const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('auth_token')
+    if (storedToken) {
+      setToken(storedToken)
+      loadCurrentUser(storedToken)
+    } else {
+      setLoading(false)
+    }
+  }, [])
+
+  const loadCurrentUser = async (authToken: string) => {
+    try {
+      const userData = await authApi.getCurrentUser()
+      setUser(userData)
+    } catch (error) {
+      console.error('Failed to load user:', error)
+      localStorage.removeItem('auth_token')
+      setToken(null)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const users = await window.spark.kv.get<User[]>('users') || []
-    
-    const user = users.find(u => u.email === email && u.active)
-    
-    if (user) {
-      const token = `jwt-${user.id}-${Date.now()}`
-      setAuthState((prev) => ({
-        ...prev,
-        user,
-        token,
-        isAuthenticated: true,
-      }))
+    try {
+      const response = await authApi.login(email, password)
       
-      await window.spark.kv.set('audit-logs', [
-        ...(await window.spark.kv.get<any[]>('audit-logs') || []),
-        {
-          id: `audit-${Date.now()}`,
-          userId: user.id,
-          userName: user.name,
-          action: 'LOGIN',
-          module: 'AUTH',
-          entityId: user.id,
-          details: 'User logged in',
-          timestamp: new Date().toISOString(),
-          ipAddress: '127.0.0.1',
-        }
-      ])
+      if (response.token && response.user) {
+        localStorage.setItem('auth_token', response.token)
+        setToken(response.token)
+        setUser(response.user)
+        toast.success('Successfully logged in')
+        return true
+      }
       
-      return true
+      toast.error('Invalid credentials')
+      return false
+    } catch (error: any) {
+      console.error('Login error:', error)
+      toast.error(error.message || 'Login failed')
+      return false
     }
-    
-    return false
   }
 
   const logout = () => {
-    setAuthState((prev) => ({
-      ...prev,
-      user: null,
-      token: null,
-      isAuthenticated: false,
-    }))
+    localStorage.removeItem('auth_token')
+    setToken(null)
+    setUser(null)
+    toast.info('Logged out successfully')
   }
 
   const hasRole = (roles: string | string[]): boolean => {
-    if (!authState?.user) return false
+    if (!user) return false
     const roleArray = Array.isArray(roles) ? roles : [roles]
-    return roleArray.includes(authState.user.role)
+    return roleArray.includes(user.role)
   }
 
   return (
     <AuthContext.Provider value={{ 
-      user: authState?.user || null,
-      token: authState?.token || null,
-      isAuthenticated: authState?.isAuthenticated || false,
+      user,
+      token,
+      isAuthenticated: !!token && !!user,
+      loading,
       login, 
       logout, 
       hasRole 
