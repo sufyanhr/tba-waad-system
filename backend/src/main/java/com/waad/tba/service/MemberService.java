@@ -14,7 +14,7 @@ import java.util.List;
 public class MemberService {
     
     private final MemberRepository memberRepository;
-    
+
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
     }

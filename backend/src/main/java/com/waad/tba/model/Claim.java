@@ -88,4 +88,59 @@ public class Claim {
         PENDING_DOCUMENTS,
         PAID
     }
+
+    // existing explicit constructors and getters/setters (kept intentionally)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getClaimNumber() { return claimNumber; }
+    public void setClaimNumber(String claimNumber) { this.claimNumber = claimNumber; }
+
+    public Member getMember() { return member; }
+    public void setMember(Member member) { this.member = member; }
+
+    public Provider getProvider() { return provider; }
+    public void setProvider(Provider provider) { this.provider = provider; }
+
+    public LocalDate getServiceDate() { return serviceDate; }
+    public void setServiceDate(LocalDate serviceDate) { this.serviceDate = serviceDate; }
+
+    public LocalDate getSubmissionDate() { return submissionDate; }
+    public void setSubmissionDate(LocalDate submissionDate) { this.submissionDate = submissionDate; }
+
+    public String getDiagnosis() { return diagnosis; }
+    public void setDiagnosis(String diagnosis) { this.diagnosis = diagnosis; }
+
+    public String getTreatmentDescription() { return treatmentDescription; }
+    public void setTreatmentDescription(String treatmentDescription) { this.treatmentDescription = treatmentDescription; }
+
+    public BigDecimal getClaimedAmount() { return claimedAmount; }
+    public void setClaimedAmount(BigDecimal claimedAmount) { this.claimedAmount = claimedAmount; }
+
+    public BigDecimal getApprovedAmount() { return approvedAmount; }
+    public void setApprovedAmount(BigDecimal approvedAmount) { this.approvedAmount = approvedAmount; }
+
+    public ClaimStatus getStatus() { return status; }
+    public void setStatus(ClaimStatus status) { this.status = status; }
+
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+
+    public String getDocumentUrls() { return documentUrls; }
+    public void setDocumentUrls(String documentUrls) { this.documentUrls = documentUrls; }
+
+    public String getReviewedBy() { return reviewedBy; }
+    public void setReviewedBy(String reviewedBy) { this.reviewedBy = reviewedBy; }
+
+    public LocalDateTime getReviewDate() { return reviewDate; }
+    public void setReviewDate(LocalDateTime reviewDate) { this.reviewDate = reviewDate; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
