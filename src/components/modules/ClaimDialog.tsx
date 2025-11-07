@@ -11,8 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { Claim, ClaimStatus, Member, Provider } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
+import { FileUpload, FileList } from '@/components/FileUpload'
 
 interface ClaimDialogProps {
   open: boolean
@@ -237,6 +239,32 @@ export function ClaimDialog({ open, onOpenChange, claim, onSave }: ClaimDialogPr
               </div>
             </>
           )}
+
+          <Separator />
+
+          <div className="space-y-3">
+            <Label>Supporting Documents</Label>
+            {claim && (
+              <FileUpload
+                category="CLAIM"
+                entityId={claim.id}
+                entityReference={claim.claimNumber}
+                maxSizeMB={10}
+              />
+            )}
+            {claim && (
+              <FileList
+                category="CLAIM"
+                entityId={claim.id}
+                showDelete={!isReview}
+              />
+            )}
+            {!claim && (
+              <p className="text-sm text-muted-foreground">
+                Save the claim first to upload documents
+              </p>
+            )}
+          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

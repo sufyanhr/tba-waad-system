@@ -34,11 +34,11 @@ This is a multi-tenant enterprise system requiring sophisticated role-based acce
 - **Success criteria**: Organizations can be created, updated, and linked to member employees with accurate member counts
 
 ### Member Management
-- **Functionality**: Complete employee/member profiles with coverage details and claim history
-- **Purpose**: Track insured individuals and their insurance coverage status
+- **Functionality**: Complete employee/member profiles with coverage details, claim history, and document management
+- **Purpose**: Track insured individuals, their insurance coverage status, and maintain personal documentation
 - **Trigger**: Any authorized user accesses Members module
-- **Progression**: Member list with search/filter → View profile → Coverage details → Claim history → Edit capabilities (role-based)
-- **Success criteria**: Members can be registered, coverage tracked, and complete claim history accessible
+- **Progression**: Member list with search/filter → View profile → Coverage details → Document upload/download → Claim history → Edit capabilities (role-based)
+- **Success criteria**: Members can be registered, coverage tracked, documents uploaded (ID cards, medical records), and complete claim history accessible
 
 ### Provider Management
 - **Functionality**: Healthcare provider (clinic/hospital) directory with specialties and service tracking
@@ -48,18 +48,18 @@ This is a multi-tenant enterprise system requiring sophisticated role-based acce
 - **Success criteria**: Providers can be registered, categorized by specialty, and linked to their submitted claims
 
 ### Claims Processing
-- **Functionality**: Complete medical claims workflow from submission to settlement
-- **Purpose**: Process reimbursement requests for medical services rendered
+- **Functionality**: Complete medical claims workflow from submission to settlement with document upload support
+- **Purpose**: Process reimbursement requests for medical services rendered with supporting documentation
 - **Trigger**: Provider submits claim or Member views claim status
-- **Progression**: Claim submission → Document upload → Validation → Review → Approval/Rejection → Payment processing → Closure
-- **Success criteria**: Claims move through complete lifecycle with status tracking, supporting documents, and audit trail
+- **Progression**: Claim submission → Document upload (PDF/Excel) → Validation → Review → Approval/Rejection → Payment processing → Closure
+- **Success criteria**: Claims move through complete lifecycle with status tracking, file uploads (PDF, Excel), document downloads, and audit trail
 
 ### Pre-Authorization Approvals
-- **Functionality**: Request and approve medical procedures before treatment
-- **Purpose**: Control costs and ensure covered services before provision
+- **Functionality**: Request and approve medical procedures before treatment with document attachment
+- **Purpose**: Control costs and ensure covered services before provision with medical documentation
 - **Trigger**: Provider requests authorization for planned procedure
-- **Progression**: Authorization request → Medical necessity review → Insurance approval decision → Member notification → Provider confirmation
-- **Success criteria**: Pre-auth requests can be submitted, reviewed, and approved/denied with clear reasoning
+- **Progression**: Authorization request → Document upload → Medical necessity review → Insurance approval decision → Member notification → Provider confirmation
+- **Success criteria**: Pre-auth requests can be submitted with supporting documents, reviewed, approved/denied with clear reasoning, and documents can be downloaded
 
 ### Finance & Settlements
 - **Functionality**: Invoice generation, payment tracking, and financial settlements
@@ -87,6 +87,8 @@ This is a multi-tenant enterprise system requiring sophisticated role-based acce
 - **Concurrent Edits**: Show warning when record was modified by another user, allow review before overwrite
 - **Invalid Claims**: Comprehensive validation with specific error messages guiding correction
 - **Missing Documents**: Allow claim submission with pending status, require documents before approval
+- **Large File Uploads**: Limit file size to 10MB with clear error messages for oversized files
+- **Unsupported File Types**: Validate file types (PDF, Excel only) and provide user-friendly error messages
 - **Payment Failures**: Retry mechanism with clear error tracking and manual intervention option
 - **Network Errors**: Graceful degradation with retry buttons and cached data where possible
 - **Role Permission Conflicts**: Default to deny access with clear explanation of required role

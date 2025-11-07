@@ -5,6 +5,8 @@ import { LoginPage } from '@/components/auth/LoginPage'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { Dashboard } from '@/components/modules/Dashboard'
 import { Claims } from '@/components/modules/Claims'
+import { Members } from '@/components/modules/Members'
+import { Approvals } from '@/components/modules/Approvals'
 import { PlaceholderModule } from '@/components/modules/PlaceholderModule'
 
 function AppContent() {
@@ -35,13 +37,13 @@ function AppContent() {
       case 'organizations':
         return <PlaceholderModule title="Organizations" description="Manage employer organizations" />
       case 'members':
-        return <PlaceholderModule title="Members" description="Manage insured members" />
+        return <Members />
       case 'providers':
         return <PlaceholderModule title="Providers" description="Manage healthcare providers" />
       case 'claims':
         return <Claims />
       case 'approvals':
-        return <PlaceholderModule title="Approvals" description="Pre-authorization management" />
+        return <Approvals />
       case 'finance':
         return <PlaceholderModule title="Finance" description="Invoices and settlements" />
       case 'reports':

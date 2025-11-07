@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { Claim, ClaimStatus } from '@/types'
+import { FileList } from '@/components/FileUpload'
 
 interface ClaimViewDialogProps {
   open: boolean
@@ -112,6 +114,17 @@ export function ClaimViewDialog({ open, onOpenChange, claim }: ClaimViewDialogPr
               Reviewed by {claim.reviewedBy} on {formatDate(claim.reviewedAt)}
             </div>
           )}
+
+          <Separator />
+
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">Supporting Documents</p>
+            <FileList
+              category="CLAIM"
+              entityId={claim.id}
+              showDelete={false}
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

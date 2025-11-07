@@ -175,3 +175,20 @@ export interface SystemSettings {
   notificationEmail: string
   maintenanceMode: boolean
 }
+
+export type FileCategory = 'CLAIM' | 'MEMBER' | 'APPROVAL'
+
+export interface UploadedFile {
+  id: string
+  filename: string
+  originalName: string
+  fileType: string
+  fileSize: number
+  category: FileCategory
+  entityId: string
+  entityReference: string
+  uploadedBy: string
+  uploadedByName: string
+  uploadDate: string
+  dataUrl: string
+}
