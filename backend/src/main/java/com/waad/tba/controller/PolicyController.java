@@ -23,7 +23,7 @@ public class PolicyController {
     private final PolicyService policyService;
     
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get all policies")
     public ResponseEntity<List<Policy>> getAllPolicies() {
         return ResponseEntity.ok(policyService.getAllPolicies());
@@ -44,7 +44,7 @@ public class PolicyController {
     }
     
     @GetMapping("/insurance-company/{insuranceCompanyId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get policies by insurance company")
     public ResponseEntity<List<Policy>> getPoliciesByInsuranceCompany(@PathVariable Long insuranceCompanyId) {
         return ResponseEntity.ok(policyService.getPoliciesByInsuranceCompany(insuranceCompanyId));
@@ -58,14 +58,14 @@ public class PolicyController {
     }
     
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Create new policy")
     public ResponseEntity<Policy> createPolicy(@RequestBody Policy policy) {
         return ResponseEntity.ok(policyService.createPolicy(policy));
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Update policy")
     public ResponseEntity<Policy> updatePolicy(@PathVariable Long id, @RequestBody Policy policy) {
         return ResponseEntity.ok(policyService.updatePolicy(id, policy));

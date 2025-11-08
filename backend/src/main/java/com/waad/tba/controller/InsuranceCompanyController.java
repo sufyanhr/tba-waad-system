@@ -23,21 +23,21 @@ public class InsuranceCompanyController {
     private final InsuranceCompanyService insuranceCompanyService;
     
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get all insurance companies")
     public ResponseEntity<List<InsuranceCompany>> getAllInsuranceCompanies() {
         return ResponseEntity.ok(insuranceCompanyService.getAllInsuranceCompanies());
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get insurance company by ID")
     public ResponseEntity<InsuranceCompany> getInsuranceCompanyById(@PathVariable Long id) {
         return ResponseEntity.ok(insuranceCompanyService.getInsuranceCompanyById(id));
     }
     
     @GetMapping("/email/{email}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get insurance company by email")
     public ResponseEntity<InsuranceCompany> getInsuranceCompanyByEmail(@PathVariable String email) {
         return ResponseEntity.ok(insuranceCompanyService.getInsuranceCompanyByEmail(email));
@@ -51,7 +51,7 @@ public class InsuranceCompanyController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Update insurance company")
     public ResponseEntity<InsuranceCompany> updateInsuranceCompany(@PathVariable Long id, @RequestBody InsuranceCompany insuranceCompany) {
         return ResponseEntity.ok(insuranceCompanyService.updateInsuranceCompany(id, insuranceCompany));

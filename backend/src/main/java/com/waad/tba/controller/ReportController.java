@@ -19,7 +19,7 @@ import java.util.Map;
 public class ReportController {
     
     @GetMapping("/dashboard")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get dashboard statistics")
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -33,7 +33,7 @@ public class ReportController {
     }
     
     @GetMapping("/claims-summary")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get claims summary report")
     public ResponseEntity<Map<String, Object>> getClaimsSummary(
             @RequestParam(required = false) String startDate,
@@ -46,7 +46,7 @@ public class ReportController {
     }
     
     @GetMapping("/financial-summary")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get financial summary report")
     public ResponseEntity<Map<String, Object>> getFinancialSummary(
             @RequestParam(required = false) String startDate,
@@ -60,7 +60,7 @@ public class ReportController {
     }
     
     @GetMapping("/provider-performance")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get provider performance report")
     public ResponseEntity<Map<String, Object>> getProviderPerformance(
             @RequestParam(required = false) Long providerId) {
@@ -73,7 +73,7 @@ public class ReportController {
     }
     
     @GetMapping("/member-utilization")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE', 'EMPLOYER')")
     @Operation(summary = "Get member utilization report")
     public ResponseEntity<Map<String, Object>> getMemberUtilization(
             @RequestParam(required = false) Long organizationId) {

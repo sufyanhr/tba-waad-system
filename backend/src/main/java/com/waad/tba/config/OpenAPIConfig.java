@@ -16,9 +16,9 @@ public class OpenAPIConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("TBA-WAAD API")
-                        .version("1.0.0")
-                        .description("Third Party Administrator - Health Insurance Platform API")
+                        .title("TBA-WAAD System API")
+                        .version("1.1.0")
+                        .description("Third-Party Administrator / Health-Insurance Platform (WAAD-TBA)")
                         .contact(new Contact()
                                 .name("TBA-WAAD")
                                 .email("support@tba-waad.com")))

@@ -23,7 +23,7 @@ public class BenefitTableController {
     private final BenefitTableService benefitTableService;
     
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Get all benefit tables")
     public ResponseEntity<List<BenefitTable>> getAllBenefitTables() {
         return ResponseEntity.ok(benefitTableService.getAllBenefitTables());
@@ -44,21 +44,21 @@ public class BenefitTableController {
     }
     
     @GetMapping("/service-type/{serviceType}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'PROVIDER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE', 'PROVIDER')")
     @Operation(summary = "Get benefit tables by service type")
     public ResponseEntity<List<BenefitTable>> getBenefitTablesByServiceType(@PathVariable String serviceType) {
         return ResponseEntity.ok(benefitTableService.getBenefitTablesByServiceType(serviceType));
     }
     
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Create new benefit table")
     public ResponseEntity<BenefitTable> createBenefitTable(@RequestBody BenefitTable benefitTable) {
         return ResponseEntity.ok(benefitTableService.createBenefitTable(benefitTable));
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
     @Operation(summary = "Update benefit table")
     public ResponseEntity<BenefitTable> updateBenefitTable(@PathVariable Long id, @RequestBody BenefitTable benefitTable) {
         return ResponseEntity.ok(benefitTableService.updateBenefitTable(id, benefitTable));
