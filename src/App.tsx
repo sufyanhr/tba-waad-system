@@ -8,6 +8,7 @@ import { Claims } from '@/components/modules/Claims'
 import { Members } from '@/components/modules/Members'
 import { Approvals } from '@/components/modules/Approvals'
 import { PlaceholderModule } from '@/components/modules/PlaceholderModule'
+import { Settings } from '@/components/modules/Settings'
 
 function AppContent() {
   const { isAuthenticated, loading, login } = useAuth()
@@ -49,7 +50,7 @@ function AppContent() {
       case 'reports':
         return <PlaceholderModule title="Reports" description="Analytics and reporting" />
       case 'settings':
-        return <PlaceholderModule title="Settings" description="System configuration and audit logs" />
+        return <Settings />
       default:
         return <Dashboard />
     }

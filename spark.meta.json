@@ -1,4 +1,12 @@
 {
   "templateVersion": 1,
-  "dbType": "kv"
+  "dbType": "kv",
+  "variables": {
+    "API_URL": "http://localhost:8080",
+    "FRONTEND_URL": "http://localhost:3000",
+    "DEFAULT_LANGUAGE": "ar",
+    "SUPPORTED_LANGUAGES": ["ar", "en"],
+    "JWT_SECRET": ""
+  },
+  "lastSync": "2025-01-08T00:00:00Z"
 }
