@@ -61,10 +61,6 @@ Open `http://localhost:8080/swagger-ui.html` in your browser
 - **Backend API Guide:** See [backend/README.md](backend/README.md)
 - **Quick Start Guide:** See [backend/QUICKSTART.md](backend/QUICKSTART.md)
 - **Product Requirements:** See [PRD.md](PRD.md)
-- **Internationalization (i18n):** See [I18N_DOCUMENTATION.md](I18N_DOCUMENTATION.md)
-- **File Upload System:** See [FILE_UPLOAD_DOCUMENTATION.md](FILE_UPLOAD_DOCUMENTATION.md)
-- **Insurance Entities:** See [INSURANCE_ENTITIES_DOCUMENTATION.md](INSURANCE_ENTITIES_DOCUMENTATION.md)
-- **Backend Integration:** See [BACKEND_INTEGRATION.md](BACKEND_INTEGRATION.md)
 
 ## 🔐 Default Users
 
@@ -88,7 +84,6 @@ The backend automatically creates test users on first run:
 - shadcn/ui components
 - Framer Motion
 - React Hook Form
-- i18next (internationalization)
 - Zustand (state management)
 
 ### Backend
@@ -112,47 +107,6 @@ The backend automatically creates test users on first run:
 - ✅ Reporting & Analytics
 - ✅ Audit Logging
 - ✅ Role-Based Access Control
-- ✅ Bilingual Support (English & Arabic) with RTL
-
-## 🌐 Internationalization (i18n)
-
-The application supports both English and Arabic languages with automatic RTL (Right-to-Left) layout switching.
-
-### Installed Packages
-- `i18next` (^25.6.1) - Core i18n framework
-- `react-i18next` (^16.2.4) - React bindings for i18next
-- `i18next-browser-languagedetector` (^8.2.0) - Automatic language detection
-
-### Language Switching
-Users can switch languages using the language switcher (globe icon) in the top-right corner of the application. The selected language is automatically saved to localStorage and persists across sessions.
-
-### Adding Translations
-Translation files are located in:
-- `src/locales/en/translation.json` - English translations
-- `src/locales/ar/translation.json` - Arabic translations
-
-To add new translations, add keys to both files following the nested structure:
-```json
-{
-  "module": {
-    "key": "Translation text"
-  }
-}
-```
-
-### Using Translations in Components
-```tsx
-import { useTranslation } from 'react-i18next'
-
-function MyComponent() {
-  const { t } = useTranslation()
-  
-  return <h1>{t('module.key')}</h1>
-}
-```
-
-### RTL Support
-The layout automatically switches to RTL when Arabic is selected. The direction is controlled via the `dir` attribute on the HTML element and CSS styling in `src/index.css`.
 
 ## 🎯 User Roles
 
