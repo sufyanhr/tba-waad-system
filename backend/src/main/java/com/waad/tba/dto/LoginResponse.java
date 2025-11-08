@@ -18,3 +18,4 @@ public class LoginResponse {
     private String fullName;
     private Set<String> roles;
 }
+

@@ -56,3 +56,4 @@ public class Organization {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
+

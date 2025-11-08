@@ -16,7 +16,7 @@ import java.util.List;
 public class ClaimService {
     
     private final ClaimRepository claimRepository;
-    
+
     public List<Claim> getAllClaims() {
         return claimRepository.findAll();
     }
@@ -76,7 +76,7 @@ public class ClaimService {
         if (claimDetails.getNotes() != null) {
             claim.setNotes(claimDetails.getNotes());
         }
-        
+
         return claimRepository.save(claim);
     }
     
@@ -88,7 +88,7 @@ public class ClaimService {
         claim.setReviewDate(LocalDateTime.now());
         return claimRepository.save(claim);
     }
-    
+
     @Transactional
     public Claim rejectClaim(Long id, String reviewedBy, String reason) {
         Claim claim = getClaimById(id);
