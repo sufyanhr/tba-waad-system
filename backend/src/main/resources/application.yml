@@ -1,8 +1,8 @@
 spring:
   application:
-    name: tba-waad-backend
+    name: tba-waad-system-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/tba_waad
+    url: jdbc:postgresql://localhost:5432/tba_waad_system
     username: postgres
     password: 12345
     driver-class-name: org.postgresql.Driver
@@ -16,7 +16,7 @@ spring:
         format_sql: true
   
 server:
-  port: 8080
+  port: 9090
   error:
     include-message: always
     include-stacktrace: on_param

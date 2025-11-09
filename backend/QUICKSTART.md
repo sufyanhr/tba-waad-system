@@ -7,7 +7,7 @@
 psql -U postgres
 
 -- Create database
-CREATE DATABASE tba_waad;
+CREATE DATABASE tba_waad_system;
 
 -- Verify database created
 \l

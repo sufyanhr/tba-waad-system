@@ -4,7 +4,7 @@ This document explains how the React frontend has been integrated with the Sprin
 
 ## Overview
 
-The frontend now connects to your Java Spring Boot backend running on `localhost:8080`. All authentication and data operations now use RESTful API calls with JWT authentication.
+The frontend now connects to your Java Spring Boot backend running on `localhost:9090`. All authentication and data operations now use RESTful API calls with JWT authentication.
 
 ## Configuration
 

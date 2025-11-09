@@ -232,15 +232,15 @@ mvn spring-boot:run
 ```
 
 ### Access Points
-- **Application:** http://localhost:8080
-- **Swagger UI:** http://localhost:8080/swagger-ui.html
-- **API Docs:** http://localhost:8080/api-docs
+- **Application:** http://localhost:9090
+- **Swagger UI:** http://localhost:9090/swagger-ui.html
+- **API Docs:** http://localhost:9090/api-docs
 
 ## Authentication
 
 ### Getting a JWT Token
 ```bash
-POST http://localhost:8080/api/auth/login
+POST http://localhost:9090/api/auth/login
 Content-Type: application/json
 
 {
@@ -258,7 +258,7 @@ Authorization: Bearer <your-jwt-token>
 
 ### Example: Get All Insurance Companies
 ```bash
-curl -X GET "http://localhost:8080/api/insurance" \
+curl -X GET "http://localhost:9090/api/insurance" \
   -H "Authorization: Bearer <your-jwt-token>"
 ```
 
