@@ -38,7 +38,7 @@ const Login = () => {
       // التوجيه للوحة التحكم بعد تسجيل الدخول
       navigate('/dashboard')
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error('Login failed:', error.response ? error.response.data : error.message)
       setMessage('❌ فشل تسجيل الدخول، تأكد من البيانات')
     }
   }

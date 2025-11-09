@@ -1,5 +1,12 @@
 import React from 'react'
 
+// ✅ استيراد صفحة تسجيل الدخول
+import Login from './views/pages/login/Login'
+
+// ✅ استيراد PrivateRoute لحماية الصفحات
+import PrivateRoute from './PrivateRoute'
+
+// ✅ الصفحات الرئيسية
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -26,7 +33,7 @@ const Buttons = React.lazy(() => import('./views/buttons/buttons/Buttons'))
 const ButtonGroups = React.lazy(() => import('./views/buttons/button-groups/ButtonGroups'))
 const Dropdowns = React.lazy(() => import('./views/buttons/dropdowns/Dropdowns'))
 
-//Forms
+// Forms
 const ChecksRadios = React.lazy(() => import('./views/forms/checks-radios/ChecksRadios'))
 const FloatingLabels = React.lazy(() => import('./views/forms/floating-labels/FloatingLabels'))
 const FormControl = React.lazy(() => import('./views/forms/form-control/FormControl'))
@@ -51,9 +58,25 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
+// ✅ تعريف المسارات
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+
+  // ✅ صفحة تسجيل الدخول
+  { path: '/login', name: 'Login', element: Login },
+
+  // ✅ لوحة التحكم (محميّة)
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    // store a component (function) so AppContent can render it with <route.element />
+    element: () => (
+      <PrivateRoute>
+        <Dashboard />
+      </PrivateRoute>
+    ),
+  },
+
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
