@@ -44,6 +44,9 @@ public class Organization {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(name = "organization_code", length = 10, unique = true)
+    private String organizationCode;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employer_member_id")
     private Member employerOwner;

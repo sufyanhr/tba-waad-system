@@ -8,13 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import static io.jsonwebtoken.Jwts.*;
 
 @Component
 public class JwtTokenProvider {
@@ -38,13 +37,13 @@ public class JwtTokenProvider {
         return claimsResolver.apply(claims);
     }
 
+    // ✅ الصيغة الصحيحة في jjwt 0.12.x
     private Claims extractAllClaims(String token) {
-        // Use the older parser() API which exists with the project's jjwt artifacts
-        return Jwts.parser()
-                .setSigningKey(Decoders.BASE64.decode(secret))
+        return Jwts.parser()               // parser() الآن هو الـ builder الجديد
+                .verifyWith((SecretKey) getSignKey())  // بدلاً من setSigningKey()
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -62,12 +61,11 @@ public class JwtTokenProvider {
     }
 
     private String createToken(Map<String, Object> claims, String username) {
-        return builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                // ✅ في الإصدار الحديث لم تعد بحاجة إلى تحديد الخوارزمية هنا
+        return Jwts.builder()
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey())
                 .compact();
     }

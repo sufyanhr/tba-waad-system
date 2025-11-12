@@ -10,6 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.waad.tba.model.Member;
+import com.waad.tba.model.User;
+import com.waad.tba.repository.MemberRepository;
+import com.waad.tba.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.time.LocalDate;
 
 import java.util.List;
 
@@ -21,7 +28,9 @@ import java.util.List;
 public class ClaimController {
     
     private final ClaimService claimService;
-    
+    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'PROVIDER')")
     @Operation(summary = "Get all claims")
@@ -56,14 +65,30 @@ public class ClaimController {
     public ResponseEntity<List<Claim>> getClaimsByStatus(@PathVariable Claim.ClaimStatus status) {
         return ResponseEntity.ok(claimService.getClaimsByStatus(status));
     }
-    
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'PROVIDER')")
     @Operation(summary = "Create new claim")
-    public ResponseEntity<Claim> createClaim(@RequestBody Claim claim) {
-        return ResponseEntity.ok(claimService.createClaim(claim));
+    public ResponseEntity<?> createClaim(@RequestBody Claim claim) {
+        try {
+            // ✅ حتى لو جاء claimNumber فارغ من الواجهة، الخدمة تتكفل بتوليده تلقائيًا
+            Claim savedClaim = claimService.createClaim(claim);
+
+            return ResponseEntity.ok(new ApiResponse(
+                    true,
+                    "Claim created successfully",
+                    savedClaim
+            ));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body(new ApiResponse(
+                    false,
+                    "Failed to create claim: " + ex.getMessage(),
+                    null
+            ));
+        }
     }
-    
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'PROVIDER')")
     @Operation(summary = "Update claim")
@@ -91,5 +116,41 @@ public class ClaimController {
     public ResponseEntity<ApiResponse> deleteClaim(@PathVariable Long id) {
         claimService.deleteClaim(id);
         return ResponseEntity.ok(new ApiResponse(true, "Claim deleted successfully"));
+    }
+    @PostMapping("/create-from-verification")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'PROVIDER')")
+    @Operation(summary = "Create a claim directly after member verification (via QR or employee code)")
+    public ResponseEntity<ApiResponse> createClaimFromVerification(
+            @RequestParam(required = false) String qr,
+            @RequestParam(required = false) String employeeCode,
+            @RequestBody Claim claimDetails) {
+
+        // 🟦 البحث عن العضو بحسب QR أو employeeCode
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> (qr != null && qr.equalsIgnoreCase(m.getQrCode())) ||
+                        (employeeCode != null && employeeCode.equalsIgnoreCase(m.getEmployeeCode())))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Member not found for the provided QR or employee code"));
+
+        // 🟩 الحصول على المستخدم الحالي (المزوّد)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        // 🟨 إنشاء مطالبة جديدة مرتبطة بالعضو والمزوّد
+        Claim claim = new Claim();
+        claim.setMember(member);
+        claim.setProvider(currentUser.getProvider()); // يتطلب أن يكون المستخدم مربوط بـ Provider
+        claim.setServiceDate(claimDetails.getServiceDate());
+        claim.setDiagnosis(claimDetails.getDiagnosis());
+        claim.setTreatmentDescription(claimDetails.getTreatmentDescription());
+        claim.setClaimedAmount(claimDetails.getClaimedAmount());
+        claim.setSubmissionDate(LocalDate.now());
+        claim.setStatus(Claim.ClaimStatus.SUBMITTED);
+
+        Claim savedClaim = claimService.createClaim(claim);
+
+        return ResponseEntity.ok(new ApiResponse(true, "Claim created successfully", savedClaim));
     }
 }

@@ -19,44 +19,50 @@ import java.util.List;
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(name = "Members", description = "Member management endpoints")
 public class MemberController {
-    
+
     private final MemberService memberService;
-    
+
+    // 🔹 عرض جميع الأعضاء (Admin / Insurance / Employer / Provider)
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER', 'PROVIDER')")
     @Operation(summary = "Get all members")
     public ResponseEntity<List<Member>> getAllMembers() {
         return ResponseEntity.ok(memberService.getAllMembers());
     }
-    
+
+    // 🔹 عرض عضو واحد حسب ID
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER', 'PROVIDER', 'MEMBER')")
     @Operation(summary = "Get member by ID")
     public ResponseEntity<Member> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
-    
+
+    // 🔹 عرض أعضاء مؤسسة معينة
     @GetMapping("/organization/{organizationId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER')")
     @Operation(summary = "Get members by organization")
     public ResponseEntity<List<Member>> getMembersByOrganization(@PathVariable Long organizationId) {
         return ResponseEntity.ok(memberService.getMembersByOrganization(organizationId));
     }
-    
+
+    // 🔹 إنشاء عضو جديد
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER')")
     @Operation(summary = "Create new member")
     public ResponseEntity<Member> createMember(@RequestBody Member member) {
         return ResponseEntity.ok(memberService.createMember(member));
     }
-    
+
+    // 🔹 تحديث عضو
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER')")
     @Operation(summary = "Update member")
     public ResponseEntity<Member> updateMember(@PathVariable Long id, @RequestBody Member member) {
         return ResponseEntity.ok(memberService.updateMember(id, member));
     }
-    
+
+    // 🔹 حذف عضو
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE')")
     @Operation(summary = "Delete member")

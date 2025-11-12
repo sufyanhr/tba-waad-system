@@ -24,9 +24,15 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(name = "member_number", unique = true, nullable = false)
+
+    @Column(name = "member_number", unique = true)
     private String memberNumber;
+
+    @Column(name = "qr_code", unique = true)
+    private String qrCode;   // رقم QR الفريد أو UUID
+
+    @Column(name = "employee_code", unique = true)
+    private String employeeCode;  // الرقم الوظيفي الداخلي
 
     // أضف هذه الحقول داخل الكلاس بعد تعريف organization
     @Column(name = "is_employer")

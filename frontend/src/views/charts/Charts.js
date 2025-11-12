@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { CCard, CCardBody, CCol, CCardHeader, CRow } from '@coreui/react'
 import {
   CChartBar,
@@ -11,7 +11,18 @@ import {
 import { DocsLink } from 'src/components'
 
 const Charts = () => {
-  const random = () => Math.round(Math.random() * 100)
+  const [randomData, setRandomData] = useState({ line1: [], line2: [] })
+
+  useEffect(() => {
+    const r = () => Math.round(Math.random() * 100)
+    // make the state update asynchronous to avoid "setState synchronously within an effect" lint error
+    Promise.resolve().then(() =>
+      setRandomData({
+        line1: [r(), r(), r(), r(), r(), r(), r()],
+        line2: [r(), r(), r(), r(), r(), r(), r()],
+      }),
+    )
+  }, [])
 
   return (
     <CRow>
@@ -54,7 +65,7 @@ const Charts = () => {
                     borderColor: 'rgba(220, 220, 220, 1)',
                     pointBackgroundColor: 'rgba(220, 220, 220, 1)',
                     pointBorderColor: '#fff',
-                    data: [random(), random(), random(), random(), random(), random(), random()],
+                    data: randomData.line1,
                   },
                   {
                     label: 'My Second dataset',
@@ -62,7 +73,7 @@ const Charts = () => {
                     borderColor: 'rgba(151, 187, 205, 1)',
                     pointBackgroundColor: 'rgba(151, 187, 205, 1)',
                     pointBorderColor: '#fff',
-                    data: [random(), random(), random(), random(), random(), random(), random()],
+                    data: randomData.line2,
                   },
                 ],
               }}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   CCard,
   CCardBody,
@@ -35,7 +35,34 @@ import WidgetsBrand from './WidgetsBrand'
 import WidgetsDropdown from './WidgetsDropdown'
 
 const Widgets = () => {
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+  const [smallCharts, setSmallCharts] = React.useState(null)
+
+  React.useEffect(() => {
+    const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+    const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S', 'M', 'T', 'W', 'T', 'F', 'S', 'S', 'M']
+
+    const makeData = (colorVar, lineColorVar, isLine = false) => ({
+      labels,
+      datasets: [
+        {
+          backgroundColor: isLine ? 'transparent' : getStyle(colorVar),
+          borderColor: isLine ? getStyle(lineColorVar || colorVar) : 'transparent',
+          borderWidth: isLine ? 2 : 1,
+          data: Array.from({ length: labels.length }, () => random(40, 100)),
+        },
+      ],
+    })
+
+    // compute and set charts after first render to avoid impure calls during render
+    setSmallCharts({
+      barDanger: makeData('--cui-danger'),
+      barPrimary: makeData('--cui-primary'),
+      barSuccess: makeData('--cui-success'),
+      lineDanger: makeData('--cui-danger', '--cui-danger', true),
+      lineSuccess: makeData('--cui-success', '--cui-success', true),
+      lineInfo: makeData('--cui-info', '--cui-info', true),
+    })
+  }, [])
 
   return (
     <CCard className="mb-4">
@@ -155,23 +182,7 @@ const Widgets = () => {
                           backgroundColor: getStyle('--cui-danger'),
                           borderColor: 'transparent',
                           borderWidth: 1,
-                          data: [
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                          ],
+                          data: (smallCharts && smallCharts.barDanger.datasets[0].data) || [],
                         },
                       ],
                     }}
@@ -226,23 +237,7 @@ const Widgets = () => {
                           backgroundColor: getStyle('--cui-primary'),
                           borderColor: 'transparent',
                           borderWidth: 1,
-                          data: [
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                          ],
+                          data: (smallCharts && smallCharts.barPrimary.datasets[0].data) || [],
                         },
                       ],
                     }}
@@ -297,23 +292,7 @@ const Widgets = () => {
                           backgroundColor: getStyle('--cui-success'),
                           borderColor: 'transparent',
                           borderWidth: 1,
-                          data: [
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                          ],
+                          data: (smallCharts && smallCharts.barSuccess.datasets[0].data) || [],
                         },
                       ],
                     }}
@@ -363,30 +342,7 @@ const Widgets = () => {
                         'S',
                         'M',
                       ],
-                      datasets: [
-                        {
-                          backgroundColor: 'transparent',
-                          borderColor: getStyle('--cui-danger'),
-                          borderWidth: 2,
-                          data: [
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                          ],
-                        },
-                      ],
+                      datasets: (smallCharts && smallCharts.lineDanger.datasets) || [],
                     }}
                     options={{
                       maintainAspectRatio: false,
@@ -442,30 +398,7 @@ const Widgets = () => {
                         'S',
                         'M',
                       ],
-                      datasets: [
-                        {
-                          backgroundColor: 'transparent',
-                          borderColor: getStyle('--cui-success'),
-                          borderWidth: 2,
-                          data: [
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                          ],
-                        },
-                      ],
+                      datasets: (smallCharts && smallCharts.lineSuccess.datasets) || [],
                     }}
                     options={{
                       maintainAspectRatio: false,
@@ -521,30 +454,7 @@ const Widgets = () => {
                         'S',
                         'M',
                       ],
-                      datasets: [
-                        {
-                          backgroundColor: 'transparent',
-                          borderColor: getStyle('--cui-info'),
-                          borderWidth: 2,
-                          data: [
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                            random(40, 100),
-                          ],
-                        },
-                      ],
+                      datasets: (smallCharts && smallCharts.lineInfo.datasets) || [],
                     }}
                     options={{
                       maintainAspectRatio: false,
