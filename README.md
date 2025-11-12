@@ -51,10 +51,10 @@ cd backend
 mvn spring-boot:run
 ```
 
-The backend API will be available at `http://localhost:8080`
+The backend API will be available at `http://localhost:9090`
 
 4. **Access API Documentation:**
-Open `http://localhost:8080/swagger-ui.html` in your browser
+Open `http://localhost:9090/swagger-ui.html` in your browser
 
 ## 📖 Documentation
 
@@ -132,7 +132,7 @@ The backend automatically creates test users on first run:
 - `/api/finance` - Financial records
 - `/api/reports` - Analytics and reporting
 
-Full API documentation available at `http://localhost:8080/swagger-ui.html`
+Full API documentation available at `http://localhost:9090/swagger-ui.html`
 
 ## 🔧 Development
 

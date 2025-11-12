@@ -13,7 +13,7 @@ The frontend now connects to your Java Spring Boot backend running on `localhost
 The `.env` file contains the API base URL:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
+VITE_API_BASE_URL=http://localhost:9090/api
 ```
 
 You can change this URL to point to different environments (staging, production, etc.).
@@ -273,7 +273,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-Backend should be running on `http://localhost:8080`
+Backend should be running on `http://localhost:9090`
 
 ### 2. Start the Frontend
 ```bash

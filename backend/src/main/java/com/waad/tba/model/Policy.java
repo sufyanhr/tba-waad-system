@@ -40,7 +40,7 @@ public class Policy {
     
     @Column(name = "total_limit", precision = 15, scale = 2)
     private BigDecimal totalLimit;
-    
+
     @ManyToOne
     @JoinColumn(name = "insurance_company_id", nullable = false)
     private InsuranceCompany insuranceCompany;

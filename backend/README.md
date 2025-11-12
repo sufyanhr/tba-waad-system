@@ -67,7 +67,7 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-3. The application will start on `http://localhost:8080`
+3. The application will start on `http://localhost:9090`
 
 ### Using Java
 
@@ -85,12 +85,12 @@ java -jar target/tba-backend-1.0.0.jar
 
 Once the application is running, access the Swagger UI at:
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:9090/swagger-ui.html
 ```
 
 API docs JSON available at:
 ```
-http://localhost:8080/api-docs
+http://localhost:9090/api-docs
 ```
 
 ## API Endpoints
@@ -174,7 +174,7 @@ All endpoints except `/api/auth/**` require JWT authentication.
 
 1. Login to get JWT token:
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:9090/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
@@ -184,7 +184,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 2. Use the token in subsequent requests:
 ```bash
-curl -X GET http://localhost:8080/api/users \
+curl -X GET http://localhost:9090/api/users \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -200,7 +200,7 @@ curl -X GET http://localhost:8080/api/users \
 
 To create the first admin user, use the registration endpoint:
 ```bash
-curl -X POST http://localhost:8080/api/auth/register \
+curl -X POST http://localhost:9090/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",

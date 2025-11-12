@@ -19,7 +19,7 @@ The system manages the following environment variables:
   "templateVersion": 1,
   "dbType": "kv",
   "variables": {
-    "API_URL": "http://localhost:8080",
+    "API_URL": "http://localhost:9090",
     "FRONTEND_URL": "http://localhost:3000",
     "DEFAULT_LANGUAGE": "ar",
     "SUPPORTED_LANGUAGES": ["ar", "en"],
@@ -33,7 +33,7 @@ The system manages the following environment variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `API_URL` | Backend API endpoint | `http://localhost:8080` |
+| `API_URL` | Backend API endpoint | `http://localhost:9090` |
 | `FRONTEND_URL` | Frontend application URL | `http://localhost:3000` |
 | `DEFAULT_LANGUAGE` | Default UI language | `ar` (Arabic) or `en` (English) |
 | `SUPPORTED_LANGUAGES` | List of available languages | `["ar", "en"]` |

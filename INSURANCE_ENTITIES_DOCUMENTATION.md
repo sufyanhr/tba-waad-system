@@ -262,7 +262,7 @@ All endpoints are automatically documented in Swagger UI with:
 - **Tags:** Insurance Companies, Policies, Benefit Tables
 - **Descriptions:** Clear operation summaries
 - **Security:** Bearer token authentication required
-- **Access:** Available at `http://localhost:8080/swagger-ui.html`
+- **Access:** Available at `http://localhost:9090/swagger-ui.html`
 
 ---
 
@@ -326,13 +326,13 @@ ALTER TABLE members ADD COLUMN policy_id BIGINT REFERENCES policies(id);
 Once the backend is running, you can test the endpoints using:
 
 ### Swagger UI
-Visit: `http://localhost:8080/swagger-ui.html`
+Visit: `http://localhost:9090/swagger-ui.html`
 
 ### cURL Examples
 
 **Create Insurance Company:**
 ```bash
-curl -X POST http://localhost:8080/api/insurance \
+curl -X POST http://localhost:9090/api/insurance \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -346,7 +346,7 @@ curl -X POST http://localhost:8080/api/insurance \
 
 **Create Policy:**
 ```bash
-curl -X POST http://localhost:8080/api/policy \
+curl -X POST http://localhost:9090/api/policy \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -362,7 +362,7 @@ curl -X POST http://localhost:8080/api/policy \
 
 **Create Benefit Table:**
 ```bash
-curl -X POST http://localhost:8080/api/benefits \
+curl -X POST http://localhost:9090/api/benefits \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -387,7 +387,7 @@ To integrate these new entities with your system:
    ```
 
 2. **Verify Swagger documentation:**
-   - Open `http://localhost:8080/swagger-ui.html`
+   - Open `http://localhost:9090/swagger-ui.html`
    - Check for "Insurance Companies", "Policies", and "Benefit Tables" sections
 
 3. **Create test data:**

@@ -11,14 +11,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "organizations")
+@Table(name = "review_companies")
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Organization {
+public class ReviewCompany {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,38 +25,26 @@ public class Organization {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "registration_number", unique = true)
-    private String registrationNumber;
-
-    private String industry;
-
-    private String address;
-
-    private String phone;
-
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "contact_person")
-    private String contactPerson;
+    private String phone;
+    private String address;
 
-    @Column(nullable = false)
-    private Boolean active = true;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employer_member_id")
-    private Member employerOwner;
-
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    // 🔹 مستخدمين الشركة (شركة وعد مثلاً)
+    @OneToMany(mappedBy = "reviewCompany", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Member> members;
+    private List<User> users;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_organization_id")
-    private Organization parentOrganization;
+    // 🔹 المنظمات (شركات العملاء مثل الأسمنت أو المصرف)
+    @OneToMany(mappedBy = "reviewCompany", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Organization> organizations;
 
-    @ManyToOne
-    @JoinColumn(name = "review_company_id")
-    private ReviewCompany reviewCompany;
+    // 🔹 مزودو الخدمة (مثل المستشفيات أو العيادات)
+    @OneToMany(mappedBy = "reviewCompany", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Provider> providers;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -68,4 +54,3 @@ public class Organization {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
-

@@ -43,7 +43,7 @@ The application will:
 ### Login as Admin
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:9090/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
@@ -67,7 +67,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ### Create Organization
 
 ```bash
-curl -X POST http://localhost:8080/api/organizations \
+curl -X POST http://localhost:9090/api/organizations \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -85,7 +85,7 @@ curl -X POST http://localhost:8080/api/organizations \
 ### Create Provider
 
 ```bash
-curl -X POST http://localhost:8080/api/providers \
+curl -X POST http://localhost:9090/api/providers \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -105,7 +105,7 @@ curl -X POST http://localhost:8080/api/providers \
 ### Create Member
 
 ```bash
-curl -X POST http://localhost:8080/api/members \
+curl -X POST http://localhost:9090/api/members \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -128,7 +128,7 @@ curl -X POST http://localhost:8080/api/members \
 ### Submit Claim
 
 ```bash
-curl -X POST http://localhost:8080/api/claims \
+curl -X POST http://localhost:9090/api/claims \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -146,14 +146,14 @@ curl -X POST http://localhost:8080/api/claims \
 ### Approve Claim
 
 ```bash
-curl -X PATCH "http://localhost:8080/api/claims/1/approve?reviewedBy=admin" \
+curl -X PATCH "http://localhost:9090/api/claims/1/approve?reviewedBy=admin" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Create Pre-Authorization
 
 ```bash
-curl -X POST http://localhost:8080/api/approvals \
+curl -X POST http://localhost:9090/api/approvals \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -171,21 +171,21 @@ curl -X POST http://localhost:8080/api/approvals \
 ### Get Dashboard Statistics
 
 ```bash
-curl -X GET http://localhost:8080/api/reports/dashboard \
+curl -X GET http://localhost:9090/api/reports/dashboard \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get All Claims
 
 ```bash
-curl -X GET http://localhost:8080/api/claims \
+curl -X GET http://localhost:9090/api/claims \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get Claims by Status
 
 ```bash
-curl -X GET http://localhost:8080/api/claims/status/PENDING \
+curl -X GET http://ٌ/api/claims/status/PENDING \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -193,7 +193,7 @@ curl -X GET http://localhost:8080/api/claims/status/PENDING \
 
 Open your browser and navigate to:
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:9090/swagger-ui.html
 ```
 
 You can test all APIs interactively using the Swagger interface:
@@ -217,7 +217,7 @@ You can test all APIs interactively using the Swagger interface:
 You can import the Swagger JSON into Postman:
 1. Open Postman
 2. Click Import
-3. Enter URL: `http://localhost:8080/api-docs`
+3. Enter URL: `http://localhost:9090/api-docs`
 4. Postman will create a collection with all endpoints
 
 ## 8. Testing Workflow
@@ -237,41 +237,41 @@ You can import the Swagger JSON into Postman:
 
 ```bash
 # 1. Login
-TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:9090/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}' \
   | jq -r '.token')
 
 # 2. Create Organization
-ORG_ID=$(curl -s -X POST http://localhost:8080/api/organizations \
+ORG_ID=$(curl -s -X POST http://localhost:9090/api/organizations \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"Tech Corp","registrationNumber":"REG001","active":true}' \
   | jq -r '.id')
 
 # 3. Create Provider  
-PROVIDER_ID=$(curl -s -X POST http://localhost:8080/api/providers \
+PROVIDER_ID=$(curl -s -X POST http://localhost:9090/api/providers \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"City Hospital","licenseNumber":"LIC001","type":"HOSPITAL","status":"APPROVED","active":true}' \
   | jq -r '.id')
 
 # 4. Create Member
-MEMBER_ID=$(curl -s -X POST http://localhost:8080/api/members \
+MEMBER_ID=$(curl -s -X POST http://localhost:9090/api/members \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"memberNumber\":\"MEM001\",\"fullName\":\"John Doe\",\"email\":\"john@email.com\",\"organization\":{\"id\":$ORG_ID},\"coverageStatus\":\"ACTIVE\"}" \
   | jq -r '.id')
 
 # 5. Submit Claim
-CLAIM_ID=$(curl -s -X POST http://localhost:8080/api/claims \
+CLAIM_ID=$(curl -s -X POST http://localhost:9090/api/claims \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"claimNumber\":\"CLM001\",\"member\":{\"id\":$MEMBER_ID},\"provider\":{\"id\":$PROVIDER_ID},\"serviceDate\":\"2024-01-15\",\"diagnosis\":\"Test\",\"claimedAmount\":100}" \
   | jq -r '.id')
 
 # 6. Approve Claim
-curl -X PATCH "http://localhost:8080/api/claims/$CLAIM_ID/approve?reviewedBy=admin" \
+curl -X PATCH "http://localhost:9090/api/claims/$CLAIM_ID/approve?reviewedBy=admin" \
   -H "Authorization: Bearer $TOKEN"
 
 echo "Workflow completed! Claim ID: $CLAIM_ID"

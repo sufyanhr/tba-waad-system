@@ -27,7 +27,7 @@ interface SparkMeta {
 export function Settings() {
   const { t } = useTranslation()
   const [config, setConfig] = useKV<AppConfig>('app-config', {
-    API_URL: 'http://localhost:8080',
+    API_URL: 'http://localhost:9090',
     FRONTEND_URL: 'http://localhost:3000',
     DEFAULT_LANGUAGE: 'ar',
     SUPPORTED_LANGUAGES: ['ar', 'en'],
@@ -35,7 +35,7 @@ export function Settings() {
   })
 
   const [formData, setFormData] = useState<AppConfig>(config || {
-    API_URL: 'http://localhost:8080',
+    API_URL: 'http://localhost:9090',
     FRONTEND_URL: 'http://localhost:3000',
     DEFAULT_LANGUAGE: 'ar',
     SUPPORTED_LANGUAGES: ['ar', 'en'],
@@ -112,7 +112,7 @@ export function Settings() {
 
   const handleReset = () => {
     const defaultConfig: AppConfig = {
-      API_URL: 'http://localhost:8080',
+      API_URL: 'http://localhost:9090',
       FRONTEND_URL: 'http://localhost:3000',
       DEFAULT_LANGUAGE: 'ar',
       SUPPORTED_LANGUAGES: ['ar', 'en'],
@@ -146,7 +146,7 @@ export function Settings() {
                 id="api-url"
                 value={formData.API_URL}
                 onChange={(e) => setFormData({ ...formData, API_URL: e.target.value })}
-                placeholder="http://localhost:8080"
+                placeholder="http://localhost:9090"
               />
             </div>
 

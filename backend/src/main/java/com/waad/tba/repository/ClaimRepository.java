@@ -9,8 +9,13 @@ import java.util.Optional;
 
 @Repository
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
+
     Optional<Claim> findByClaimNumber(String claimNumber);
     List<Claim> findByMemberId(Long memberId);
     List<Claim> findByProviderId(Long providerId);
     List<Claim> findByStatus(Claim.ClaimStatus status);
+
+    // ✅ إضافات جديدة للـ Dashboard:
+    List<Claim> findTop10ByOrderByCreatedAtDesc();
+    long countByStatus(String status);
 }

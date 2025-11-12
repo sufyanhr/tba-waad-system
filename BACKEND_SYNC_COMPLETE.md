@@ -264,7 +264,7 @@ curl -X GET "http://localhost:9090/api/insurance" \
 
 ### Example: Create Audit Log
 ```bash
-curl -X POST "http://localhost:8080/api/audit" \
+curl -X POST "http://localhost:9090/api/audit" \
   -H "Authorization: Bearer <your-jwt-token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -292,7 +292,7 @@ The system supports the following roles:
 
 1. **Run the build:** Execute `mvn clean compile` to ensure all files compile successfully
 2. **Start the application:** Execute `mvn spring-boot:run`
-3. **Verify Swagger:** Navigate to http://localhost:8080/swagger-ui.html
+3. **Verify Swagger:** Navigate to http://localhost:9090/swagger-ui.html
 4. **Test endpoints:** Use Swagger UI or Postman to test all CRUD operations
 5. **Commit changes:** All changes are ready to be committed to the repository
 

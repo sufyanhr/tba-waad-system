@@ -64,7 +64,7 @@ export class ConfigService {
 
   static getDefaultConfig(): AppConfig {
     return {
-      API_URL: 'http://localhost:8080',
+      API_URL: 'http://localhost:9090',
       FRONTEND_URL: 'http://localhost:3000',
       DEFAULT_LANGUAGE: 'ar',
       SUPPORTED_LANGUAGES: ['ar', 'en'],

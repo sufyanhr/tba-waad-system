@@ -26,7 +26,12 @@ public class Claim {
     
     @Column(name = "claim_number", unique = true, nullable = false)
     private String claimNumber;
-    
+
+    @ManyToOne
+    @JoinColumn(name = "insurance_company_id")
+    private InsuranceCompany insuranceCompany;
+
+
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -79,7 +84,11 @@ public class Claim {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
+    public Object getAmount() {
+        return null;
+    }
+
     public enum ClaimStatus {
         SUBMITTED,
         UNDER_REVIEW,

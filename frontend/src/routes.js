@@ -3,6 +3,8 @@ import React from 'react'
 // ✅ استيراد صفحة تسجيل الدخول
 import Login from './views/pages/login/Login'
 
+import Users from './views/users/Users'
+
 // ✅ استيراد PrivateRoute لحماية الصفحات
 import PrivateRoute from './PrivateRoute'
 
@@ -61,6 +63,15 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 // ✅ تعريف المسارات
 const routes = [
   { path: '/', exact: true, name: 'Home' },
+  {
+    path: '/users',
+    name: 'Users',
+    element: () => (
+      <PrivateRoute>
+        <Users />
+      </PrivateRoute>
+    ),
+  },
 
   // ✅ صفحة تسجيل الدخول
   { path: '/login', name: 'Login', element: Login },

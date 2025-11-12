@@ -55,7 +55,11 @@ public class Provider {
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Claim> claims;
-    
+
+    @ManyToOne
+    @JoinColumn(name = "review_company_id")
+    private ReviewCompany reviewCompany;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

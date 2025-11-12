@@ -27,7 +27,11 @@ public class Member {
     
     @Column(name = "member_number", unique = true, nullable = false)
     private String memberNumber;
-    
+
+    // أضف هذه الحقول داخل الكلاس بعد تعريف organization
+    @Column(name = "is_employer")
+    private boolean isEmployer = false;
+
     @Column(name = "full_name", nullable = false)
     private String fullName;
     
@@ -46,7 +50,17 @@ public class Member {
     
     @Column(name = "national_id")
     private String nationalId;
-    
+
+    // في حالة كان مدير شركة (Employer)
+    @OneToOne(mappedBy = "employerOwner", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Organization ownedOrganization;
+
+    @ManyToOne
+    @JoinColumn(name = "insurance_company_id")
+    private InsuranceCompany insuranceCompany;
+
+
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
