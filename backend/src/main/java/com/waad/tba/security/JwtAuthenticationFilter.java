@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -49,10 +53,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (jwtTokenProvider.validateToken(jwt, userDetails)) {
+                // Create authorities from token (roles + permissions)
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                
+                // Add role authorities from token
+                List<String> roles = jwtTokenProvider.extractRoles(jwt);
+                if (roles != null) {
+                    roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                }
+                
+                // Add permission authorities from token with PERMISSION_ prefix
+                List<String> permissions = jwtTokenProvider.extractPermissions(jwt);
+                if (permissions != null) {
+                    permissions.forEach(permission -> 
+                        authorities.add(new SimpleGrantedAuthority("PERMISSION_" + permission))
+                    );
+                }
+                
+                // If no authorities from token, fall back to UserDetails authorities
+                if (authorities.isEmpty()) {
+                    authorities.addAll(userDetails.getAuthorities());
+                }
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        userDetails.getAuthorities()
+                        authorities
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
