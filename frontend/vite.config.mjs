@@ -1,49 +1,37 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'node:path'
-import autoprefixer from 'autoprefixer'
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+import jsconfigPaths from 'vite-jsconfig-paths';
+import path from 'path';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const API_URL = env.VITE_APP_BASE_NAME || '/';
+  const PORT = 3000;
+
   return {
-    base: './',
-    build: {
-      outDir: 'build',
-    },
-    css: {
-      postcss: {
-        plugins: [
-          autoprefixer({}), // add options if needed
-        ],
-      },
-    },
-    esbuild: {
-      loader: 'jsx',
-      include: /src\/.*\.jsx?$/,
-      exclude: [],
-    },
-    optimizeDeps: {
-      force: true,
-      esbuildOptions: {
-        loader: {
-          '.js': 'jsx',
-        },
-      },
-    },
-    plugins: [react()],
-    resolve: {
-      alias: [
-        {
-          find: 'src/',
-          replacement: `${path.resolve(__dirname, 'src')}/`,
-        },
-      ],
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss'],
-    },
+    base: API_URL,
     server: {
-      port: 3000,
-      proxy: {
-        // https://vitejs.dev/config/server-options.html
-      },
+      open: true,
+      port: PORT,
+      host: true
     },
-  }
-})
+    preview: {
+      open: true,
+      host: true
+    },
+    define: {
+      global: 'window' // Only if you need it for legacy packages
+    },
+    resolve: {
+      alias: {
+        '@ant-design/icons': path.resolve(__dirname, 'node_modules/@ant-design/icons')
+        // Add more aliases as needed
+      }
+    },
+    plugins: [react(), jsconfigPaths()],
+
+    optimizeDeps: {
+      include: ['@mui/material/Tooltip', 'react', 'react-dom', 'react-router-dom']
+    }
+  };
+});

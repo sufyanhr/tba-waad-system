@@ -23,7 +23,12 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
-    
+    public User findByEmailOrPhone(String identifier) {
+        if (identifier.contains("@")) {
+            return userRepository.findByEmail(identifier);
+        }
+        return userRepository.findByPhone(identifier);
+    }
     @Transactional
     public User updateUser(Long id, User userDetails) {
         User user = getUserById(id);

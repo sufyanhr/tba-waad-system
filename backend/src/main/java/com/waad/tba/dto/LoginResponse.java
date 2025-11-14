@@ -1,10 +1,9 @@
 package com.waad.tba.dto;
 
+import com.waad.tba.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -12,10 +11,5 @@ import java.util.Set;
 public class LoginResponse {
     private String token;
     private String type = "Bearer";
-    private Long id;
-    private String username;
-    private String email;
-    private String fullName;
-    private Set<String> roles;
+    private User user;
 }
-
