@@ -14,10 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -30,8 +27,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ السماح لواجهات Swagger و OpenAPI بدون توثيق
+                        // Swagger & OpenAPI
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -41,33 +39,17 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
 
-                        // ✅ السماح لطلبات التسجيل والدخول
+                        // Auth & public
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/public/**"
                         ).permitAll()
 
-                        // ✅ باقي الطلبات تحتاج JWT
+                        // باقي الطلبات تحتاج JWT
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore((req, res, chain) -> {
-                    HttpServletRequest request = (HttpServletRequest) req;
-                    HttpServletResponse response = (HttpServletResponse) res;
-
-                    String path = request.getServletPath();
-
-                    // ✅ تجاهل فلتر JWT لمسارات التسجيل والدخول
-                    if (path.startsWith("/api/auth/")) {
-                        chain.doFilter(request, response);
-                        return;
-                    }
-
-                    jwtAuthFilter.doFilter(request, response, chain);
-                }, UsernamePasswordAuthenticationFilter.class);
-
-
-
+                // ✅ إضافة فلتر الـ JWT قبل UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

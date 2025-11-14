@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -6,27 +6,22 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import useAuth from 'hooks/useAuth';
 import AuthWrapper from 'sections/auth/AuthWrapper';
-import FirebaseRegister from 'sections/auth/jwt/AuthRegister';
-
-// ================================|| JWT - REGISTER ||================================ //
+import RegisterForm from './RegisterForm';
 
 export default function Register() {
-  const { isLoggedIn } = useAuth();
-
-  const [searchParams] = useSearchParams();
-  const auth = searchParams.get('auth'); // get auth and set route based on that
-
   return (
     <AuthWrapper>
       <Grid container spacing={3}>
-        <Grid size={12}>
-          <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', mb: { xs: -0.5, sm: 0.5 } }}>
-            <Typography variant="h3">Sign up</Typography>
+        <Grid item xs={12}>
+          <Stack
+            direction="row"
+            sx={{ alignItems: 'baseline', justifyContent: 'space-between', mb: { xs: -0.5, sm: 0.5 } }}
+          >
+            <Typography variant="h3">Register</Typography>
             <Typography
               component={Link}
-              to={isLoggedIn ? '/auth/login' : auth ? `/${auth}/login?auth=jwt` : '/login'}
+              to="/auth/login"
               variant="body1"
               sx={{ textDecoration: 'none' }}
               color="primary"
@@ -35,8 +30,9 @@ export default function Register() {
             </Typography>
           </Stack>
         </Grid>
-        <Grid size={12}>
-          <FirebaseRegister />
+
+        <Grid item xs={12}>
+          <RegisterForm />
         </Grid>
       </Grid>
     </AuthWrapper>

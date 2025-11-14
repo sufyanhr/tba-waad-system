@@ -1,8 +1,6 @@
-import { createContext, useEffect, useReducer } from 'react';
-
-// third-party
-import { Chance } from 'chance';
-import { jwtDecode } from 'jwt-decode';
+// src/contexts/JWTContext.jsx
+import { createContext, useEffect, useReducer, useRef, useCallback } from 'react';
+import jwtDecode from 'jwt-decode';
 
 // reducer - state management
 import { LOGIN, LOGOUT } from 'contexts/auth-reducer/actions';
@@ -12,131 +10,120 @@ import authReducer from 'contexts/auth-reducer/auth';
 import Loader from 'components/Loader';
 import axios from 'utils/axios';
 
-const chance = new Chance();
-
-// constant
 const initialState = {
   isLoggedIn: false,
   isInitialized: false,
   user: null
 };
 
-const verifyToken = (serviceToken) => {
-  if (!serviceToken) {
+// التحقق من صلاحية التوكن
+const verifyToken = (token) => {
+  if (!token) return false;
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.exp > Date.now() / 1000;
+  } catch (error) {
+    console.error('Invalid JWT token', error);
     return false;
   }
-  const decoded = jwtDecode(serviceToken);
-  /**
-   * Property 'exp' does not exist on type '<T = unknown>(token: string, options?: JwtDecodeOptions | undefined) => T'.
-   */
-  return decoded.exp > Date.now() / 1000;
 };
 
-const setSession = (serviceToken) => {
-  if (serviceToken) {
-    localStorage.setItem('serviceToken', serviceToken);
-    axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
+// ضبط التوكن في localStorage و axios
+const setSession = (token) => {
+  if (token) {
+    localStorage.setItem('accessToken', token);
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
   } else {
-    localStorage.removeItem('serviceToken');
+    localStorage.removeItem('accessToken');
     delete axios.defaults.headers.common.Authorization;
   }
 };
-
-// ==============================|| JWT CONTEXT & PROVIDER ||============================== //
 
 const JWTContext = createContext(null);
 
 export const JWTProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  // ======================= INIT ==========================
   useEffect(() => {
     const init = async () => {
       try {
-        const serviceToken = window.localStorage.getItem('serviceToken');
-        if (serviceToken && verifyToken(serviceToken)) {
-          setSession(serviceToken);
-          const response = await axios.get('/api/account/me');
-          const { user } = response.data;
+        const token = localStorage.getItem('accessToken');
+
+        if (token && verifyToken(token)) {
+          setSession(token);
+          // غيّر هذا المسار حسب ما عملناه في الـ backend
+          const { data } = await axios.get('/api/auth/me');
+
           dispatch({
             type: LOGIN,
             payload: {
               isLoggedIn: true,
-              user
+              user: data
             }
           });
         } else {
-          dispatch({
-            type: LOGOUT
-          });
+          dispatch({ type: LOGOUT });
         }
-      } catch (err) {
-        console.error(err);
-        dispatch({
-          type: LOGOUT
-        });
+      } catch (error) {
+        console.error('Init auth error', error);
+        dispatch({ type: LOGOUT });
       }
     };
 
     init();
+  }, [dispatch]);
+
+  // ======================= LOGIN ==========================
+  const login = useCallback(
+    async (identifier, password) => {
+      const { data } = await axios.post('/api/auth/login', {
+        identifier,
+        password
+      });
+
+      const token = data.token;
+      const user = data.user;
+
+      setSession(token);
+
+      dispatch({
+        type: LOGIN,
+        payload: {
+          isLoggedIn: true,
+          user
+        }
+      });
+
+      return user;
+    },
+    [dispatch]
+  );
+
+  // ======================= REGISTER ==========================
+  const register = useCallback(async (formData) => {
+    const { data } = await axios.post('/api/auth/register', formData);
+    return data;
   }, []);
 
-  const login = async (email, password) => {
-    const response = await axios.post('/api/account/login', { email, password });
-    const { serviceToken, user } = response.data;
-    setSession(serviceToken);
-    dispatch({
-      type: LOGIN,
-      payload: {
-        isLoggedIn: true,
-        user
-      }
-    });
-  };
-
-  const register = async (email, password, firstName, lastName) => {
-    // todo: this flow need to be recode as it not verified
-    const id = chance.bb_pin();
-    const response = await axios.post('/api/account/register', {
-      id,
-      email,
-      password,
-      firstName,
-      lastName
-    });
-    let users = response.data;
-
-    if (window.localStorage.getItem('users') !== undefined && window.localStorage.getItem('users') !== null) {
-      const localUsers = window.localStorage.getItem('users');
-      users = [
-        ...JSON.parse(localUsers),
-        {
-          id,
-          email,
-          password,
-          name: `${firstName} ${lastName}`
-        }
-      ];
-    }
-
-    window.localStorage.setItem('users', JSON.stringify(users));
-  };
-
-  const logout = () => {
+  const logout = useCallback(() => {
     setSession(null);
     dispatch({ type: LOGOUT });
-  };
+  }, [dispatch]);
 
-  const resetPassword = async (email) => {
-    console.log('email - ', email);
-  };
+  // لتقليل تحذير الـ Context value changes on every render
+  // use a ref + effect to keep a stable reference for the context value
+  const contextValueRef = useRef({ ...state, login, logout, register });
 
-  const updateProfile = () => {};
+  useEffect(() => {
+    contextValueRef.current = { ...state, login, logout, register };
+  }, [state, login, logout, register]);
 
-  if (state.isInitialized !== undefined && !state.isInitialized) {
+  if (!state.isInitialized) {
     return <Loader />;
   }
 
-  return <JWTContext value={{ ...state, login, logout, register, resetPassword, updateProfile }}>{children}</JWTContext>;
+  return <JWTContext.Provider value={contextValueRef.current}>{children}</JWTContext.Provider>;
 };
 
 export default JWTContext;
