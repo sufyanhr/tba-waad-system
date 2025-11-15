@@ -51,6 +51,18 @@ const AccountTabPassword = Loadable(lazy(() => import('sections/apps/profiles/ac
 const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/account/TabRole')));
 const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
 
+// render - RBAC pages
+const RolesList = Loadable(lazy(() => import('pages/rbac/roles/RolesList')));
+const RoleCreate = Loadable(lazy(() => import('pages/rbac/roles/RoleCreate')));
+const RoleEdit = Loadable(lazy(() => import('pages/rbac/roles/RoleEdit')));
+const AssignPermissions = Loadable(lazy(() => import('pages/rbac/roles/AssignPermissions')));
+
+const PermissionsList = Loadable(lazy(() => import('pages/rbac/permissions/PermissionsList')));
+const PermissionCreate = Loadable(lazy(() => import('pages/rbac/permissions/PermissionCreate')));
+const PermissionEdit = Loadable(lazy(() => import('pages/rbac/permissions/PermissionEdit')));
+
+const AssignRoles = Loadable(lazy(() => import('pages/rbac/users/AssignRoles')));
+
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
 const AppECommProductList = Loadable(lazy(() => import('pages/apps/e-commerce/products-list')));
@@ -325,6 +337,80 @@ const MainRoutes = {
                 {
                   path: 'checkout',
                   element: <AppECommCheckout />
+                }
+              ]
+            }
+          ]
+        },
+        {
+          path: 'admin',
+          children: [
+            {
+              path: 'rbac',
+              children: [
+                {
+                  path: 'roles',
+                  element: (
+                    <ProtectedRoute permissions={['roles.manage']}>
+                      <RolesList />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'roles/create',
+                  element: (
+                    <ProtectedRoute permissions={['roles.manage']}>
+                      <RoleCreate />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'roles/:id/edit',
+                  element: (
+                    <ProtectedRoute permissions={['roles.manage']}>
+                      <RoleEdit />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'roles/assign-permissions',
+                  element: (
+                    <ProtectedRoute permissions={['roles.assign_permissions']}>
+                      <AssignPermissions />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'permissions',
+                  element: (
+                    <ProtectedRoute permissions={['permissions.manage']}>
+                      <PermissionsList />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'permissions/create',
+                  element: (
+                    <ProtectedRoute permissions={['permissions.manage']}>
+                      <PermissionCreate />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'permissions/:id/edit',
+                  element: (
+                    <ProtectedRoute permissions={['permissions.manage']}>
+                      <PermissionEdit />
+                    </ProtectedRoute>
+                  )
+                },
+                {
+                  path: 'users/assign-roles',
+                  element: (
+                    <ProtectedRoute permissions={['users.assign_roles']}>
+                      <AssignRoles />
+                    </ProtectedRoute>
+                  )
                 }
               ]
             }
