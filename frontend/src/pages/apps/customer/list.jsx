@@ -12,6 +12,7 @@ import { PatternFormat } from 'react-number-format';
 // project imports
 import Avatar from 'components/@extended/Avatar';
 import IconButton from 'components/@extended/IconButton';
+import PermissionGuard from 'components/auth/PermissionGuard';
 import { IndeterminateCheckbox } from 'components/third-party/react-table';
 
 import CustomerModal from 'sections/apps/customer/CustomerModal';
@@ -129,30 +130,34 @@ export default function CustomerListPage() {
                   {collapseIcon}
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Edit">
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedCustomer(row.original);
-                    setCustomerModal(true);
-                  }}
-                >
-                  <EditOutlined />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton
-                  color="error"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpen(true);
-                    setCustomerDeleteId(Number(row.original.id));
-                  }}
-                >
-                  <DeleteOutlined />
-                </IconButton>
-              </Tooltip>
+              <PermissionGuard permissions={['customers.edit']}>
+                <Tooltip title="Edit">
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCustomer(row.original);
+                      setCustomerModal(true);
+                    }}
+                  >
+                    <EditOutlined />
+                  </IconButton>
+                </Tooltip>
+              </PermissionGuard>
+              <PermissionGuard permissions={['customers.delete']}>
+                <Tooltip title="Delete">
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpen(true);
+                      setCustomerDeleteId(Number(row.original.id));
+                    }}
+                  >
+                    <DeleteOutlined />
+                  </IconButton>
+                </Tooltip>
+              </PermissionGuard>
             </Stack>
           );
         }

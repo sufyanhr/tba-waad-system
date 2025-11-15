@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
+@Service("memberBenefitTableService")
 @RequiredArgsConstructor
-public class BenefitTableService {
+public class MemberBenefitTableService {
     
     private final BenefitTableRepository benefitTableRepository;
     

@@ -44,12 +44,8 @@ public class FinanceService {
         Provider provider = providerRepository.findById(providerId)
             .orElseThrow(() -> new IllegalArgumentException("Provider not found with id: " + providerId));
         
-        // تحويل LocalDate إلى LocalDateTime للبحث
-        LocalDateTime fromDateTime = periodFrom.atStartOfDay();
-        LocalDateTime toDateTime = periodTo.atTime(23, 59, 59);
-        
         // الحصول على المطالبات المعتمدة للمقدم في الفترة المحددة
-        List<Claim> approvedClaims = claimRepository.findByClaimDateBetween(fromDateTime, toDateTime)
+        List<Claim> approvedClaims = claimRepository.findByClaimDateBetween(periodFrom, periodTo)
             .stream()
             .filter(claim -> claim.getProvider().getId().equals(providerId))
             .filter(claim -> claim.getStatus() == Claim.ClaimStatus.APPROVED)

@@ -12,6 +12,7 @@ import NavGroup from './NavGroup';
 import menuItem from 'menu-items';
 import { MenuFromAPI } from 'menu-items/dashboard';
 
+import useAuth from 'hooks/useAuth';
 import useConfig from 'hooks/useConfig';
 import { HORIZONTAL_MAX_ITEM, MenuOrientation } from 'config';
 import { useGetMenu, useGetMenuMaster } from 'api/menu';
@@ -29,6 +30,7 @@ function isFound(arr, str) {
 
 export default function Navigation() {
   const { state } = useConfig();
+  const { hasAnyRole, hasAnyPermission } = useAuth();
   const { menuLoading } = useGetMenu();
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
@@ -41,16 +43,49 @@ export default function Navigation() {
 
   const dashboardMenu = MenuFromAPI();
 
+  // Function to check if menu item should be visible
+  const isMenuItemVisible = (item) => {
+    // If no permissions/roles defined, show by default
+    if (!item.roles && !item.permissions) return true;
+    
+    const hasRequiredRole = item.roles ? hasAnyRole(item.roles) : false;
+    const hasRequiredPermission = item.permissions ? hasAnyPermission(item.permissions) : false;
+    
+    return hasRequiredRole || hasRequiredPermission;
+  };
+
+  // Function to filter menu items based on permissions
+  const filterMenuItems = (items) => {
+    return items.filter(item => {
+      if (!isMenuItemVisible(item)) return false;
+      
+      // If item has children, filter them recursively
+      if (item.children && item.children.length > 0) {
+        const filteredChildren = filterMenuItems(item.children);
+        item.children = filteredChildren;
+        // Only show group if it has visible children
+        return filteredChildren.length > 0;
+      }
+      
+      return true;
+    });
+  };
+
   useLayoutEffect(() => {
+    let items = [];
     if (menuLoading && !isFound(menuItem, 'group-dashboard-loading')) {
       menuItem.items.splice(0, 0, dashboardMenu);
-      setMenuItems({ items: [...menuItem.items] });
+      items = [...menuItem.items];
     } else if (!menuLoading && dashboardMenu?.id !== undefined && !isFound(menuItem, 'group-dashboard')) {
       menuItem.items.splice(0, 1, dashboardMenu);
-      setMenuItems({ items: [...menuItem.items] });
+      items = [...menuItem.items];
     } else {
-      setMenuItems({ items: [...menuItem.items] });
+      items = [...menuItem.items];
     }
+    
+    // Filter menu items based on user permissions
+    const filteredItems = filterMenuItems(items);
+    setMenuItems({ items: filteredItems });
     // eslint-disable-next-line
   }, [menuLoading]);
 

@@ -2,7 +2,7 @@ package com.waad.tba.modules.members.controller;
 
 import com.waad.tba.core.dto.ApiResponse;
 import com.waad.tba.modules.members.model.BenefitTable;
-import com.waad.tba.modules.members.service.BenefitTableService;
+import com.waad.tba.modules.members.service.MemberBenefitTableService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +20,7 @@ import java.util.List;
 @Tag(name = "Benefit Tables", description = "Policy benefit table management endpoints")
 public class BenefitTableController {
     
-    private final BenefitTableService benefitTableService;
+    private final MemberBenefitTableService benefitTableService;
     
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")

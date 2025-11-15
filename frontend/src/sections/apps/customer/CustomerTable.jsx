@@ -29,6 +29,7 @@ import { rankItem } from '@tanstack/match-sorter-utils';
 
 // project imports
 import MainCard from 'components/MainCard';
+import PermissionGuard from 'components/auth/PermissionGuard';
 
 import {
   CSVExport,
@@ -127,9 +128,11 @@ export default function CustomerTable({ data, columns, modalToggler }) {
           </Select>
           <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
           <Stack direction="row" sx={{ gap: 2, alignItems: 'center' }}>
-            <Button variant="contained" startIcon={<PlusOutlined />} onClick={modalToggler}>
-              Add Customer
-            </Button>
+            <PermissionGuard permissions={['customers.create']}>
+              <Button variant="contained" startIcon={<PlusOutlined />} onClick={modalToggler}>
+                Add Customer
+              </Button>
+            </PermissionGuard>
             <CSVExport
               {...{
                 data:

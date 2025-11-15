@@ -44,6 +44,25 @@ const JWTContext = createContext(null);
 export const JWTProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  // Helper functions for role and permission checks
+  const hasRole = useCallback((role) => {
+    return state.user?.roles?.includes(role) || false;
+  }, [state.user]);
+
+  const hasAnyRole = useCallback((roles) => {
+    if (!roles || roles.length === 0) return true;
+    return roles.some(role => hasRole(role));
+  }, [hasRole]);
+
+  const hasPermission = useCallback((permission) => {
+    return state.user?.permissions?.includes(permission) || false;
+  }, [state.user]);
+
+  const hasAnyPermission = useCallback((permissions) => {
+    if (!permissions || permissions.length === 0) return true;
+    return permissions.some(permission => hasPermission(permission));
+  }, [hasPermission]);
+
   // ======================= INIT ==========================
   useEffect(() => {
     const init = async () => {
@@ -52,14 +71,21 @@ export const JWTProvider = ({ children }) => {
 
         if (token && verifyToken(token)) {
           setSession(token);
-          // غيّر هذا المسار حسب ما عملناه في الـ backend
-          const { data } = await axios.get('/api/auth/me');
-
+          // Auto-restore user from token
+          const decoded = jwtDecode(token);
+          
           dispatch({
             type: LOGIN,
             payload: {
               isLoggedIn: true,
-              user: data
+              user: {
+                id: decoded.userId,
+                username: decoded.sub,
+                fullName: decoded.fullName,
+                email: decoded.email,
+                roles: decoded.roles || [],
+                permissions: decoded.permissions || []
+              }
             }
           });
         } else {
@@ -77,33 +103,35 @@ export const JWTProvider = ({ children }) => {
   // ======================= LOGIN ==========================
   const login = useCallback(
     async (identifier, password) => {
-      const { data } = await axios.post('/api/auth/login', {
-        identifier,
-        password
-      });
+      try {
+        const { data } = await axios.post('/api/auth/login', { identifier, password });
 
-      const token = data.token;
-      const user = data.user;
+        const token = data.token;
+        const user = data.user;
 
-      setSession(token);
+        setSession(token);
 
-      dispatch({
-        type: LOGIN,
-        payload: {
-          isLoggedIn: true,
-          user
-        }
-      });
+        dispatch({
+          type: LOGIN,
+          payload: { isLoggedIn: true, user }
+        });
 
-      return user;
+        return { success: true };
+      } catch (error) {
+        return { success: false, message: error.response?.data || "Login failed" };
+      }
     },
     [dispatch]
   );
 
   // ======================= REGISTER ==========================
   const register = useCallback(async (formData) => {
-    const { data } = await axios.post('/api/auth/register', formData);
-    return data;
+    try {
+      const { data } = await axios.post('/api/auth/register', formData);
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, message: error.response?.data || "Register failed" };
+    }
   }, []);
 
   const logout = useCallback(() => {
@@ -113,11 +141,29 @@ export const JWTProvider = ({ children }) => {
 
   // لتقليل تحذير الـ Context value changes on every render
   // use a ref + effect to keep a stable reference for the context value
-  const contextValueRef = useRef({ ...state, login, logout, register });
+  const contextValueRef = useRef({ 
+    ...state, 
+    login, 
+    logout, 
+    register, 
+    hasRole, 
+    hasAnyRole, 
+    hasPermission, 
+    hasAnyPermission 
+  });
 
   useEffect(() => {
-    contextValueRef.current = { ...state, login, logout, register };
-  }, [state, login, logout, register]);
+    contextValueRef.current = { 
+      ...state, 
+      login, 
+      logout, 
+      register, 
+      hasRole, 
+      hasAnyRole, 
+      hasPermission, 
+      hasAnyPermission 
+    };
+  }, [state, login, logout, register, hasRole, hasAnyRole, hasPermission, hasAnyPermission]);
 
   if (!state.isInitialized) {
     return <Loader />;

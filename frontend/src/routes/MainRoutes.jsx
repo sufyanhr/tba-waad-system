@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import ErrorBoundary from './ErrorBoundary';
 import Loadable from 'components/Loadable';
+import ProtectedRoute from 'components/ProtectedRoute';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import SimpleLayout from 'layout/Simple';
@@ -112,6 +113,7 @@ const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/jwt/code-ver
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
+const MaintenanceForbidden = Loadable(lazy(() => import('pages/errors/Forbidden')));
 const MaintenanceUnderConstruction = Loadable(lazy(() => import('pages/maintenance/under-construction')));
 const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/coming-soon')));
 const MaintenanceJoinWaitList = Loadable(lazy(() => import('pages/maintenance/join-waitlist')));
@@ -197,11 +199,19 @@ const MainRoutes = {
               children: [
                 {
                   path: 'customer-list',
-                  element: <AppCustomerList />
+                  element: (
+                    <ProtectedRoute permissions={['customers.view']}>
+                      <AppCustomerList />
+                    </ProtectedRoute>
+                  )
                 },
                 {
                   path: 'customer-card',
-                  element: <AppCustomerCard />
+                  element: (
+                    <ProtectedRoute permissions={['customers.view']}>
+                      <AppCustomerCard />
+                    </ProtectedRoute>
+                  )
                 }
               ]
             },
@@ -520,6 +530,10 @@ const MainRoutes = {
         {
           path: '404',
           element: <MaintenanceError />
+        },
+        {
+          path: '403',
+          element: <MaintenanceForbidden />
         },
         {
           path: '500',

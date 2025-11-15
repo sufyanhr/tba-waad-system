@@ -42,7 +42,8 @@ const applications = {
       type: 'item',
       url: '/apps/chat',
       icon: icons.MessageOutlined,
-      breadcrumbs: false
+      breadcrumbs: false,
+      permissions: ['chat.view']
     },
     {
       id: 'calendar',
@@ -50,6 +51,7 @@ const applications = {
       type: 'item',
       url: '/apps/calendar',
       icon: icons.CalendarOutlined,
+      permissions: ['calendar.view'],
       actions: [
         {
           type: NavActionType.LINK,
@@ -67,13 +69,15 @@ const applications = {
       icon: BuildOutlined,
       link: '/apps/kanban/:tab',
       url: '/apps/kanban/board',
-      breadcrumbs: false
+      breadcrumbs: false,
+      permissions: ['kanban.view']
     },
     {
       id: 'customer',
       title: 'customer',
       type: 'collapse',
       icon: icons.CustomerServiceOutlined,
+      permissions: ['customers.view'],
       children: [
         {
           id: 'customer-list',
