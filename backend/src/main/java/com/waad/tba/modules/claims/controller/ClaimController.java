@@ -3,6 +3,7 @@ package com.waad.tba.modules.claims.controller;
 import com.waad.tba.core.dto.ApiResponse;
 import com.waad.tba.modules.claims.model.Claim;
 import com.waad.tba.modules.claims.service.ClaimService;
+import com.waad.tba.security.PermissionConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,28 +33,28 @@ public class ClaimController {
     private final UserRepository userRepository;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('PERMISSION_CLAIMS_REVIEW')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.CLAIMS_VIEW + "')")
     @Operation(summary = "Get all claims")
     public ResponseEntity<List<Claim>> getAllClaims() {
         return ResponseEntity.ok(claimService.getAllClaims());
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERMISSION_CLAIMS_REVIEW')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.CLAIMS_VIEW + "')")
     @Operation(summary = "Get claim by ID")
     public ResponseEntity<Claim> getClaimById(@PathVariable Long id) {
         return ResponseEntity.ok(claimService.getClaimById(id));
     }
     
     @GetMapping("/member/{memberId}")
-    @PreAuthorize("hasAuthority('PERMISSION_CLAIMS_REVIEW')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.CLAIMS_VIEW + "')")
     @Operation(summary = "Get claims by member")
     public ResponseEntity<List<Claim>> getClaimsByMember(@PathVariable Long memberId) {
         return ResponseEntity.ok(claimService.getClaimsByMember(memberId));
     }
     
     @GetMapping("/provider/{providerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'PROVIDER')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.CLAIMS_VIEW + "')")
     @Operation(summary = "Get claims by provider")
     public ResponseEntity<List<Claim>> getClaimsByProvider(@PathVariable Long providerId) {
         return ResponseEntity.ok(claimService.getClaimsByProvider(providerId));

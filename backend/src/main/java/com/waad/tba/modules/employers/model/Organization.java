@@ -34,6 +34,9 @@ public class Organization {
 
     private String industry;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private String address;
 
     private String phone;

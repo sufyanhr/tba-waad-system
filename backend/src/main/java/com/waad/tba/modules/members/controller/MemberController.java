@@ -3,6 +3,7 @@ package com.waad.tba.modules.members.controller;
 import com.waad.tba.core.dto.ApiResponse;
 import com.waad.tba.modules.members.model.Member;
 import com.waad.tba.modules.members.service.MemberService;
+import com.waad.tba.security.PermissionConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,50 +23,45 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    // 🔹 عرض جميع الأعضاء
     @GetMapping
-    @PreAuthorize("hasAuthority('PERMISSION_MEMBERS_VIEW')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.MEMBERS_VIEW + "')")
     @Operation(summary = "Get all members")
     public ResponseEntity<List<Member>> getAllMembers() {
         return ResponseEntity.ok(memberService.getAllMembers());
     }
 
-    // 🔹 عرض عضو واحد حسب ID
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERMISSION_MEMBERS_VIEW')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.MEMBERS_VIEW + "')")
     @Operation(summary = "Get member by ID")
     public ResponseEntity<Member> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
-    // 🔹 عرض أعضاء مؤسسة معينة
     @GetMapping("/organization/{organizationId}")
-    @PreAuthorize("hasAuthority('PERMISSION_MEMBERS_VIEW')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.MEMBERS_VIEW + "')")
     @Operation(summary = "Get members by organization")
     public ResponseEntity<List<Member>> getMembersByOrganization(@PathVariable Long organizationId) {
         return ResponseEntity.ok(memberService.getMembersByOrganization(organizationId));
     }
 
-    // 🔹 إنشاء عضو جديد
     @PostMapping
-    @PreAuthorize("hasAuthority('PERMISSION_MEMBERS_CREATE')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.MEMBERS_CREATE + "')")
     @Operation(summary = "Create new member")
-    public ResponseEntity<Member> createMember(@RequestBody Member member) {
+    public ResponseEntity<ApiResponse> createMember(@RequestBody Member member) {
         Member createdMember = memberService.createMember(member);
-        return ResponseEntity.ok(createdMember);
+        return ResponseEntity.ok(new ApiResponse(true, "Member created successfully", createdMember));
     }
 
-    // 🔹 تحديث عضو
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERMISSION_MEMBERS_UPDATE')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.MEMBERS_UPDATE + "')")
     @Operation(summary = "Update member")
-    public ResponseEntity<Member> updateMember(@PathVariable Long id, @RequestBody Member member) {
-        return ResponseEntity.ok(memberService.updateMember(id, member));
+    public ResponseEntity<ApiResponse> updateMember(@PathVariable Long id, @RequestBody Member member) {
+        Member updatedMember = memberService.updateMember(id, member);
+        return ResponseEntity.ok(new ApiResponse(true, "Member updated successfully", updatedMember));
     }
 
-    // 🔹 حذف عضو
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERMISSION_MEMBERS_DELETE')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.MEMBERS_DELETE + "')")
     @Operation(summary = "Delete member")
     public ResponseEntity<ApiResponse> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);

@@ -109,7 +109,7 @@ public class FinanceService {
             detail.setUsedTimes(usage.getUsedTimes());
             detail.setRemainingAmount(usage.getRemainingAmount());
             detail.setRemainingTimes(usage.getRemainingTimes());
-            detail.setLastUsageDate(usage.getLastUsageDate());
+            // detail.setLastUsageDate(usage.getLastUsageDate()); // TODO: Implement in Phase B
             
             report.getBenefitUsages().add(detail);
             
@@ -168,5 +168,41 @@ public class FinanceService {
         }
         
         return report;
+    }
+    
+    // Missing controller methods - A4 stubs  
+    public List<com.waad.tba.modules.finance.model.Finance> getAllFinanceRecords() {
+        return List.of();
+    }
+    
+    public com.waad.tba.modules.finance.model.Finance getFinanceById(Long id) {
+        return null;
+    }
+    
+    public List<com.waad.tba.modules.finance.model.Finance> getFinanceByProvider(Long providerId) {
+        return List.of();
+    }
+    
+    public List<com.waad.tba.modules.finance.model.Finance> getFinanceByStatus(com.waad.tba.modules.finance.model.Finance.PaymentStatus status) {
+        return List.of();
+    }
+    
+    @Transactional
+    public com.waad.tba.modules.finance.model.Finance createFinanceRecord(com.waad.tba.modules.finance.model.Finance finance) {
+        return null;
+    }
+    
+    @Transactional  
+    public com.waad.tba.modules.finance.model.Finance updateFinanceRecord(Long id, com.waad.tba.modules.finance.model.Finance finance) {
+        return null;
+    }
+    
+    @Transactional
+    public com.waad.tba.modules.finance.model.Finance markAsPaid(Long id, String paymentMethod, String transactionReference) {
+        return null;
+    }
+    
+    @Transactional
+    public void deleteFinanceRecord(Long id) {
     }
 }

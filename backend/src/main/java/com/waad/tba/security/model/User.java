@@ -85,7 +85,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return userRoles.stream()
-                .filter(UserRole::getActive)
+                .filter(userRole -> userRole.getActive())
                 .flatMap(userRole -> {
                     Set<GrantedAuthority> authorities = new HashSet<>();
                     // Add role authority
@@ -97,32 +97,42 @@ public class User implements UserDetails {
                 })
                 .collect(Collectors.toSet());
     }
+    
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+    
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
 
     @Override
     public boolean isAccountNonExpired() {
-        return active;
+        return Boolean.TRUE.equals(active);
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return active;
+        return Boolean.TRUE.equals(active);
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return active;
+        return Boolean.TRUE.equals(active);
     }
 
     @Override
     public boolean isEnabled() {
-        return active;
+        return Boolean.TRUE.equals(active);
     }
 
     // ===== Helper Methods =====
     public Set<Role> getActiveRoles() {
         return userRoles.stream()
-                .filter(UserRole::getActive)
-                .map(UserRole::getRole)
+                .filter(userRole -> userRole.getActive())
+                .map(userRole -> userRole.getRole())
                 .collect(Collectors.toSet());
     }
 

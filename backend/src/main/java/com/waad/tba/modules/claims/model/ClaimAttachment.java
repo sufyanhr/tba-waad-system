@@ -23,6 +23,10 @@ public class ClaimAttachment {
 
     private String fileType;
 
+    private String documentType;
+
+    private String filePath;
+
     private Long fileSize;
 
     @ManyToOne(fetch = FetchType.LAZY)

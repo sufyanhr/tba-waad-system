@@ -49,6 +49,12 @@ public class BenefitUsage {
     @Column(name = "used_count", nullable = false)
     private Integer usedCount = 0;  // عدد المرات المستخدمة
     
+    @Column(name = "used_times", nullable = false)
+    private Integer usedTimes = 0;  // عدد المرات المستخدمة (alias)
+    
+    @Column(name = "remaining_times")
+    private Integer remainingTimes;  // عدد المرات المتبقية
+    
     @Column(name = "remaining_amount", precision = 10, scale = 2, nullable = false)
     private BigDecimal remainingAmount;  // المبلغ المتبقي
     

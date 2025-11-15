@@ -3,6 +3,7 @@ package com.waad.tba.modules.insurance.controller;
 import com.waad.tba.core.dto.ApiResponse;
 import com.waad.tba.modules.insurance.model.Policy;
 import com.waad.tba.modules.insurance.service.PolicyService;
+import com.waad.tba.security.PermissionConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,14 +24,14 @@ public class PolicyController {
     private final PolicyService policyService;
     
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.POLICIES_VIEW + "')")
     @Operation(summary = "Get all policies")
     public ResponseEntity<List<Policy>> getAllPolicies() {
         return ResponseEntity.ok(policyService.getAllPolicies());
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSURANCE', 'EMPLOYER')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.POLICIES_VIEW + "')")
     @Operation(summary = "Get policy by ID")
     public ResponseEntity<Policy> getPolicyById(@PathVariable Long id) {
         return ResponseEntity.ok(policyService.getPolicyById(id));

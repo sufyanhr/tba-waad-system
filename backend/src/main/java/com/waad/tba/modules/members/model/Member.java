@@ -95,6 +95,9 @@ public class Member {
     @Column(name = "coverage_status")
     private CoverageStatus coverageStatus = CoverageStatus.ACTIVE;
     
+    @Column(name = "active")
+    private Boolean active = true;
+    
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Claim> claims;

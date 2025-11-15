@@ -53,4 +53,7 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     @Query("SELECT COUNT(c) FROM Claim c WHERE c.claimDate >= :startDate AND c.claimDate <= :endDate")
     Long countClaimsByDateRange(@Param("startDate") LocalDateTime startDate, 
                                @Param("endDate") LocalDateTime endDate);
+
+    List<Claim> findByMemberOrganization(com.waad.tba.modules.employers.model.Organization organization);
+    List<Claim> findByMember(com.waad.tba.modules.members.model.Member member);
 }
