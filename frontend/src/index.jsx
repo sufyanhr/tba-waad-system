@@ -1,4 +1,6 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 
 // style.scss
 import 'assets/style.css';
@@ -15,10 +17,6 @@ import 'assets/third-party/apex-chart.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // google-fonts
-// Preload critical fonts (for example, Roboto) to reduce FOUC.
-// (In a real app, you might add a <link rel="preload" as="font" href="..." crossorigin="anonymous" /> tag in your HTML (or via a plugin) for each critical font.)
-// (Below is a dummy example – replace with your actual font URLs if needed.)
-// <link rel="preload" as="font" href="https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2" crossorigin="anonymous" />
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/300.css';
@@ -41,7 +39,7 @@ import '@fontsource/public-sans/700.css';
 
 // project imports
 import App from './App';
-import { ConfigProvider } from 'contexts/ConfigContext';
+import { JWTProvider } from 'contexts/JWTContext';
 import reportWebVitals from './reportWebVitals';
 
 const container = document.getElementById('root');
@@ -50,9 +48,11 @@ const root = createRoot(container);
 // ==============================|| MAIN - REACT DOM RENDER ||============================== //
 
 root.render(
-  <ConfigProvider>
-    <App />
-  </ConfigProvider>
+  <BrowserRouter>
+    <JWTProvider>
+      <App />
+    </JWTProvider>
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function

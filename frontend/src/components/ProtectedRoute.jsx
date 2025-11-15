@@ -33,7 +33,7 @@ const ProtectedRoute = ({ children, roles = [], permissions = [] }) => {
   }
 
   // إذا لم يملك الصلاحيات المطلوبة، اتجه إلى صفحة الرفض
-  return <Navigate to="/403" replace />;
+  return <Navigate to="/maintenance/403" replace />;
 };
 
 export default ProtectedRoute;

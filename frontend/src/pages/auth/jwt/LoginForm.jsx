@@ -16,8 +16,12 @@ export default function LoginForm() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await login(identifier, password);
-      navigate('/dashboard'); // غيّر المسار حسب ما تريد بعد تسجيل الدخول
+      const result = await login(identifier, password);
+      if (result.success) {
+        navigate('/dashboard/default');
+      } else {
+        alert(result.message || 'Invalid login');
+      }
     } catch (error) {
       console.error('Login failed', error);
       alert('Invalid login');

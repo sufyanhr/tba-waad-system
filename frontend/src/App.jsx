@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 // project imports
 import router from 'routes';
 import ThemeCustomization from 'themes';
+import { ConfigProvider } from 'contexts/ConfigContext';
 
 import Locales from 'components/Locales';
 import RTLLayout from 'components/RTLLayout';
@@ -11,30 +12,25 @@ import Snackbar from 'components/@extended/Snackbar';
 import Notistack from 'components/third-party/Notistack';
 import Metrics from 'metrics';
 
-// auth-provider
-import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
-
 // ==============================|| APP - THEME, ROUTER, LOCAL ||============================== //
 
 export default function App() {
   return (
     <>
-      <ThemeCustomization>
-        <RTLLayout>
-          <Locales>
-            <ScrollTop>
-              <AuthProvider>
-                <>
-                  <Notistack>
-                    <RouterProvider router={router} />
-                    <Snackbar />
-                  </Notistack>
-                </>
-              </AuthProvider>
-            </ScrollTop>
-          </Locales>
-        </RTLLayout>
-      </ThemeCustomization>
+      <ConfigProvider>
+        <ThemeCustomization>
+          <RTLLayout>
+            <Locales>
+              <ScrollTop>
+                <Notistack>
+                  <RouterProvider router={router} />
+                  <Snackbar />
+                </Notistack>
+              </ScrollTop>
+            </Locales>
+          </RTLLayout>
+        </ThemeCustomization>
+      </ConfigProvider>
       <Metrics />
     </>
   );

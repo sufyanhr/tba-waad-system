@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -8,8 +8,16 @@ import Typography from '@mui/material/Typography';
 // project imports
 import AuthWrapper from 'sections/auth/AuthWrapper';
 import LoginForm from './LoginForm';
+import useAuth from 'hooks/useAuth';
 
 export default function Login() {
+  const { isLoggedIn } = useAuth();
+
+  // If already logged in, redirect to dashboard
+  if (isLoggedIn) {
+    return <Navigate to="/dashboard/default" replace />;
+  }
+
   return (
     <AuthWrapper>
       <Grid container spacing={3}>
@@ -26,7 +34,7 @@ export default function Login() {
               sx={{ textDecoration: 'none' }}
               color="primary"
             >
-              Don’t have an account?
+              Don't have an account?
             </Typography>
           </Stack>
         </Grid>

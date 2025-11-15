@@ -145,7 +145,11 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <DashboardLayout />,
+      element: (
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           path: 'dashboard',

@@ -14,9 +14,9 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401 && !window.location.href.includes('/login')) {
+    if (error?.response?.status === 401 && !window.location.href.includes('/auth/login')) {
       localStorage.removeItem('accessToken');
-      window.location.pathname = '/login';
+      window.location.pathname = '/auth/login';
     }
     return Promise.reject(error);
   }
