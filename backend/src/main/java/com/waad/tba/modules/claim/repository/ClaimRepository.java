@@ -18,11 +18,11 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     
     @Query("SELECT c FROM Claim c WHERE " +
            "LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(c.diagnosis) LIKE LOWER(CONCAT('%', :query, '%'))")
+           "LOWER(c.notes) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<Claim> search(String query);
     
-    @Query("SELECT c.visitDate, COUNT(c) FROM Claim c " +
-           "WHERE c.visitDate BETWEEN :startDate AND :endDate " +
-           "GROUP BY c.visitDate ORDER BY c.visitDate")
+    @Query("SELECT c.claimDate, COUNT(c) FROM Claim c " +
+           "WHERE c.claimDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY c.claimDate ORDER BY c.claimDate")
     List<Object[]> countClaimsPerDay(LocalDate startDate, LocalDate endDate);
 }

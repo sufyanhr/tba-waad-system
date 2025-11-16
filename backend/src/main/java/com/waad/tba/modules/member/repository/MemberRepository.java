@@ -16,7 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Boolean existsByNationalId(String nationalId);
     
     @Query("SELECT m FROM Member m WHERE " +
-           "LOWER(m.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(m.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(m.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(m.memberNumber) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(m.nationalId) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<Member> search(String query);
