@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -18,7 +18,6 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import useAuth from 'hooks/useAuth';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 
@@ -34,12 +33,16 @@ import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 export default function AuthResetPassword() {
   const navigate = useNavigate();
 
-  const { isLoggedIn } = useAuth();
-
   const [level, setLevel] = useState();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleClickShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const handleMouseDownPassword = (event) => {
@@ -51,9 +54,6 @@ export default function AuthResetPassword() {
     setLevel(strengthColor(temp));
   };
 
-  const [searchParams] = useSearchParams();
-  const auth = searchParams.get('auth'); // get auth and set route based on that
-
   useEffect(() => {
     changePassword('');
   }, []);
@@ -61,11 +61,15 @@ export default function AuthResetPassword() {
   return (
     <Formik
       initialValues={{
+        code: '',
         password: '',
         confirmPassword: '',
         submit: null
       }}
       validationSchema={Yup.object().shape({
+        code: Yup.string()
+          .matches(/^[0-9]{6}$/, 'Code must be exactly 6 digits')
+          .required('Reset code is required'),
         password: Yup.string().max(255).required('Password is required'),
         confirmPassword: Yup.string()
           .required('Confirm Password is required')
@@ -73,21 +77,21 @@ export default function AuthResetPassword() {
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          // password reset
+          // TODO: Connect to backend API later
+          // For now, just show success message
           setStatus({ success: true });
           setSubmitting(false);
           openSnackbar({
             open: true,
-            message: 'Successfully reset password.',
+            message: 'Password reset successfully! You can now login with your new password.',
             variant: 'alert',
-
             alert: {
               color: 'success'
             }
           });
 
           setTimeout(() => {
-            navigate(isLoggedIn ? '/auth/login' : auth ? `/${auth}/login?auth=jwt` : '/login', { replace: true });
+            navigate('/auth/login', { replace: true });
           }, 1500);
         } catch (err) {
           console.error(err);
@@ -102,7 +106,29 @@ export default function AuthResetPassword() {
           <Grid container spacing={3}>
             <Grid size={12}>
               <Stack sx={{ gap: 1 }}>
-                <InputLabel htmlFor="password-reset">Password</InputLabel>
+                <InputLabel htmlFor="code-reset">Reset Code</InputLabel>
+                <OutlinedInput
+                  fullWidth
+                  error={Boolean(touched.code && errors.code)}
+                  id="code-reset"
+                  type="text"
+                  value={values.code}
+                  name="code"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  placeholder="Enter 6-digit code"
+                  inputProps={{ maxLength: 6 }}
+                />
+              </Stack>
+              {touched.code && errors.code && (
+                <FormHelperText error id="helper-text-code-reset">
+                  {errors.code}
+                </FormHelperText>
+              )}
+            </Grid>
+            <Grid size={12}>
+              <Stack sx={{ gap: 1 }}>
+                <InputLabel htmlFor="password-reset">New Password</InputLabel>
                 <OutlinedInput
                   fullWidth
                   error={Boolean(touched.password && errors.password)}
@@ -156,12 +182,25 @@ export default function AuthResetPassword() {
                   fullWidth
                   error={Boolean(touched.confirmPassword && errors.confirmPassword)}
                   id="confirm-password-reset"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={values.confirmPassword}
                   name="confirmPassword"
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  placeholder="Enter confirm password"
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle confirm password visibility"
+                        onClick={handleClickShowConfirmPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                        color="secondary"
+                      >
+                        {showConfirmPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  placeholder="Re-enter new password"
                 />
               </Stack>
               {touched.confirmPassword && errors.confirmPassword && (

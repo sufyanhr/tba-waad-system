@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @ComponentScan(basePackages = {
     "com.waad.tba.common",
+    "com.waad.tba.core",
     "com.waad.tba.security", 
     "com.waad.tba.modules"
 })
@@ -17,7 +18,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.waad.tba.modules.*.repository"
 })
 @EntityScan(basePackages = {
-    "com.waad.tba.modules.*.entity"
+    "com.waad.tba.modules.*.entity",
+    "com.waad.tba.modules.*.model"
 })
 public class TbaWaadApplication {
     public static void main(String[] args) {

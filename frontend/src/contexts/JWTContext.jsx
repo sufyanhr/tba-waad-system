@@ -100,23 +100,35 @@ export const JWTProvider = ({ children }) => {
 
   // ======================= LOGIN ==========================
   const login = useCallback(
-    async (identifier, password) => {
+    async (username, password) => {
       try {
-        const { data } = await axios.post('/api/auth/login', { identifier, password });
-
-        const token = data.token;
-        const user = data.user;
-
-        setSession(token);
-
-        dispatch({
-          type: LOGIN,
-          payload: { isLoggedIn: true, user }
+        const { data } = await axios.post('/api/auth/login', { 
+          username, 
+          password 
         });
 
-        return { success: true };
+        if (data.status === 'success' && data.data) {
+          const token = data.data.token;
+          const user = data.data.user;
+
+          setSession(token);
+          localStorage.setItem('user', JSON.stringify(user));
+
+          dispatch({
+            type: LOGIN,
+            payload: { isLoggedIn: true, user }
+          });
+
+          return { success: true };
+        } else {
+          return { success: false, message: data.message || "Login failed" };
+        }
       } catch (error) {
-        return { success: false, message: error.response?.data || "Login failed" };
+        console.error('Login error:', error);
+        return { 
+          success: false, 
+          message: error.response?.data?.message || error.message || "Login failed" 
+        };
       }
     },
     [dispatch]
@@ -134,6 +146,7 @@ export const JWTProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     setSession(null);
+    localStorage.removeItem('user');
     dispatch({ type: LOGOUT });
   }, [dispatch]);
 

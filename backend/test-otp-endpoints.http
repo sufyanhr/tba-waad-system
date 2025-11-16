@@ -1,0 +1,35 @@
+### Test Forgot Password API
+POST http://localhost:9090/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "admin@tba-waad.com"
+}
+
+### Test Reset Password API
+POST http://localhost:9090/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "admin@tba-waad.com",
+  "otp": "123456",
+  "newPassword": "NewPassword123!"
+}
+
+### Test Login with old password
+POST http://localhost:9090/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Test Login with new password (after reset)
+POST http://localhost:9090/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "NewPassword123!"
+}

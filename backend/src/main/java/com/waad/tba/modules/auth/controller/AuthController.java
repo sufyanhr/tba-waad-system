@@ -1,15 +1,19 @@
 package com.waad.tba.modules.auth.controller;
 
 import com.waad.tba.common.dto.ApiResponse;
+import com.waad.tba.modules.auth.dto.ForgotPasswordRequest;
 import com.waad.tba.modules.auth.dto.LoginRequest;
 import com.waad.tba.modules.auth.dto.LoginResponse;
 import com.waad.tba.modules.auth.dto.RegisterRequest;
+import com.waad.tba.modules.auth.dto.ResetPasswordRequest;
 import com.waad.tba.modules.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,5 +41,25 @@ public class AuthController {
         String token = authHeader.substring(7); // Remove "Bearer " prefix
         LoginResponse.UserInfo userInfo = authService.getCurrentUser(token);
         return ResponseEntity.ok(ApiResponse.success(userInfo));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.sendResetOtp(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .status("success")
+                .message("Reset OTP sent to your email")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .status("success")
+                .message("Password reset successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }

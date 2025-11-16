@@ -1,8 +1,12 @@
 package com.waad.tba.modules.auth.service;
 
+import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.core.email.EmailService;
 import com.waad.tba.modules.auth.dto.LoginRequest;
 import com.waad.tba.modules.auth.dto.LoginResponse;
 import com.waad.tba.modules.auth.dto.RegisterRequest;
+import com.waad.tba.modules.auth.model.PasswordResetToken;
+import com.waad.tba.modules.auth.repository.PasswordResetTokenRepository;
 import com.waad.tba.modules.rbac.entity.Permission;
 import com.waad.tba.modules.rbac.entity.Role;
 import com.waad.tba.modules.rbac.entity.User;
@@ -17,7 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,6 +35,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -134,5 +142,79 @@ public class AuthService {
                 .roles(roles)
                 .permissions(permissions)
                 .build();
+    }
+
+    @Transactional
+    public void sendResetOtp(String email) {
+        log.info("Password reset OTP request for email: {}", email);
+
+        // 1) Check if user exists by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        // 2) Generate 6-digit OTP
+        String otp = String.format("%06d", new Random().nextInt(1_000_000));
+
+        // 3) Compute expiry = now + 10 minutes
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(10);
+
+        // 4) Remove any existing token for this email
+        passwordResetTokenRepository.deleteByEmail(email);
+
+        // 5) Save new token
+        PasswordResetToken token = PasswordResetToken.builder()
+                .email(email)
+                .otp(otp)
+                .expiryTime(expiry)
+                .build();
+        passwordResetTokenRepository.save(token);
+
+        // 6) Send email using EmailService
+        String subject = "TBA-WAAD Password Reset OTP";
+        String body = String.format(
+                "Dear %s,\n\n" +
+                "You have requested to reset your password.\n\n" +
+                "Your OTP code is: %s\n\n" +
+                "This code will expire in 10 minutes.\n\n" +
+                "If you did not request this, please ignore this email.\n\n" +
+                "Best regards,\n" +
+                "TBA-WAAD System",
+                user.getFullName(), otp
+        );
+
+        emailService.send(email, subject, body);
+        log.info("Password reset OTP sent successfully to: {}", email);
+    }
+
+    @Transactional
+    public void resetPassword(String email, String otp, String newPassword) {
+        log.info("Password reset attempt for email: {}", email);
+
+        // 1) Load token by email
+        PasswordResetToken token = passwordResetTokenRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("No reset request found for this email"));
+
+        // 2) Validate OTP
+        if (!token.getOtp().equals(otp)) {
+            throw new IllegalArgumentException("Invalid OTP");
+        }
+
+        // 3) Validate expiry
+        if (token.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("OTP has expired");
+        }
+
+        // 4) Load user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        // 5) Encode password and save user
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // 6) Delete token record for this email
+        passwordResetTokenRepository.deleteByEmail(email);
+
+        log.info("Password reset successfully for user: {}", user.getUsername());
     }
 }
