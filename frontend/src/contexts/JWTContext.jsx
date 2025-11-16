@@ -1,11 +1,9 @@
 // src/contexts/JWTContext.jsx
 import { createContext, useEffect, useReducer, useRef, useCallback } from 'react';
-import jwtDecode from 'jwt-decode';
-
+import { jwtDecode } from 'jwt-decode';
 // reducer - state management
 import { LOGIN, LOGOUT } from 'contexts/auth-reducer/actions';
 import authReducer from 'contexts/auth-reducer/auth';
-
 // project imports
 import Loader from 'components/Loader';
 import axios from 'utils/axios';
