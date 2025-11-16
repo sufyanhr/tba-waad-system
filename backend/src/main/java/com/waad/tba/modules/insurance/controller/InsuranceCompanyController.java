@@ -1,12 +1,14 @@
 package com.waad.tba.modules.insurance.controller;
 
-import com.waad.tba.core.dto.ApiResponse;
-import com.waad.tba.modules.insurance.model.InsuranceCompany;
+import com.waad.tba.common.dto.ApiResponse;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
 import com.waad.tba.modules.insurance.service.InsuranceCompanyService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,54 +16,61 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/insurance")
+@RequestMapping("/api/insurance-companies")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "Bearer Authentication")
-@Tag(name = "Insurance Companies", description = "Insurance company management endpoints")
 public class InsuranceCompanyController {
-    
+
     private final InsuranceCompanyService insuranceCompanyService;
-    
+
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('insurance.view')")
+    public ResponseEntity<ApiResponse<List<InsuranceCompanyResponseDto>>> getAll() {
+        List<InsuranceCompanyResponseDto> companies = insuranceCompanyService.getAll();
+        return ResponseEntity.ok(ApiResponse.success("Insurance companies retrieved successfully", companies));
+    }
+
     @GetMapping
-    @PreAuthorize("hasAuthority('PERMISSION_INSURANCE_MANAGE')")
-    @Operation(summary = "Get all insurance companies")
-    public ResponseEntity<List<InsuranceCompany>> getAllInsuranceCompanies() {
-        return ResponseEntity.ok(insuranceCompanyService.getAllInsuranceCompanies());
+    @PreAuthorize("hasAuthority('insurance.view')")
+    public ResponseEntity<ApiResponse<Page<InsuranceCompanyResponseDto>>> getAllPaginated(Pageable pageable) {
+        Page<InsuranceCompanyResponseDto> companies = insuranceCompanyService.getAllPaginated(pageable);
+        return ResponseEntity.ok(ApiResponse.success("Insurance companies retrieved successfully", companies));
     }
-    
+
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERMISSION_INSURANCE_MANAGE')")
-    @Operation(summary = "Get insurance company by ID")
-    public ResponseEntity<InsuranceCompany> getInsuranceCompanyById(@PathVariable Long id) {
-        return ResponseEntity.ok(insuranceCompanyService.getInsuranceCompanyById(id));
+    @PreAuthorize("hasAuthority('insurance.view')")
+    public ResponseEntity<ApiResponse<InsuranceCompanyResponseDto>> getById(@PathVariable Long id) {
+        InsuranceCompanyResponseDto company = insuranceCompanyService.getById(id);
+        return ResponseEntity.ok(ApiResponse.success("Insurance company retrieved successfully", company));
     }
-    
-    @GetMapping("/email/{email}")
-    @PreAuthorize("hasAuthority('PERMISSION_INSURANCE_MANAGE')")
-    @Operation(summary = "Get insurance company by email")
-    public ResponseEntity<InsuranceCompany> getInsuranceCompanyByEmail(@PathVariable String email) {
-        return ResponseEntity.ok(insuranceCompanyService.getInsuranceCompanyByEmail(email));
-    }
-    
+
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Create new insurance company")
-    public ResponseEntity<InsuranceCompany> createInsuranceCompany(@RequestBody InsuranceCompany insuranceCompany) {
-        return ResponseEntity.ok(insuranceCompanyService.createInsuranceCompany(insuranceCompany));
+    @PreAuthorize("hasAuthority('insurance.manage')")
+    public ResponseEntity<ApiResponse<InsuranceCompanyResponseDto>> create(@Valid @RequestBody InsuranceCompanyCreateDto dto) {
+        InsuranceCompanyResponseDto created = insuranceCompanyService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Insurance company created successfully", created));
     }
-    
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'WAAD', 'INSURANCE')")
-    @Operation(summary = "Update insurance company")
-    public ResponseEntity<InsuranceCompany> updateInsuranceCompany(@PathVariable Long id, @RequestBody InsuranceCompany insuranceCompany) {
-        return ResponseEntity.ok(insuranceCompanyService.updateInsuranceCompany(id, insuranceCompany));
+    @PreAuthorize("hasAuthority('insurance.manage')")
+    public ResponseEntity<ApiResponse<InsuranceCompanyResponseDto>> update(
+            @PathVariable Long id,
+            @Valid @RequestBody InsuranceCompanyCreateDto dto) {
+        InsuranceCompanyResponseDto updated = insuranceCompanyService.update(id, dto);
+        return ResponseEntity.ok(ApiResponse.success("Insurance company updated successfully", updated));
     }
-    
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Delete insurance company")
-    public ResponseEntity<ApiResponse> deleteInsuranceCompany(@PathVariable Long id) {
-        insuranceCompanyService.deleteInsuranceCompany(id);
-        return ResponseEntity.ok(new ApiResponse(true, "Insurance company deleted successfully"));
+    @PreAuthorize("hasAuthority('insurance.manage')")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+        insuranceCompanyService.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Insurance company deleted successfully", null));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAuthority('insurance.view')")
+    public ResponseEntity<ApiResponse<List<InsuranceCompanyResponseDto>>> search(@RequestParam String query) {
+        List<InsuranceCompanyResponseDto> results = insuranceCompanyService.search(query);
+        return ResponseEntity.ok(ApiResponse.success("Search completed successfully", results));
     }
 }
