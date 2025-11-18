@@ -18,10 +18,10 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
   mail:
-    host: smtp.gmail.com
+    host: smtp.hostinger.com
     port: 587
-    username: ${MAIL_USERNAME:alwahasufyan@gmail.com}
-    password: ${MAIL_PASSWORD:vglj ewgn reie slcf}
+    username: support@alwahacare.com
+    password: 6L8~nz@Go
     properties:
       mail:
         smtp:
@@ -29,6 +29,8 @@ spring:
           starttls:
             enable: true
             required: true
+          ssl:
+            trust: smtp.hostinger.com
   
 server:
   port: 9090

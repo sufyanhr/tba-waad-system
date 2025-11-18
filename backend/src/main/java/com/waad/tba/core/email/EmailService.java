@@ -13,6 +13,7 @@ public class EmailService {
 
     public void send(String to, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom("TBA-WAAD System <support@alwahacare.com>");
         msg.setTo(to);
         msg.setSubject(subject);
         msg.setText(body);
