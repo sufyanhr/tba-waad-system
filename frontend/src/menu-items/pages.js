@@ -15,6 +15,7 @@ const pages = {
   id: 'group-pages',
   title: 'pages',
   type: 'group',
+  roles: ['ADMIN', 'INSURANCE_COMPANY', 'REVIEW_COMPANY', 'HOSPITAL', 'EMPLOYER'],
   children: [
     {
       id: 'authentication',

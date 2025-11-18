@@ -43,8 +43,8 @@ import IconButton from 'components/@extended/IconButton';
 import CircularWithPath from 'components/@extended/progress/CircularWithPath';
 
 import { Gender } from 'config';
-import { openSnackbar } from 'api/snackbar';
-import { insertCustomer, updateCustomer } from 'api/customer';
+// NEW: React Query hooks
+import { useCreateCustomer, useUpdateCustomer } from 'modules/customers/useCustomers';
 import { withAlpha } from 'utils/colorUtils';
 import { getImageUrl, ImagePath } from 'utils/getImageUrl';
 
@@ -136,6 +136,10 @@ const allStatus = [
 // ==============================|| CUSTOMER ADD / EDIT - FORM ||============================== //
 
 export default function FormCustomerAdd({ customer, closeModal }) {
+  // NEW: React Query mutations
+  const createCustomer = useCreateCustomer();
+  const updateCustomerMutation = useUpdateCustomer();
+
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(undefined);
   const [avatar, setAvatar] = useState(
@@ -178,36 +182,24 @@ export default function FormCustomerAdd({ customer, closeModal }) {
         newCustomer.name = newCustomer.firstName + ' ' + newCustomer.lastName;
 
         if (customer) {
-          updateCustomer(newCustomer.id, newCustomer).then(() => {
-            openSnackbar({
-              open: true,
-              message: 'Customer update successfully.',
-              variant: 'alert',
-
-              alert: {
-                color: 'success'
-              }
-            });
-            setSubmitting(false);
-            closeModal();
+          // UPDATE existing customer
+          await updateCustomerMutation.mutateAsync({
+            id: newCustomer.id,
+            data: newCustomer
           });
+          closeModal();
         } else {
-          await insertCustomer(newCustomer).then(() => {
-            openSnackbar({
-              open: true,
-              message: 'Customer added successfully.',
-              variant: 'alert',
-
-              alert: {
-                color: 'success'
-              }
-            });
-            setSubmitting(false);
-            closeModal();
-          });
+          // CREATE new customer
+          await createCustomer.mutateAsync(newCustomer);
+          closeModal();
         }
       } catch (error) {
-        console.error(error);
+        console.error('Customer form error:', error);
+      } finally {
+        setSubmitting(false);
+      }
+    }
+  });
       }
     }
   });

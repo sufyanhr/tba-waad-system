@@ -20,11 +20,18 @@ import Box from '@mui/material/Box';
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
+import CircularLoader from 'components/CircularLoader';
 import MonthlyBarChart from 'sections/dashboard/default/MonthlyBarChart';
 import ReportAreaChart from 'sections/dashboard/default/ReportAreaChart';
 import UniqueVisitorCard from 'sections/dashboard/default/UniqueVisitorCard';
 import SaleReportCard from 'sections/dashboard/default/SaleReportCard';
 import OrdersTable from 'sections/dashboard/default/OrdersTable';
+
+// NEW: React Query hooks for real data
+import { useGetClaimStats } from 'modules/claims/useClaims';
+import { useGetMembersCount } from 'modules/members/useMembers';
+import { useGetEmployersCount } from 'modules/employers/useEmployers';
+import { useGetCustomers } from 'modules/customers/useCustomers';
 
 // assets
 import EllipsisOutlined from '@ant-design/icons/EllipsisOutlined';
@@ -57,6 +64,12 @@ const actionSX = {
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
+  // NEW: Fetch real data from backend
+  const { data: claimStats, isLoading: loadingClaims } = useGetClaimStats();
+  const { data: membersCount, isLoading: loadingMembers } = useGetMembersCount();
+  const { data: employersCount, isLoading: loadingEmployers } = useGetEmployersCount();
+  const { data: customersData, isLoading: loadingCustomers } = useGetCustomers({ page: 0, size: 1 });
+
   const [orderMenuAnchor, setOrderMenuAnchor] = useState(null);
   const [analyticsMenuAnchor, setAnalyticsMenuAnchor] = useState(null);
 
@@ -74,6 +87,21 @@ export default function DashboardDefault() {
     setAnalyticsMenuAnchor(null);
   };
 
+  // Show loader while fetching initial data
+  const isLoadingData = loadingClaims || loadingMembers || loadingEmployers || loadingCustomers;
+
+  if (isLoadingData) {
+    return <CircularLoader />;
+  }
+
+  // Extract data with fallbacks
+  const totalClaims = claimStats?.totalClaims || 0;
+  const pendingClaims = claimStats?.pendingClaims || 0;
+  const approvedClaims = claimStats?.approvedClaims || 0;
+  const totalMembers = membersCount?.count || 0;
+  const totalEmployers = employersCount?.count || 0;
+  const totalCustomers = customersData?.totalElements || 0;
+
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 1 */}
@@ -81,16 +109,37 @@ export default function DashboardDefault() {
         <Typography variant="h5">Dashboard</Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Page Views" count="4,42,236" percentage={59.3} extra="35,000" />
+        <AnalyticEcommerce 
+          title="Total Claims" 
+          count={totalClaims.toLocaleString()} 
+          percentage={claimStats?.growthRate || 0} 
+          extra={pendingClaims + ' Pending'} 
+        />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Users" count="78,250" percentage={70.5} extra="8,900" />
+        <AnalyticEcommerce 
+          title="Total Members" 
+          count={totalMembers.toLocaleString()} 
+          percentage={claimStats?.memberGrowthRate || 0} 
+          extra={claimStats?.newMembersThisMonth || 0 + ' This Month'} 
+        />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Order" count="18,800" percentage={27.4} isLoss color="warning" extra="1,943" />
+        <AnalyticEcommerce 
+          title="Approved Claims" 
+          count={approvedClaims.toLocaleString()} 
+          percentage={claimStats?.approvalRate || 0} 
+          color="success" 
+          extra={claimStats?.approvedThisMonth || 0 + ' This Month'} 
+        />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Sales" count="35,078" percentage={27.4} isLoss color="warning" extra="20,395" />
+        <AnalyticEcommerce 
+          title="Total Employers" 
+          count={totalEmployers.toLocaleString()} 
+          percentage={claimStats?.employerGrowthRate || 0} 
+          extra={totalCustomers + ' Customers'} 
+        />
       </Grid>
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
       {/* row 2 */}

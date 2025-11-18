@@ -14,7 +14,7 @@ import Box from '@mui/material/Box';
 
 // project imports
 import Avatar from 'components/@extended/Avatar';
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 import { useGetMenuMaster } from 'api/menu';
 
 // assets

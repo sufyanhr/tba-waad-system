@@ -1,6 +1,6 @@
 // src/pages/auth/jwt/RegisterForm.jsx
 import { useState } from 'react';
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 import { TextField, Button, Stack } from '@mui/material';
 
 export default function RegisterForm() {

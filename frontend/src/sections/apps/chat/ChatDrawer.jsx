@@ -27,7 +27,7 @@ import MainCard from 'components/MainCard';
 import IconButton from 'components/@extended/IconButton';
 import SimpleBar from 'components/third-party/SimpleBar';
 
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 
 // assets
 import CheckCircleFilled from '@ant-design/icons/CheckCircleFilled';

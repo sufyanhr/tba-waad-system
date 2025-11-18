@@ -4,7 +4,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Stack from '@mui/material/Stack';
 
 // project imports
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 
 // assets
 import Google from 'assets/images/icons/google.svg';

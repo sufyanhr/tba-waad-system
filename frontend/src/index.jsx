@@ -31,16 +31,19 @@ import '@fontsource/public-sans/600.css';
 import '@fontsource/public-sans/700.css';
 
 import App from './App';
-import { JWTProvider } from 'contexts/JWTContext';
+import ReactQueryProvider from 'providers/ReactQueryProvider';
+import { AuthProvider } from 'modules/auth/AuthContext';
 import reportWebVitals from './reportWebVitals';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 root.render(
-  <JWTProvider>
-    <App />
-  </JWTProvider>
+  <ReactQueryProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </ReactQueryProvider>
 );
 
 reportWebVitals();

@@ -24,7 +24,7 @@ import { preload } from 'swr';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 
 import { fetcher } from 'utils/axios';
 

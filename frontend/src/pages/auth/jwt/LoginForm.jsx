@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -15,7 +16,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 import { openSnackbar } from 'api/snackbar';
@@ -26,6 +27,7 @@ import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 
 export default function LoginForm() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => {
@@ -57,14 +59,17 @@ export default function LoginForm() {
             
             openSnackbar({
               open: true,
-              message: 'Login successful',
+              message: 'Login successful! Redirecting...',
               variant: 'alert',
               alert: {
                 color: 'success'
               }
             });
 
-            // Redirect handled by JWTContext after successful login
+            // Redirect to dashboard
+            setTimeout(() => {
+              navigate('/dashboard/default');
+            }, 500);
           } else {
             setStatus({ success: false });
             setErrors({ submit: result.message || 'Invalid credentials' });

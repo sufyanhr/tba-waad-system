@@ -25,6 +25,7 @@ const icons = {
 const other = {
   id: 'other',
   type: 'group',
+  roles: ['ADMIN'],
   children: [
     {
       id: 'menu-level',

@@ -24,6 +24,7 @@ const rbac = {
   title: 'RBAC Administration',
   icon: icons.SecurityScanOutlined,
   type: 'group',
+  roles: ['ADMIN'],
   children: [
     {
       id: 'roles',

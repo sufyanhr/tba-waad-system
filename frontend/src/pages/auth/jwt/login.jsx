@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 // project imports
 import AuthWrapper from 'sections/auth/AuthWrapper';
 import LoginForm from './LoginForm';
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 
 export default function Login() {
   const { isLoggedIn } = useAuth();

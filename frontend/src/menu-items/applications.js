@@ -35,6 +35,7 @@ const applications = {
   title: 'applications',
   icon: icons.AppstoreAddOutlined,
   type: 'group',
+  roles: ['ADMIN', 'INSURANCE_COMPANY', 'REVIEW_COMPANY', 'HOSPITAL', 'EMPLOYER'],
   children: [
     {
       id: 'chat',
@@ -43,6 +44,7 @@ const applications = {
       url: '/apps/chat',
       icon: icons.MessageOutlined,
       breadcrumbs: false,
+      roles: ['ADMIN', 'INSURANCE_COMPANY'],
       permissions: ['chat.view']
     },
     {
@@ -77,6 +79,7 @@ const applications = {
       title: 'customer',
       type: 'collapse',
       icon: icons.CustomerServiceOutlined,
+      roles: ['ADMIN', 'INSURANCE_COMPANY'],
       permissions: ['customers.view'],
       children: [
         {

@@ -19,8 +19,10 @@ import CustomerModal from 'sections/apps/customer/CustomerModal';
 import AlertCustomerDelete from 'sections/apps/customer/AlertCustomerDelete';
 import CustomerTable from 'sections/apps/customer/CustomerTable';
 import EmptyReactTable from 'pages/tables/react-table/empty';
+import CircularLoader from 'components/CircularLoader';
 
-import { useGetCustomer } from 'api/customer';
+// NEW: React Query hooks
+import { useGetCustomers } from 'modules/customers/useCustomers';
 import { ImagePath, getImageUrl } from 'utils/getImageUrl';
 
 // assets
@@ -32,7 +34,19 @@ import PlusOutlined from '@ant-design/icons/PlusOutlined';
 // ==============================|| CUSTOMER LIST ||============================== //
 
 export default function CustomerListPage() {
-  const { customersLoading, customers: lists } = useGetCustomer();
+  // NEW: React Query hook with pagination
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  
+  const { 
+    data, 
+    isLoading: customersLoading, 
+    isError,
+    error 
+  } = useGetCustomers({ page, size });
+
+  const lists = data?.content || [];
+  const totalElements = data?.totalElements || 0;
 
   const [open, setOpen] = useState(false);
 
@@ -166,7 +180,19 @@ export default function CustomerListPage() {
     []
   );
 
-  if (customersLoading) return <EmptyReactTable />;
+  // Show loader while fetching
+  if (customersLoading) return <CircularLoader />;
+
+  // Show error state
+  if (isError) {
+    return (
+      <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 400 }}>
+        <Typography variant="h6" color="error">
+          {error?.message || 'Failed to load customers'}
+        </Typography>
+      </Stack>
+    );
+  }
 
   return (
     <>
@@ -174,6 +200,11 @@ export default function CustomerListPage() {
         {...{
           data: lists,
           columns,
+          totalElements,
+          page,
+          size,
+          onPageChange: setPage,
+          onSizeChange: setSize,
           modalToggler: () => {
             setCustomerModal(true);
             setSelectedCustomer(null);

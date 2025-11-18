@@ -22,7 +22,7 @@ import { Formik } from 'formik';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 import useScriptRef from 'hooks/useScriptRef';
 import { openSnackbar } from 'api/snackbar';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
