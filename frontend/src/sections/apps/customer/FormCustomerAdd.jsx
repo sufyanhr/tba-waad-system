@@ -200,9 +200,6 @@ export default function FormCustomerAdd({ customer, closeModal }) {
       }
     }
   });
-      }
-    }
-  });
 
   const { errors, touched, handleSubmit, isSubmitting, getFieldProps, setFieldValue } = formik;
 

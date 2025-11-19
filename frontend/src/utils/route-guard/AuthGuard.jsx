@@ -1,27 +1,33 @@
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // project imports
-import useAuth from 'hooks/useAuth';
+import Loader from 'components/Loader';
+import { useAuth } from 'modules/auth/useAuth';
 
 // ==============================|| AUTH GUARD ||============================== //
 
 export default function AuthGuard({ children }) {
-  const { isLoggedIn } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('login', {
+    if (user !== undefined && !isAuthenticated) {
+      navigate('/auth/login', {
         state: {
           from: location.pathname
         },
         replace: true
       });
     }
-  }, [isLoggedIn, navigate, location]);
+  }, [isAuthenticated, user, navigate, location]);
+
+  // Show loader while checking auth
+  if (user === undefined) {
+    return <Loader />;
+  }
 
   return children;
 }

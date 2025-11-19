@@ -1,38 +1,37 @@
 // components/ProtectedRoute.jsx
-import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 import Loader from 'components/Loader';
 
 const ProtectedRoute = ({ children, roles = [], permissions = [] }) => {
-  const { isLoggedIn, isInitialized, hasAnyRole, hasAnyPermission } = useAuth();
+  const { user, isAuthenticated, hasRole, hasPermission } = useAuth();
   const location = useLocation();
 
-  // انتظر حتى يكتمل التهيئة
-  if (!isInitialized) {
+  // Wait for auth to initialize
+  if (user === undefined) {
     return <Loader />;
   }
 
-  // إذا لم يسجل دخول، اتجه إلى صفحة تسجيل الدخول
-  if (!isLoggedIn) {
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  // إذا لم يمرر أدوار أو صلاحيات، اسمح بالوصول
+  // If no roles or permissions specified, allow access
   if (roles.length === 0 && permissions.length === 0) {
     return children;
   }
 
-  // تحقق من الأدوار والصلاحيات
-  const hasRequiredRole = roles.length > 0 ? hasAnyRole(roles) : false;
-  const hasRequiredPermission = permissions.length > 0 ? hasAnyPermission(permissions) : false;
+  // Check roles and permissions
+  const hasRequiredRole = roles.length > 0 ? roles.some(role => hasRole(role)) : false;
+  const hasRequiredPermission = permissions.length > 0 ? permissions.some(perm => hasPermission(perm)) : false;
 
   // Allow access if user has any required role OR any required permission
   if (hasRequiredRole || hasRequiredPermission) {
     return children;
   }
 
-  // إذا لم يملك الصلاحيات المطلوبة، اتجه إلى صفحة الرفض
+  // If no required permissions, redirect to forbidden page
   return <Navigate to="/maintenance/403" replace />;
 };
 

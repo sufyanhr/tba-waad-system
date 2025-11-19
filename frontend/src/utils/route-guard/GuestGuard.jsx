@@ -4,17 +4,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 // project imports
 import { APP_DEFAULT_PATH } from 'config';
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 
 // ==============================|| GUEST GUARD ||============================== //
 
 export default function GuestGuard({ children }) {
-  const { isLoggedIn } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isAuthenticated) {
       navigate(location?.state?.from ? location?.state?.from : APP_DEFAULT_PATH, {
         state: {
           from: ''
@@ -22,7 +22,7 @@ export default function GuestGuard({ children }) {
         replace: true
       });
     }
-  }, [isLoggedIn, navigate, location]);
+  }, [isAuthenticated, navigate, location]);
 
   return children;
 }

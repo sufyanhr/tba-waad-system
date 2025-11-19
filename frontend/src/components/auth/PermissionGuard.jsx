@@ -1,9 +1,9 @@
 // components/auth/PermissionGuard.jsx
 import PropTypes from 'prop-types';
-import useAuth from 'hooks/useAuth';
+import { useAuth } from 'modules/auth/useAuth';
 
 const PermissionGuard = ({ children, roles = [], permissions = [] }) => {
-  const { hasAnyRole, hasAnyPermission } = useAuth();
+  const { hasRole, hasPermission } = useAuth();
 
   // If no roles or permissions specified, allow access
   if (roles.length === 0 && permissions.length === 0) {
@@ -11,8 +11,8 @@ const PermissionGuard = ({ children, roles = [], permissions = [] }) => {
   }
 
   // Check if user has any required role OR any required permission
-  const hasRequiredRole = roles.length > 0 ? hasAnyRole(roles) : false;
-  const hasRequiredPermission = permissions.length > 0 ? hasAnyPermission(permissions) : false;
+  const hasRequiredRole = roles.length > 0 ? roles.some(role => hasRole(role)) : false;
+  const hasRequiredPermission = permissions.length > 0 ? permissions.some(perm => hasPermission(perm)) : false;
 
   // Allow access if user has any required role OR any required permission
   if (hasRequiredRole || hasRequiredPermission) {

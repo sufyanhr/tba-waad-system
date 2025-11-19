@@ -1,5 +1,4 @@
 // project imports
-import { handlerCustomerDialog } from 'api/customer';
 import { NavActionType } from 'config';
 
 // assets
@@ -86,15 +85,7 @@ const applications = {
           id: 'customer-list',
           title: 'list',
           type: 'item',
-          url: '/apps/customer/customer-list',
-          actions: [
-            {
-              type: NavActionType.FUNCTION,
-              label: 'Add Customer',
-              function: () => handlerCustomerDialog(true),
-              icon: icons.PlusOutlined
-            }
-          ]
+          url: '/apps/customer/customer-list'
         },
         {
           id: 'customer-card',
