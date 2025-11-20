@@ -1,69 +1,29 @@
 // api/rbac.js
-import axios from 'utils/axios';
+import axiosClient from 'api/axiosClient';
 
 // ==================== ROLES API ====================
-export const getRoles = async () => {
-  const response = await axios.get('/api/admin/roles');
-  return response.data;
-};
+export const getRoles = async () => (await axiosClient.get('/admin/roles')).data;
 
-export const getRole = async (id) => {
-  const response = await axios.get(`/api/admin/roles/${id}`);
-  return response.data;
-};
+export const getRole = async (id) => (await axiosClient.get(`/admin/roles/${id}`)).data;
 
-export const createRole = async (data) => {
-  const response = await axios.post('/api/admin/roles', data);
-  return response.data;
-};
+export const createRole = async (data) => (await axiosClient.post('/admin/roles', data)).data;
 
-export const updateRole = async (id, data) => {
-  const response = await axios.put(`/api/admin/roles/${id}`, data);
-  return response.data;
-};
+export const updateRole = async (id, data) => (await axiosClient.put(`/admin/roles/${id}`, data)).data;
 
-export const deleteRole = async (id) => {
-  const response = await axios.delete(`/api/admin/roles/${id}`);
-  return response.data;
-};
+export const deleteRole = async (id) => (await axiosClient.delete(`/admin/roles/${id}`)).data;
 
 // ==================== PERMISSIONS API ====================
-export const getPermissions = async () => {
-  const response = await axios.get('/api/admin/permissions');
-  return response.data;
-};
+export const getPermissions = async () => (await axiosClient.get('/admin/permissions')).data;
 
-export const getPermission = async (id) => {
-  const response = await axios.get(`/api/admin/permissions/${id}`);
-  return response.data;
-};
+export const getPermission = async (id) => (await axiosClient.get(`/admin/permissions/${id}`)).data;
 
-export const createPermission = async (data) => {
-  const response = await axios.post('/api/admin/permissions', data);
-  return response.data;
-};
+export const createPermission = async (data) => (await axiosClient.post('/admin/permissions', data)).data;
 
-export const updatePermission = async (id, data) => {
-  const response = await axios.put(`/api/admin/permissions/${id}`, data);
-  return response.data;
-};
+export const updatePermission = async (id, data) => (await axiosClient.put(`/admin/permissions/${id}`, data)).data;
 
 // ==================== USERS & ASSIGNMENTS API ====================
-export const getUsers = async () => {
-  const response = await axios.get('/api/admin/users');
-  return response.data;
-};
+export const getUsers = async () => (await axiosClient.get('/admin/users')).data;
 
-export const assignRolesToUser = async (userId, roleIds) => {
-  const response = await axios.post(`/api/admin/users/${userId}/roles`, {
-    roleIds
-  });
-  return response.data;
-};
+export const assignRolesToUser = async (userId, roleIds) => (await axiosClient.post(`/admin/users/${userId}/roles`, { roleIds })).data;
 
-export const assignPermissionsToRole = async (roleId, permissionIds) => {
-  const response = await axios.post(`/api/admin/roles/${roleId}/permissions`, {
-    permissionIds
-  });
-  return response.data;
-};
+export const assignPermissionsToRole = async (roleId, permissionIds) => (await axiosClient.post(`/admin/roles/${roleId}/permissions`, { permissionIds })).data;

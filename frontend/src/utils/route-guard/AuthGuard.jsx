@@ -9,12 +9,13 @@ import { useAuth } from 'modules/auth/useAuth';
 // ==============================|| AUTH GUARD ||============================== //
 
 export default function AuthGuard({ children }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (user !== undefined && !isAuthenticated) {
+    // Wait until auth initialization completes before redirecting
+    if (!loading && !isAuthenticated) {
       navigate('/auth/login', {
         state: {
           from: location.pathname
@@ -22,10 +23,10 @@ export default function AuthGuard({ children }) {
         replace: true
       });
     }
-  }, [isAuthenticated, user, navigate, location]);
+  }, [isAuthenticated, loading, navigate, location]);
 
   // Show loader while checking auth
-  if (user === undefined) {
+  if (loading) {
     return <Loader />;
   }
 

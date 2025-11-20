@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Link as RouterLink, useSearchParams } from 'react-router-dom';
+import { Link as RouterLink, useSearchParams, useNavigate } from 'react-router-dom';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -14,17 +14,22 @@ import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
 
 // third-party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { preload } from 'swr';
+import toast from 'react-hot-toast';
 
 // project imports
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 
 import { useAuth } from 'modules/auth/useAuth';
+import { login as apiLogin } from 'modules/auth/authService';
 
 import { fetcher } from 'utils/axios';
 
@@ -38,6 +43,7 @@ export default function AuthLogin({ isDemo = false }) {
   const [checked, setChecked] = React.useState(false);
 
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => {
@@ -70,16 +76,18 @@ export default function AuthLogin({ isDemo = false }) {
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
-            const result = await login(values.identifier.trim(), values.password);
-            if (result.success) {
-              setStatus({ success: true });
-              setSubmitting(false);
-              preload('api/menu/dashboard', fetcher); // load menu on login success
-            } else {
-              throw new Error(result.message);
-            }
+            const credentials = { username: values.identifier.trim(), password: values.password };
+            const { token, user } = await apiLogin(credentials);
+            if (!token || !user) throw new Error('Invalid login response');
+            login(token, user); // AuthContext persistence
+            toast.success('Login successful');
+            setStatus({ success: true });
+            setSubmitting(false);
+            preload('api/menu/dashboard', fetcher);
+            navigate('/dashboard/default');
           } catch (err) {
             console.error(err);
+            toast.error(err.message);
             setStatus({ success: false });
             setErrors({ submit: err.message });
             setSubmitting(false);
@@ -173,6 +181,20 @@ export default function AuthLogin({ isDemo = false }) {
                   <FormHelperText error>{errors.submit}</FormHelperText>
                 </Grid>
               )}
+              <Grid size={12}>
+                <Paper variant="outlined" sx={{ p:2, mb:2 }}>
+                  <Typography variant="subtitle2" gutterBottom>Example Login Payload</Typography>
+                  <Box component="pre" sx={{ m:0, fontSize:12, whiteSpace:'pre-wrap' }}>{`{
+  "identifier": "admin@example.com",
+  "password": "ChangeMe123!"
+}`}</Box>
+                  <Button size="small" sx={{ mt:1 }} onClick={() => {
+                    handleChange({ target: { name:'identifier', value:'admin@example.com' }});
+                    handleChange({ target: { name:'password', value:'ChangeMe123!' }});
+                    toast('Example data filled');
+                  }}>Test Example Data</Button>
+                </Paper>
+              </Grid>
               <Grid size={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">

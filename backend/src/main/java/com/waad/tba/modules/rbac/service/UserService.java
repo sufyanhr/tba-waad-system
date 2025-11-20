@@ -37,6 +37,10 @@ public class UserService {
                 .map(userMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
+    public User getByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+    }
 
     @Transactional(readOnly = true)
     public UserResponseDto findById(Long id) {

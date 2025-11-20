@@ -9,20 +9,18 @@ import { useAuth } from 'modules/auth/useAuth';
 // ==============================|| GUEST GUARD ||============================== //
 
 export default function GuestGuard({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!loading && isAuthenticated) {
       navigate(location?.state?.from ? location?.state?.from : APP_DEFAULT_PATH, {
-        state: {
-          from: ''
-        },
+        state: { from: '' },
         replace: true
       });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, loading, navigate, location]);
 
   return children;
 }

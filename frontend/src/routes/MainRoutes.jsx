@@ -6,137 +6,32 @@ import Loadable from 'components/Loadable';
 import ProtectedRoute from 'components/ProtectedRoute';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
-import SimpleLayout from 'layout/Simple';
-
 import { SimpleLayoutType } from 'config';
-import { loader as productsLoader, productLoader } from 'api/products';
-
-// render - dashboard
-const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
-const DashboardAnalytics = Loadable(lazy(() => import('pages/dashboard/analytics')));
-
-// render - widget
-const WidgetStatistics = Loadable(lazy(() => import('pages/widget/statistics')));
-const WidgetData = Loadable(lazy(() => import('pages/widget/data')));
-const WidgetChart = Loadable(lazy(() => import('pages/widget/chart')));
-
-// render - applications
-const AppChat = Loadable(lazy(() => import('pages/apps/chat')));
-const AppCalendar = Loadable(lazy(() => import('pages/apps/calendar')));
-
-const AppKanban = Loadable(lazy(() => import('pages/apps/kanban')));
-const AppKanbanBacklogs = Loadable(lazy(() => import('sections/apps/kanban/Backlogs')));
-const AppKanbanBoard = Loadable(lazy(() => import('sections/apps/kanban/Board')));
-
-const AppCustomerList = Loadable(lazy(() => import('pages/apps/customer/list')));
-const AppCustomerCard = Loadable(lazy(() => import('pages/apps/customer/card')));
-
-const AppInvoiceCreate = Loadable(lazy(() => import('pages/apps/invoice/create')));
-const AppInvoiceDashboard = Loadable(lazy(() => import('pages/apps/invoice/dashboard')));
-const AppInvoiceList = Loadable(lazy(() => import('pages/apps/invoice/list')));
-const AppInvoiceDetails = Loadable(lazy(() => import('pages/apps/invoice/details')));
-const AppInvoiceEdit = Loadable(lazy(() => import('pages/apps/invoice/edit')));
-
-const UserProfile = Loadable(lazy(() => import('pages/apps/profiles/user')));
-const UserTabPersonal = Loadable(lazy(() => import('sections/apps/profiles/user/TabPersonal')));
-const UserTabPayment = Loadable(lazy(() => import('sections/apps/profiles/user/TabPayment')));
-const UserTabPassword = Loadable(lazy(() => import('sections/apps/profiles/user/TabPassword')));
-const UserTabSettings = Loadable(lazy(() => import('sections/apps/profiles/user/TabSettings')));
-
-const AccountProfile = Loadable(lazy(() => import('pages/apps/profiles/account')));
-const AccountTabProfile = Loadable(lazy(() => import('sections/apps/profiles/account/TabProfile')));
-const AccountTabPersonal = Loadable(lazy(() => import('sections/apps/profiles/account/TabPersonal')));
-const AccountTabAccount = Loadable(lazy(() => import('sections/apps/profiles/account/TabAccount')));
-const AccountTabPassword = Loadable(lazy(() => import('sections/apps/profiles/account/TabPassword')));
-const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/account/TabRole')));
-const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
-
-// render - RBAC pages
-const RolesList = Loadable(lazy(() => import('pages/rbac/roles/RolesList')));
-const RoleCreate = Loadable(lazy(() => import('pages/rbac/roles/RoleCreate')));
-const RoleEdit = Loadable(lazy(() => import('pages/rbac/roles/RoleEdit')));
-const AssignPermissions = Loadable(lazy(() => import('pages/rbac/roles/AssignPermissions')));
-
-const PermissionsList = Loadable(lazy(() => import('pages/rbac/permissions/PermissionsList')));
-const PermissionCreate = Loadable(lazy(() => import('pages/rbac/permissions/PermissionCreate')));
-const PermissionEdit = Loadable(lazy(() => import('pages/rbac/permissions/PermissionEdit')));
-
-const AssignRoles = Loadable(lazy(() => import('pages/rbac/users/AssignRoles')));
-
-const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
-const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
-const AppECommProductList = Loadable(lazy(() => import('pages/apps/e-commerce/products-list')));
-const AppECommCheckout = Loadable(lazy(() => import('pages/apps/e-commerce/checkout')));
-const AppECommAddProduct = Loadable(lazy(() => import('pages/apps/e-commerce/add-product')));
-
-// render - forms & tables
-const FormsValidation = Loadable(lazy(() => import('pages/forms/validation')));
-const FormsWizard = Loadable(lazy(() => import('pages/forms/wizard')));
-
-const FormsLayoutBasic = Loadable(lazy(() => import('pages/forms/layouts/basic')));
-const FormsLayoutMultiColumn = Loadable(lazy(() => import('pages/forms/layouts/multi-column')));
-const FormsLayoutActionBar = Loadable(lazy(() => import('pages/forms/layouts/action-bar')));
-const FormsLayoutStickyBar = Loadable(lazy(() => import('pages/forms/layouts/sticky-bar')));
-
-const FormsPluginsMask = Loadable(lazy(() => import('pages/forms/plugins/mask')));
-const FormsPluginsClipboard = Loadable(lazy(() => import('pages/forms/plugins/clipboard')));
-const FormsPluginsRecaptcha = Loadable(lazy(() => import('pages/forms/plugins/re-captcha')));
-const FormsPluginsEditor = Loadable(lazy(() => import('pages/forms/plugins/editor')));
-const FormsPluginsDropzone = Loadable(lazy(() => import('pages/forms/plugins/dropzone')));
-
-const ReactTableBasic = Loadable(lazy(() => import('pages/tables/react-table/basic')));
-const ReactDenseTable = Loadable(lazy(() => import('pages/tables/react-table/dense')));
-const ReactTableSorting = Loadable(lazy(() => import('pages/tables/react-table/sorting')));
-const ReactTableFiltering = Loadable(lazy(() => import('pages/tables/react-table/filtering')));
-const ReactTableGrouping = Loadable(lazy(() => import('pages/tables/react-table/grouping')));
-const ReactTablePagination = Loadable(lazy(() => import('pages/tables/react-table/pagination')));
-const ReactTableRowSelection = Loadable(lazy(() => import('pages/tables/react-table/row-selection')));
-const ReactTableExpanding = Loadable(lazy(() => import('pages/tables/react-table/expanding')));
-const ReactTableEditable = Loadable(lazy(() => import('pages/tables/react-table/editable')));
-const ReactTableDragDrop = Loadable(lazy(() => import('pages/tables/react-table/drag-drop')));
-const ReactTableColumnVisibility = Loadable(lazy(() => import('pages/tables/react-table/column-visibility')));
-const ReactTableColumnResizing = Loadable(lazy(() => import('pages/tables/react-table/column-resizing')));
-const ReactTableStickyTable = Loadable(lazy(() => import('pages/tables/react-table/sticky')));
-const ReactTableUmbrella = Loadable(lazy(() => import('pages/tables/react-table/umbrella')));
-const ReactTableEmpty = Loadable(lazy(() => import('pages/tables/react-table/empty')));
-const ReactTableVirtualized = Loadable(lazy(() => import('pages/tables/react-table/virtualized')));
-
-// render - charts & map
-const ChartApexchart = Loadable(lazy(() => import('pages/charts/apexchart')));
-const ChartOrganization = Loadable(lazy(() => import('pages/charts/org-chart')));
-const Map = Loadable(lazy(() => import('pages/map')));
-
-// table routing
-const MuiTableBasic = Loadable(lazy(() => import('pages/tables/mui-table/basic')));
-const MuiTableDense = Loadable(lazy(() => import('pages/tables/mui-table/dense')));
-const MuiTableEnhanced = Loadable(lazy(() => import('pages/tables/mui-table/enhanced')));
-const MuiTableDatatable = Loadable(lazy(() => import('pages/tables/mui-table/datatable')));
-const MuiTableCustom = Loadable(lazy(() => import('pages/tables/mui-table/custom')));
-const MuiTableFixedHeader = Loadable(lazy(() => import('pages/tables/mui-table/fixed-header')));
-const MuiTableCollapse = Loadable(lazy(() => import('pages/tables/mui-table/collapse')));
-
-// pages routing
-const AuthLogin = Loadable(lazy(() => import('pages/auth/jwt/login')));
-const AuthRegister = Loadable(lazy(() => import('pages/auth/jwt/register')));
-const AuthForgotPassword = Loadable(lazy(() => import('pages/auth/jwt/forgot-password')));
-const AuthResetPassword = Loadable(lazy(() => import('pages/auth/jwt/reset-password')));
-const AuthCheckMail = Loadable(lazy(() => import('pages/auth/jwt/check-mail')));
-const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/jwt/code-verification')));
-
-const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
-const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
-const MaintenanceForbidden = Loadable(lazy(() => import('pages/errors/Forbidden')));
-const MaintenanceUnderConstruction = Loadable(lazy(() => import('pages/maintenance/under-construction')));
-const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/coming-soon')));
-const MaintenanceJoinWaitList = Loadable(lazy(() => import('pages/maintenance/join-waitlist')));
-
-const AppContactUS = Loadable(lazy(() => import('pages/contact-us')));
-const ChangeLog = Loadable(lazy(() => import('pages/change-log')));
-const AppFaqs = Loadable(lazy(() => import('pages/faqs')));
-
-// render - sample page
-const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
-const PricingPage = Loadable(lazy(() => import('pages/extra-pages/pricing')));
+import SimpleLayout from 'layout/Simple';
+import Unauthorized from 'pages/errors/Unauthorized';
+import NotFound from 'pages/errors/NotFound';
+import Claims from 'pages/claims/Claims';
+import Members from 'pages/members/Members';
+import Employers from 'pages/employers/Employers';
+import InsuranceCompanies from 'pages/insurance/InsuranceCompanies';
+import ReviewerCompanies from 'pages/reviewer/ReviewerCompanies';
+import Visits from 'pages/visits/Visits';
+import SystemTools from 'components/pages/SystemTools';
+import RolesList from 'pages/rbac/roles/RolesList';
+import RoleCreate from 'pages/rbac/roles/RoleCreate';
+import RoleEdit from 'pages/rbac/roles/RoleEdit';
+import AssignPermissions from 'pages/rbac/roles/AssignPermissions';
+import PermissionsList from 'pages/rbac/permissions/PermissionsList';
+import PermissionCreate from 'pages/rbac/permissions/PermissionCreate';
+import PermissionEdit from 'pages/rbac/permissions/PermissionEdit';
+import AssignRoles from 'pages/rbac/users/AssignRoles';
+import AuthLogin from 'pages/auth/jwt/login';
+import AuthRegister from 'pages/auth/jwt/register';
+import AuthForgotPassword from 'pages/auth/jwt/forgot-password';
+import AuthResetPassword from 'pages/auth/jwt/reset-password';
+import AuthCheckMail from 'pages/auth/jwt/check-mail';
+import AuthCodeVerification from 'pages/auth/jwt/code-verification';
+import DashboardDefault from 'pages/dashboard/default';
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -156,199 +51,78 @@ const MainRoutes = {
           children: [
             {
               path: 'default',
-              element: <DashboardDefault />
-            },
-            {
-              path: 'analytics',
-              element: <DashboardAnalytics />
-            },
-            {
-              path: 'invoice',
-              element: <AppInvoiceDashboard />
+              element: (
+                <ProtectedRoute permissions={['dashboard.view']}>
+                  <DashboardDefault />
+                </ProtectedRoute>
+              )
             }
           ]
         },
         {
-          path: 'widget',
-          children: [
-            {
-              path: 'statistics',
-              element: <WidgetStatistics />
-            },
-            {
-              path: 'data',
-              element: <WidgetData />
-            },
-            {
-              path: 'chart',
-              element: <WidgetChart />
-            }
-          ]
+          path: 'claims',
+          element: (
+            <ProtectedRoute permissions={['claim.view']}>
+              <Claims />
+            </ProtectedRoute>
+          )
         },
         {
-          path: 'apps',
-          children: [
-            {
-              path: 'chat',
-              element: <AppChat />
-            },
-            {
-              path: 'calendar',
-              element: <AppCalendar />
-            },
-            {
-              path: 'kanban',
-              element: <AppKanban />,
-              children: [
-                {
-                  path: 'backlogs',
-                  element: <AppKanbanBacklogs />
-                },
-                {
-                  path: 'board',
-                  element: <AppKanbanBoard />
-                }
-              ]
-            },
-            {
-              path: 'customer',
-              children: [
-                {
-                  path: 'customer-list',
-                  element: (
-                    <ProtectedRoute permissions={['customers.view']}>
-                      <AppCustomerList />
-                    </ProtectedRoute>
-                  )
-                },
-                {
-                  path: 'customer-card',
-                  element: (
-                    <ProtectedRoute permissions={['customers.view']}>
-                      <AppCustomerCard />
-                    </ProtectedRoute>
-                  )
-                }
-              ]
-            },
-            {
-              path: 'invoice',
-              children: [
-                {
-                  path: 'dashboard',
-                  element: <AppInvoiceDashboard />
-                },
-                {
-                  path: 'create',
-                  element: <AppInvoiceCreate />
-                },
-                {
-                  path: 'details/:id',
-                  element: <AppInvoiceDetails />
-                },
-                {
-                  path: 'edit/:id',
-                  element: <AppInvoiceEdit />
-                },
-                {
-                  path: 'list',
-                  element: <AppInvoiceList />
-                }
-              ]
-            },
-            {
-              path: 'profiles',
-              children: [
-                {
-                  path: 'account',
-                  element: <AccountProfile />,
-                  children: [
-                    {
-                      path: 'basic',
-                      element: <AccountTabProfile />
-                    },
-                    {
-                      path: 'personal',
-                      element: <AccountTabPersonal />
-                    },
-                    {
-                      path: 'my-account',
-                      element: <AccountTabAccount />
-                    },
-                    {
-                      path: 'password',
-                      element: <AccountTabPassword />
-                    },
-                    {
-                      path: 'role',
-                      element: <AccountTabRole />
-                    },
-                    {
-                      path: 'settings',
-                      element: <AccountTabSettings />
-                    }
-                  ]
-                },
-                {
-                  path: 'user',
-                  element: <UserProfile />,
-                  children: [
-                    {
-                      path: 'personal',
-                      element: <UserTabPersonal />
-                    },
-                    {
-                      path: 'payment',
-                      element: <UserTabPayment />
-                    },
-                    {
-                      path: 'password',
-                      element: <UserTabPassword />
-                    },
-                    {
-                      path: 'settings',
-                      element: <UserTabSettings />
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              path: 'e-commerce',
-              children: [
-                {
-                  path: 'products',
-                  element: <AppECommProducts />,
-                  loader: productsLoader,
-                  errorElement: <ErrorBoundary />
-                },
-                {
-                  path: 'product-details/:id',
-                  element: <AppECommProductDetails />,
-                  loader: productLoader,
-                  errorElement: <ErrorBoundary />
-                },
-                {
-                  path: 'product-list',
-                  element: <AppECommProductList />,
-                  loader: productsLoader,
-                  errorElement: <ErrorBoundary />
-                },
-                {
-                  path: 'add-new-product',
-                  element: <AppECommAddProduct />
-                },
-                {
-                  path: 'checkout',
-                  element: <AppECommCheckout />
-                }
-              ]
-            }
-          ]
+          path: 'members',
+          element: (
+            <ProtectedRoute permissions={['member.view']}>
+              <Members />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: 'employers',
+          element: (
+            <ProtectedRoute permissions={['employer.view']}>
+              <Employers />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: 'insurance-companies',
+          element: (
+            <ProtectedRoute permissions={['insurance.view']}>
+              <InsuranceCompanies />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: 'reviewer-companies',
+          element: (
+            <ProtectedRoute permissions={['reviewer.view']}>
+              <ReviewerCompanies />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: 'visits',
+          element: (
+            <ProtectedRoute permissions={['visit.view']}>
+              <Visits />
+            </ProtectedRoute>
+          )
         },
         {
           path: 'admin',
           children: [
+            {
+              path: 'system',
+              children: [
+                {
+                  path: 'tools',
+                  element: (
+                    <ProtectedRoute permissions={['system.manage']}>
+                      <SystemTools />
+                    </ProtectedRoute>
+                  )
+                }
+              ]
+            },
             {
               path: 'rbac',
               children: [
@@ -419,227 +193,6 @@ const MainRoutes = {
               ]
             }
           ]
-        },
-        {
-          path: 'forms',
-          children: [
-            {
-              path: 'validation',
-              element: <FormsValidation />
-            },
-            {
-              path: 'wizard',
-              element: <FormsWizard />
-            },
-            {
-              path: 'layout',
-              children: [
-                {
-                  path: 'basic',
-                  element: <FormsLayoutBasic />
-                },
-                {
-                  path: 'multi-column',
-                  element: <FormsLayoutMultiColumn />
-                },
-                {
-                  path: 'action-bar',
-                  element: <FormsLayoutActionBar />
-                },
-                {
-                  path: 'sticky-bar',
-                  element: <FormsLayoutStickyBar />
-                }
-              ]
-            },
-            {
-              path: 'plugins',
-              children: [
-                {
-                  path: 'mask',
-                  element: <FormsPluginsMask />
-                },
-                {
-                  path: 'clipboard',
-                  element: <FormsPluginsClipboard />
-                },
-                {
-                  path: 're-captcha',
-                  element: <FormsPluginsRecaptcha />
-                },
-                {
-                  path: 'editor',
-                  element: <FormsPluginsEditor />
-                },
-                {
-                  path: 'dropzone',
-                  element: <FormsPluginsDropzone />
-                }
-              ]
-            }
-          ]
-        },
-        {
-          path: 'tables',
-          children: [
-            {
-              path: 'react-table',
-              children: [
-                {
-                  path: 'basic',
-                  element: <ReactTableBasic />
-                },
-                {
-                  path: 'dense',
-                  element: <ReactDenseTable />
-                },
-                {
-                  path: 'sorting',
-                  element: <ReactTableSorting />
-                },
-                {
-                  path: 'filtering',
-                  element: <ReactTableFiltering />
-                },
-                {
-                  path: 'grouping',
-                  element: <ReactTableGrouping />
-                },
-                {
-                  path: 'pagination',
-                  element: <ReactTablePagination />
-                },
-                {
-                  path: 'row-selection',
-                  element: <ReactTableRowSelection />
-                },
-                {
-                  path: 'expanding',
-                  element: <ReactTableExpanding />
-                },
-                {
-                  path: 'editable',
-                  element: <ReactTableEditable />
-                },
-                {
-                  path: 'drag-drop',
-                  element: <ReactTableDragDrop />
-                },
-                {
-                  path: 'column-visibility',
-                  element: <ReactTableColumnVisibility />
-                },
-                {
-                  path: 'column-resizing',
-                  element: <ReactTableColumnResizing />
-                },
-                {
-                  path: 'sticky-table',
-                  element: <ReactTableStickyTable />
-                },
-                {
-                  path: 'umbrella',
-                  element: <ReactTableUmbrella />
-                },
-                {
-                  path: 'empty',
-                  element: <ReactTableEmpty />
-                },
-                {
-                  path: 'virtualized',
-                  element: <ReactTableVirtualized />
-                }
-              ]
-            },
-            {
-              path: 'mui-table',
-              children: [
-                {
-                  path: 'basic',
-                  element: <MuiTableBasic />
-                },
-                {
-                  path: 'dense',
-                  element: <MuiTableDense />
-                },
-                {
-                  path: 'enhanced',
-                  element: <MuiTableEnhanced />
-                },
-                {
-                  path: 'datatable',
-                  element: <MuiTableDatatable />
-                },
-                {
-                  path: 'custom',
-                  element: <MuiTableCustom />
-                },
-                {
-                  path: 'fixed-header',
-                  element: <MuiTableFixedHeader />
-                },
-                {
-                  path: 'collapse',
-                  element: <MuiTableCollapse />
-                }
-              ]
-            }
-          ]
-        },
-        {
-          path: 'charts',
-          children: [
-            {
-              path: 'apexchart',
-              element: <ChartApexchart />
-            },
-            {
-              path: 'org-chart',
-              element: <ChartOrganization />
-            }
-          ]
-        },
-        {
-          path: 'map',
-          element: <Map />
-        },
-        {
-          path: 'sample-page',
-          element: <SamplePage />
-        },
-        {
-          path: 'pricing',
-          element: <PricingPage />
-        }
-      ]
-    },
-    {
-      path: '/maintenance',
-      element: <PagesLayout />,
-      children: [
-        {
-          path: '404',
-          element: <MaintenanceError />
-        },
-        {
-          path: '403',
-          element: <MaintenanceForbidden />
-        },
-        {
-          path: '500',
-          element: <MaintenanceError500 />
-        },
-        {
-          path: 'under-construction',
-          element: <MaintenanceUnderConstruction />
-        },
-        {
-          path: 'coming-soon',
-          element: <MaintenanceComingSoon />
-        },
-        {
-          path: 'join-waitlist',
-          element: <MaintenanceJoinWaitList />
         }
       ]
     },
@@ -674,34 +227,17 @@ const MainRoutes = {
       ]
     },
     {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'change-log',
-          element: <ChangeLog />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} enableElevationScroll />,
-      children: [
-        {
-          path: 'contact-us',
-          element: <AppContactUS />
-        }
-      ]
+      path: '/unauthorized',
+      element: <Unauthorized />
     },
     {
       path: '/',
       element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'faqs',
-          element: <AppFaqs />
-        }
-      ]
+      children: []
+    },
+    {
+      path: '*',
+      element: <NotFound />
     }
   ]
 };

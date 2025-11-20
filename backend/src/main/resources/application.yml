@@ -2,16 +2,13 @@ spring:
   application:
     name: tba-waad-system-backend
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: password
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
+    datasource:
+      url: jdbc:postgresql://localhost:5432/tba_waad
+      username: postgres
+      password: 12345
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -33,7 +30,7 @@ spring:
             trust: smtp.hostinger.com
   
 server:
-  port: 9090
+  port: 9092
   error:
     include-message: always
     include-stacktrace: on_param

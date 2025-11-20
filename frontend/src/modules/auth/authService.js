@@ -1,5 +1,14 @@
 import apiClient from 'api/apiClient';
 
+export async function login(credentials) {
+  const response = await apiClient.post('/auth/login', credentials);
+  // Support ApiResponse wrapper or direct
+  const data = response.data?.data ? response.data.data : response.data || response;
+  const token = data.token;
+  const user = data.user;
+  return { token, user };
+}
+
 const authService = {
   // Login user
   async login(username, password) {

@@ -65,7 +65,7 @@ export default function DashboardLayout() {
             <Footer />
           </Container>
         </Box>
-        <AddCustomer />
+        {/* Removed demo AddCustomer floating action component */}
       </Box>
     </AuthGuard>
   );

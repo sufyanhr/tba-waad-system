@@ -95,9 +95,17 @@ public class VisitService {
     }
 
     @Transactional(readOnly = true)
-    public Page<VisitResponseDto> findAllPaginated(Pageable pageable) {
-        log.debug("Finding visits with pagination");
-        return repository.findAll(pageable)
-                .map(mapper::toResponseDto);
+    public Page<VisitResponseDto> findAllPaginated(Pageable pageable, String search) {
+        log.debug("Finding visits with pagination. search={}", search);
+        if (search == null || search.isBlank()) {
+            return repository.findAll(pageable).map(mapper::toResponseDto);
+        } else {
+            return repository.searchPaged(search, pageable).map(mapper::toResponseDto);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return repository.count();
     }
 }

@@ -104,9 +104,16 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MemberResponseDto> findAllPaginated(Pageable pageable) {
-        log.debug("Finding members with pagination");
-        return repository.findAll(pageable)
-                .map(mapper::toResponseDto);
+    public Page<MemberResponseDto> findAllPaginated(Pageable pageable, String search) {
+        log.debug("Finding members with pagination. search={}", search);
+        if (search == null || search.isBlank()) {
+            return repository.findAll(pageable).map(mapper::toResponseDto);
+        }
+        return repository.searchPaged(search, pageable).map(mapper::toResponseDto);
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return repository.count();
     }
 }

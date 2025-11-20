@@ -73,15 +73,11 @@ export default function Navigation() {
   const filterMenuItems = (items) => {
     return items.filter(item => {
       if (!isMenuItemVisible(item)) return false;
-      
-      // If item has children, filter them recursively
       if (item.children && item.children.length > 0) {
-        const filteredChildren = filterMenuItems(item.children);
+        const filteredChildren = filterMenuItems([...item.children]);
         item.children = filteredChildren;
-        // Only show group if it has visible children
         return filteredChildren.length > 0;
       }
-      
       return true;
     });
   };

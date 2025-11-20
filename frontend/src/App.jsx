@@ -1,4 +1,5 @@
 import { RouterProvider } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 // project imports
 import router from 'routes';
@@ -25,6 +26,7 @@ export default function App() {
                 <Notistack>
                   <RouterProvider router={router} />
                   <Snackbar />
+                  <Toaster position="top-right" gutter={8} toastOptions={{ duration: 4000 }} />
                 </Notistack>
               </ScrollTop>
             </Locales>

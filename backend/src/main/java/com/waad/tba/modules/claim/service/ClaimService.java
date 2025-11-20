@@ -98,10 +98,13 @@ public class ClaimService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ClaimResponseDto> findAllPaginated(Pageable pageable) {
-        log.debug("Finding claims with pagination");
-        return repository.findAll(pageable)
-                .map(mapper::toResponseDto);
+    public Page<ClaimResponseDto> findAllPaginated(Pageable pageable, String search) {
+        log.debug("Finding claims with pagination. search={}", search);
+        if (search == null || search.isBlank()) {
+            return repository.findAll(pageable).map(mapper::toResponseDto);
+        } else {
+            return repository.searchPaged(search, pageable).map(mapper::toResponseDto);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -110,6 +113,11 @@ public class ClaimService {
         return repository.findByStatus(status).stream()
                 .map(mapper::toResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return repository.count();
     }
 
     @Transactional

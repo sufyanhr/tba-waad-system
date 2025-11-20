@@ -46,6 +46,15 @@ public class InsuranceCompanyService {
     }
 
     @Transactional(readOnly = true)
+    public Page<InsuranceCompanyResponseDto> findAllPaginated(Pageable pageable, String search) {
+        if (search == null || search.isBlank()) {
+            return insuranceCompanyRepository.findAll(pageable).map(insuranceCompanyMapper::toResponseDto);
+        } else {
+            return insuranceCompanyRepository.searchPaged(search, pageable).map(insuranceCompanyMapper::toResponseDto);
+        }
+    }
+
+    @Transactional(readOnly = true)
     public InsuranceCompanyResponseDto getById(Long id) {
         InsuranceCompany entity = findEntityById(id);
         return insuranceCompanyMapper.toResponseDto(entity);
@@ -72,6 +81,11 @@ public class InsuranceCompanyService {
         return insuranceCompanyRepository.searchInsuranceCompanies(searchTerm).stream()
                 .map(insuranceCompanyMapper::toResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return insuranceCompanyRepository.count();
     }
 
     private InsuranceCompany findEntityById(Long id) {

@@ -1,5 +1,6 @@
 package com.waad.tba.modules.employer.service;
 
+import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.employer.dto.EmployerCreateDto;
 import com.waad.tba.modules.employer.dto.EmployerResponseDto;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,15 +26,13 @@ public class EmployerService {
 
     @Transactional(readOnly = true)
     public List<EmployerResponseDto> findAll() {
-        log.debug("Finding all employers");
         return repository.findAll().stream()
                 .map(mapper::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public EmployerResponseDto findById(Long id) {
-        log.debug("Finding employer by id: {}", id);
         Employer entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employer", "id", id));
         return mapper.toResponseDto(entity);
@@ -42,53 +40,62 @@ public class EmployerService {
 
     @Transactional
     public EmployerResponseDto create(EmployerCreateDto dto) {
-        log.info("Creating new employer: {}", dto.getName());
-
         Employer entity = mapper.toEntity(dto);
         Employer saved = repository.save(entity);
-        
-        log.info("Employer created successfully with id: {}", saved.getId());
         return mapper.toResponseDto(saved);
     }
 
     @Transactional
     public EmployerResponseDto update(Long id, EmployerCreateDto dto) {
-        log.info("Updating employer with id: {}", id);
-        
         Employer entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employer", "id", id));
 
         mapper.updateEntityFromDto(entity, dto);
-        Employer updated = repository.save(entity);
-        
-        log.info("Employer updated successfully: {}", id);
-        return mapper.toResponseDto(updated);
+        return mapper.toResponseDto(repository.save(entity));
     }
 
     @Transactional
     public void delete(Long id) {
-        log.info("Deleting employer with id: {}", id);
-        
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Employer", "id", id);
         }
-        
         repository.deleteById(id);
-        log.info("Employer deleted successfully: {}", id);
     }
 
     @Transactional(readOnly = true)
     public List<EmployerResponseDto> search(String query) {
-        log.debug("Searching employers with query: {}", query);
         return repository.search(query).stream()
                 .map(mapper::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
+    // ✅ النسخة النهائية الصحيحة
     @Transactional(readOnly = true)
-    public Page<EmployerResponseDto> findAllPaginated(Pageable pageable) {
-        log.debug("Finding employers with pagination");
-        return repository.findAll(pageable)
-                .map(mapper::toResponseDto);
+    public PaginationResponse<EmployerResponseDto> findAllPaginated(Pageable pageable, String search) {
+
+        Page<Employer> page;
+
+        if (search != null && !search.isEmpty()) {
+            String q = "%" + search.toLowerCase() + "%";
+            page = repository.searchPaged(q, pageable);
+        } else {
+            page = repository.findAll(pageable);
+        }
+
+        List<EmployerResponseDto> items = page.getContent()
+                .stream()
+                .map(mapper::toResponseDto)
+                .toList();
+
+        return new PaginationResponse<>(
+                items,
+                page.getTotalElements(),
+                page.getNumber() + 1,
+                page.getSize()
+        );
+    }
+
+    public long count() {
+        return repository.count();
     }
 }

@@ -51,6 +51,7 @@ export default function NavUser() {
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
 
   const { logout, user } = useAuth();
+  const displayName = user?.fullName || user?.username || user?.name || user?.email || 'User';
   const handleLogout = async () => {
     try {
       await logout();
@@ -98,7 +99,7 @@ export default function NavUser() {
           <ListItemAvatar>
             <Avatar alt="Avatar" src={avatar1} sx={{ ...(drawerOpen && { width: 46, height: 46 }) }} />
           </ListItemAvatar>
-          <ListItemText primary={user?.name} secondary="UI/UX Designer" />
+          <ListItemText primary={displayName} secondary="UI/UX Designer" />
         </ListItem>
       </List>
       <Menu

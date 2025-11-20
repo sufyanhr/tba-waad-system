@@ -86,9 +86,17 @@ public class ReviewerCompanyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReviewerCompanyResponseDto> findAllPaginated(Pageable pageable) {
-        log.debug("Finding reviewer companies with pagination");
-        return repository.findAll(pageable)
-                .map(mapper::toResponseDto);
+    public Page<ReviewerCompanyResponseDto> findAllPaginated(Pageable pageable, String search) {
+        log.debug("Finding reviewer companies with pagination. search={}", search);
+        if (search == null || search.isBlank()) {
+            return repository.findAll(pageable).map(mapper::toResponseDto);
+        } else {
+            return repository.searchPaged(search, pageable).map(mapper::toResponseDto);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return repository.count();
     }
 }
