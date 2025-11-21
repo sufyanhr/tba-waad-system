@@ -1799,32 +1799,6 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.52.4.tgz"
   integrity sha512-dtBZYjDmCQ9hW+WgEkaffvRRCKm767wWhxsFW3Lw86VXz/uJRuD438/XvbZT//B96Vs8oTA8Q4A0AfHbrxP9zw==
 
-<<<<<<< HEAD
-"@rollup/rollup-openharmony-arm64@4.52.4":
-  version "4.52.4"
-  resolved "https://registry.npmjs.org/@rollup/rollup-openharmony-arm64/-/rollup-openharmony-arm64-4.52.4.tgz"
-  integrity sha512-1ox+GqgRWqaB1RnyZXL8PD6E5f7YyRUJYnCqKpNzxzP0TkaUh112NDrR9Tt+C8rJ4x5G9Mk8PQR3o7Ku2RKqKA==
-
-"@rollup/rollup-win32-arm64-msvc@4.52.4":
-  version "4.52.4"
-  resolved "https://registry.npmjs.org/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.52.4.tgz"
-  integrity sha512-8GKr640PdFNXwzIE0IrkMWUNUomILLkfeHjXBi/nUvFlpZP+FA8BKGKpacjW6OUUHaNI6sUURxR2U2g78FOHWQ==
-
-"@rollup/rollup-win32-ia32-msvc@4.52.4":
-  version "4.52.4"
-  resolved "https://registry.npmjs.org/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.52.4.tgz"
-  integrity sha512-AIy/jdJ7WtJ/F6EcfOb2GjR9UweO0n43jNObQMb6oGxkYTfLcnN7vYYpG+CN3lLxrQkzWnMOoNSHTW54pgbVxw==
-
-"@rollup/rollup-win32-x64-gnu@4.52.4":
-  version "4.52.4"
-  resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.52.4.tgz"
-  integrity sha512-UF9KfsH9yEam0UjTwAgdK0anlQ7c8/pWPU2yVjyWcF1I1thABt6WXE47cI71pGiZ8wGvxohBoLnxM04L/wj8mQ==
-
-"@rollup/rollup-win32-x64-msvc@4.52.4":
-  version "4.52.4"
-  resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.52.4.tgz"
-  integrity sha512-bf9PtUa0u8IXDVxzRToFQKsNCRz9qLYfR/MpECxl4mRoWYjAeFjgxj1XdZr2M/GNVpT05p+LgQOHopYDlUu6/w==
-
 "@sigstore/bundle@^4.0.0":
   version "4.0.0"
   dependencies:
@@ -1859,8 +1833,6 @@
     "@sigstore/core" "^3.0.0"
     "@sigstore/protobuf-specs" "^0.5.0"
 
-=======
->>>>>>> origin/main
 "@smithy/types@^4.7.1":
   version "4.8.0"
   resolved "https://registry.npmjs.org/@smithy/types/-/types-4.8.0.tgz"
@@ -3754,19 +3726,11 @@ framer-motion@12.23.24:
     motion-utils "^12.23.6"
     tslib "^2.4.0"
 
-<<<<<<< HEAD
 fs-minipass@^3.0.0, fs-minipass@^3.0.3:
   version "3.0.3"
   dependencies:
     minipass "^7.0.3"
 
-fsevents@~2.3.2, fsevents@~2.3.3:
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
-  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
-
-=======
->>>>>>> origin/main
 function-bind@^1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz"

@@ -6,11 +6,12 @@ import samplePage from './sample-page';
 import chartsMap from './charts-map';
 import other from './other';
 import pages from './pages';
+import tbaSystem from './tba-system';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [widget, applications, formsTables, chartsMap, samplePage, pages, other]
+  items: [tbaSystem, widget, applications, formsTables, chartsMap, samplePage, pages, other]
 };
 
 export default menuItems;

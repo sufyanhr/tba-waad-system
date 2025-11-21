@@ -1,32 +1,29 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { Link as RouterLink, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
-import InputAdornment from '@mui/material/InputAdornment';
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormHelperText,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Stack,
+  Typography,
+  IconButton
+} from '@mui/material';
 
-// third-party
+// third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import { preload } from 'swr';
 
 // project imports
-import IconButton from 'components/@extended/IconButton';
-import AnimateButton from 'components/@extended/AnimateButton';
-
 import useAuth from 'hooks/useAuth';
-
-import { fetcher } from 'utils/axios';
+import AnimateButton from 'components/@extended/AnimateButton';
+import { useSnackbar } from 'notistack';
 
 // assets
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
@@ -34,12 +31,14 @@ import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 
 // ============================|| JWT - LOGIN ||============================ //
 
-export default function AuthLogin({ isDemo = false }) {
-  const [checked, setChecked] = React.useState(false);
-
+const AuthLogin = ({ isDemo = false }) => {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  
+  const [checked, setChecked] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -48,36 +47,35 @@ export default function AuthLogin({ isDemo = false }) {
     event.preventDefault();
   };
 
-  const [searchParams] = useSearchParams();
-  const auth = searchParams.get('auth'); // get auth and set route based on that
-
   return (
     <>
       <Formik
         initialValues={{
-          email: 'info@codedthemes.com',
-          password: '123456',
+          email: 'admin@tba.sa',
+          password: 'admin123',
           submit: null
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-          password: Yup.string()
-            .required('Password is required')
-            .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
-            .max(10, 'Password must be less than 10 characters')
+          password: Yup.string().max(255).required('Password is required')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
-            const trimmedEmail = values.email.trim();
-            await login(trimmedEmail, values.password);
+            await login(values.email, values.password);
             setStatus({ success: true });
             setSubmitting(false);
-            preload('api/menu/dashboard', fetcher); // load menu on login success
+            
+            enqueueSnackbar('Login successful!', { variant: 'success' });
+            
+            // Redirect to dashboard
+            navigate('/dashboard/default');
           } catch (err) {
             console.error(err);
             setStatus({ success: false });
-            setErrors({ submit: err.message });
+            setErrors({ submit: err.response?.data?.message || 'Invalid email or password' });
             setSubmitting(false);
+            
+            enqueueSnackbar(err.response?.data?.message || 'Login failed', { variant: 'error' });
           }
         }}
       >
@@ -85,7 +83,7 @@ export default function AuthLogin({ isDemo = false }) {
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid size={12}>
-                <Stack sx={{ gap: 1 }}>
+                <Stack spacing={1}>
                   <InputLabel htmlFor="email-login">Email Address</InputLabel>
                   <OutlinedInput
                     id="email-login"
@@ -98,20 +96,20 @@ export default function AuthLogin({ isDemo = false }) {
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
                   />
+                  {touched.email && errors.email && (
+                    <FormHelperText error id="standard-weight-helper-text-email-login">
+                      {errors.email}
+                    </FormHelperText>
+                  )}
                 </Stack>
-                {touched.email && errors.email && (
-                  <FormHelperText error id="standard-weight-helper-text-email-login">
-                    {errors.email}
-                  </FormHelperText>
-                )}
               </Grid>
               <Grid size={12}>
-                <Stack sx={{ gap: 1 }}>
+                <Stack spacing={1}>
                   <InputLabel htmlFor="password-login">Password</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.password && errors.password)}
-                    id="-password-login"
+                    id="password-login"
                     type={showPassword ? 'text' : 'password'}
                     value={values.password}
                     name="password"
@@ -132,15 +130,16 @@ export default function AuthLogin({ isDemo = false }) {
                     }
                     placeholder="Enter password"
                   />
+                  {touched.password && errors.password && (
+                    <FormHelperText error id="standard-weight-helper-text-password-login">
+                      {errors.password}
+                    </FormHelperText>
+                  )}
                 </Stack>
-                {touched.password && errors.password && (
-                  <FormHelperText error id="standard-weight-helper-text-password-login">
-                    {errors.password}
-                  </FormHelperText>
-                )}
               </Grid>
-              <Grid sx={{ mt: -1 }} size={12}>
-                <Stack direction="row" sx={{ gap: 2, alignItems: 'baseline', justifyContent: 'space-between' }}>
+
+              <Grid size={12} sx={{ mt: -1 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -151,16 +150,16 @@ export default function AuthLogin({ isDemo = false }) {
                         size="small"
                       />
                     }
-                    label={<Typography variant="h6">Keep me sign in</Typography>}
+                    label={<Typography variant="h6">Keep me signed in</Typography>}
                   />
-                  <Link
+                  <Typography
                     variant="h6"
-                    component={RouterLink}
-                    to={isDemo ? '/auth/forgot-password' : auth ? `/${auth}/forgot-password?auth=jwt` : '/forgot-password'}
-                    color="text.primary"
+                    color="primary"
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => navigate('/auth/forgot-password')}
                   >
                     Forgot Password?
-                  </Link>
+                  </Typography>
                 </Stack>
               </Grid>
               {errors.submit && (
@@ -181,6 +180,6 @@ export default function AuthLogin({ isDemo = false }) {
       </Formik>
     </>
   );
-}
+};
 
-AuthLogin.propTypes = { isDemo: PropTypes.bool };
+export default AuthLogin;

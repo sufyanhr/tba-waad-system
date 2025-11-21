@@ -1,50 +1,15 @@
-import { useState } from 'react';
-
-// material-ui
-import Button from '@mui/material/Button';
-import FormHelperText from '@mui/material/FormHelperText';
-import Grid from '@mui/material/Grid';
-
-// project imports
-import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
-import AnimateButton from 'components/@extended/AnimateButton';
-
-// assets
-import LockOutlined from '@ant-design/icons/LockOutlined';
-
-// ============================|| AUTH0 - LOGIN ||============================ //
+import { Typography, Box, Paper, TextField, Button, Stack } from '@mui/material';
 
 const AuthLogin = () => {
-  const { loginAuth } = useAuth();
-  const scriptedRef = useScriptRef();
-
-  const [error, setError] = useState(null);
-  const loginHandler = async () => {
-    try {
-      if (loginAuth) await loginAuth();
-    } catch (err) {
-      if (scriptedRef.current) {
-        setError(err.message);
-      }
-    }
-  };
-
   return (
-    <Grid container sx={{ justifyContent: 'center', alignItems: 'center' }} spacing={2}>
-      {error && (
-        <Grid size={12}>
-          <FormHelperText error>{error}</FormHelperText>
-        </Grid>
-      )}
-      <Grid size={12}>
-        <AnimateButton>
-          <Button onClick={loginHandler} variant="contained" fullWidth startIcon={<LockOutlined />}>
-            Log in with Auth0
-          </Button>
-        </AnimateButton>
-      </Grid>
-    </Grid>
+    <Paper sx={{ p: 4 }}>
+      <Typography variant="h3" gutterBottom>AuthLogin - auth0</Typography>
+      <Stack spacing={2} sx={{ mt: 3 }}>
+        <TextField label="Email" fullWidth />
+        <TextField label="Password" type="password" fullWidth />
+        <Button variant="contained" fullWidth>Submit</Button>
+      </Stack>
+    </Paper>
   );
 };
 

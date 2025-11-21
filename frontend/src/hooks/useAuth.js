@@ -14,5 +14,45 @@ export default function useAuth() {
 
   if (!context) throw new Error('context must be use inside provider');
 
-  return context;
+  // Add hasPermission function
+  const hasPermission = (permission) => {
+    if (!context.user) return false;
+    
+    // Check if user has the required permission
+    const userPermissions = context.user.permissions || [];
+    return userPermissions.includes(permission);
+  };
+
+  // Add hasRole function
+  const hasRole = (role) => {
+    if (!context.user) return false;
+    
+    // Check if user has the required role
+    const userRoles = context.user.roles || [];
+    return userRoles.includes(role);
+  };
+
+  // Add hasAnyPermission function
+  const hasAnyPermission = (permissions) => {
+    if (!context.user) return false;
+    
+    const userPermissions = context.user.permissions || [];
+    return permissions.some(permission => userPermissions.includes(permission));
+  };
+
+  // Add hasAllPermissions function
+  const hasAllPermissions = (permissions) => {
+    if (!context.user) return false;
+    
+    const userPermissions = context.user.permissions || [];
+    return permissions.every(permission => userPermissions.includes(permission));
+  };
+
+  return {
+    ...context,
+    hasPermission,
+    hasRole,
+    hasAnyPermission,
+    hasAllPermissions
+  };
 }

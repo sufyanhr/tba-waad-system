@@ -124,6 +124,14 @@ const AppFaqs = Loadable(lazy(() => import('pages/faqs')));
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 const PricingPage = Loadable(lazy(() => import('pages/extra-pages/pricing')));
 
+// render - TBA pages
+const TBAClaims = Loadable(lazy(() => import('tba/pages/Claims')));
+const TBAMembers = Loadable(lazy(() => import('tba/pages/Members')));
+const TBAEmployers = Loadable(lazy(() => import('tba/pages/Employers')));
+const TBAInsuranceCompanies = Loadable(lazy(() => import('tba/pages/InsuranceCompanies')));
+const TBAReviewerCompanies = Loadable(lazy(() => import('tba/pages/ReviewerCompanies')));
+const TBAVisits = Loadable(lazy(() => import('tba/pages/Visits')));
+
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -510,6 +518,35 @@ const MainRoutes = {
         {
           path: 'pricing',
           element: <PricingPage />
+        },
+        {
+          path: 'tba',
+          children: [
+            {
+              path: 'claims',
+              element: <TBAClaims />
+            },
+            {
+              path: 'members',
+              element: <TBAMembers />
+            },
+            {
+              path: 'employers',
+              element: <TBAEmployers />
+            },
+            {
+              path: 'insurance-companies',
+              element: <TBAInsuranceCompanies />
+            },
+            {
+              path: 'reviewer-companies',
+              element: <TBAReviewerCompanies />
+            },
+            {
+              path: 'visits',
+              element: <TBAVisits />
+            }
+          ]
         }
       ]
     },
