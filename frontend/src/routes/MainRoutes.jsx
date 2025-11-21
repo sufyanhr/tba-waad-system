@@ -33,6 +33,20 @@ import AuthCheckMail from 'pages/auth/jwt/check-mail';
 import AuthCodeVerification from 'pages/auth/jwt/code-verification';
 import DashboardDefault from 'pages/dashboard/default';
 
+// Demo pages (Mantis Template)
+const AppChat = Loadable(lazy(() => import('pages/apps/chat')));
+const AppCalendar = Loadable(lazy(() => import('pages/apps/calendar')));
+const AppKanban = Loadable(lazy(() => import('pages/apps/kanban')));
+const AppInvoiceDashboard = Loadable(lazy(() => import('pages/apps/invoice/dashboard')));
+const AppInvoiceCreate = Loadable(lazy(() => import('pages/apps/invoice/create')));
+const AppInvoiceDetails = Loadable(lazy(() => import('pages/apps/invoice/details')));
+const AppInvoiceList = Loadable(lazy(() => import('pages/apps/invoice/list')));
+const AppInvoiceEdit = Loadable(lazy(() => import('pages/apps/invoice/edit')));
+const AppUserProfile = Loadable(lazy(() => import('pages/apps/profiles/user')));
+const AppAccountProfile = Loadable(lazy(() => import('pages/apps/profiles/account')));
+const AppCustomerList = Loadable(lazy(() => import('pages/apps/customer/list')));
+const AppCustomerCard = Loadable(lazy(() => import('pages/apps/customer/card')));
+
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -189,6 +203,80 @@ const MainRoutes = {
                       <AssignRoles />
                     </ProtectedRoute>
                   )
+                }
+              ]
+            }
+          ]
+        },
+        // ==============================|| DEMO PAGES (MANTIS TEMPLATE) ||============================== //
+        {
+          path: 'apps',
+          children: [
+            {
+              path: 'chat',
+              element: <AppChat />
+            },
+            {
+              path: 'calendar',
+              element: <AppCalendar />
+            },
+            {
+              path: 'kanban',
+              children: [
+                {
+                  path: ':tab',
+                  element: <AppKanban />
+                }
+              ]
+            },
+            {
+              path: 'customer',
+              children: [
+                {
+                  path: 'customer-list',
+                  element: <AppCustomerList />
+                },
+                {
+                  path: 'customer-card',
+                  element: <AppCustomerCard />
+                }
+              ]
+            },
+            {
+              path: 'invoice',
+              children: [
+                {
+                  path: 'dashboard',
+                  element: <AppInvoiceDashboard />
+                },
+                {
+                  path: 'create',
+                  element: <AppInvoiceCreate />
+                },
+                {
+                  path: 'details/:id',
+                  element: <AppInvoiceDetails />
+                },
+                {
+                  path: 'list',
+                  element: <AppInvoiceList />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <AppInvoiceEdit />
+                }
+              ]
+            },
+            {
+              path: 'profiles',
+              children: [
+                {
+                  path: 'user/:tab',
+                  element: <AppUserProfile />
+                },
+                {
+                  path: 'account/:tab',
+                  element: <AppAccountProfile />
                 }
               ]
             }

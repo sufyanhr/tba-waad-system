@@ -1,5 +1,6 @@
 // project imports
 import rbac from './rbac';
+import demo from './demo';
 
 // Lightweight inline icon component to avoid external icon dependency
 const BusinessIcon = () => {
@@ -18,5 +19,5 @@ const reviewers = { id: 'group-reviewers', title: 'Reviewer Companies', type: 'g
 const visits = { id: 'group-visits', title: 'Visits', type: 'group', children: [ { id: 'visits', title: 'Visits', type: 'item', url: '/visits', permissions: ['visit.view'] } ] };
 const systemTools = { id: 'group-system', title: 'System Tools', type: 'group', children: [ { id: 'system-tools', title: 'Tools', type: 'item', url: '/admin/system/tools', permissions: ['system.manage'] } ] };
 
-const menuItems = { items: [dashboard, claims, members, employers, insurance, reviewers, visits, rbac, systemTools] };
+const menuItems = { items: [dashboard, claims, members, employers, insurance, reviewers, visits, rbac, systemTools, demo] };
 export default menuItems;
