@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import ErrorBoundary from './ErrorBoundary';
 import Loadable from 'components/Loadable';
+import AuthGuard from 'utils/route-guard/AuthGuard';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import SimpleLayout from 'layout/Simple';
@@ -139,7 +140,11 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <DashboardLayout />,
+      element: (
+        <AuthGuard>
+          <DashboardLayout />
+        </AuthGuard>
+      ),
       children: [
         {
           path: 'dashboard',
