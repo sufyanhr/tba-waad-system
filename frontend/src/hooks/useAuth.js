@@ -1,4 +1,4 @@
-import { use } from 'react';
+import { useContext } from 'react';
 
 // auth provider
 import AuthContext from 'contexts/JWTContext';
@@ -10,9 +10,9 @@ import AuthContext from 'contexts/JWTContext';
 // ==============================|| AUTH HOOKS ||============================== //
 
 export default function useAuth() {
-  const context = use(AuthContext);
+  const context = useContext(AuthContext);
 
-  if (!context) throw new Error('context must be use inside provider');
+  if (!context) throw new Error('useAuth must be used inside JWTProvider');
 
   // Add hasPermission function
   const hasPermission = (permission) => {
