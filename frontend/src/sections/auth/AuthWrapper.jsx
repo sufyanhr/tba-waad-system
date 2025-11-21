@@ -16,7 +16,7 @@ import Logo from 'components/logo';
 import AuthCard from './AuthCard';
 import LoginProvider from './LoginProvider';
 
-import { useAuth } from 'modules/auth/useAuth';
+import useAuth from 'hooks/useAuth';
 
 // assets
 import AuthBackground from './AuthBackground';

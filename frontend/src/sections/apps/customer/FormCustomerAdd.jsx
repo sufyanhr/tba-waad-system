@@ -43,8 +43,8 @@ import IconButton from 'components/@extended/IconButton';
 import CircularWithPath from 'components/@extended/progress/CircularWithPath';
 
 import { Gender } from 'config';
-// NEW: React Query hooks
-import { useCreateCustomer, useUpdateCustomer } from 'modules/customers/useCustomers';
+import { openSnackbar } from 'api/snackbar';
+import { insertCustomer, updateCustomer } from 'api/customer';
 import { withAlpha } from 'utils/colorUtils';
 import { getImageUrl, ImagePath } from 'utils/getImageUrl';
 
@@ -136,10 +136,6 @@ const allStatus = [
 // ==============================|| CUSTOMER ADD / EDIT - FORM ||============================== //
 
 export default function FormCustomerAdd({ customer, closeModal }) {
-  // NEW: React Query mutations
-  const createCustomer = useCreateCustomer();
-  const updateCustomerMutation = useUpdateCustomer();
-
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(undefined);
   const [avatar, setAvatar] = useState(
@@ -182,21 +178,36 @@ export default function FormCustomerAdd({ customer, closeModal }) {
         newCustomer.name = newCustomer.firstName + ' ' + newCustomer.lastName;
 
         if (customer) {
-          // UPDATE existing customer
-          await updateCustomerMutation.mutateAsync({
-            id: newCustomer.id,
-            data: newCustomer
+          updateCustomer(newCustomer.id, newCustomer).then(() => {
+            openSnackbar({
+              open: true,
+              message: 'Customer update successfully.',
+              variant: 'alert',
+
+              alert: {
+                color: 'success'
+              }
+            });
+            setSubmitting(false);
+            closeModal();
           });
-          closeModal();
         } else {
-          // CREATE new customer
-          await createCustomer.mutateAsync(newCustomer);
-          closeModal();
+          await insertCustomer(newCustomer).then(() => {
+            openSnackbar({
+              open: true,
+              message: 'Customer added successfully.',
+              variant: 'alert',
+
+              alert: {
+                color: 'success'
+              }
+            });
+            setSubmitting(false);
+            closeModal();
+          });
         }
       } catch (error) {
-        console.error('Customer form error:', error);
-      } finally {
-        setSubmitting(false);
+        console.error(error);
       }
     }
   });

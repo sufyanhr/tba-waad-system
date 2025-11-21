@@ -25,7 +25,6 @@ const formsTables = {
   title: 'forms-tables',
   icon: icons.FileDoneOutlined,
   type: 'group',
-  roles: ['ADMIN'],
   children: [
     {
       id: 'validation',

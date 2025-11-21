@@ -1,38 +1,46 @@
 import axios from 'axios';
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:9091/api',
-  headers: { 'Content-Type': 'application/json' }
-});
+const axiosServices = axios.create({ baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:3010/' });
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// ==============================|| AXIOS - FOR MOCK SERVICES ||============================== //
 
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error?.response?.status === 401 && !window.location.href.includes('/auth/login')) {
-      localStorage.removeItem('accessToken');
-      window.location.pathname = '/auth/login';
+axiosServices.interceptors.request.use(
+  async (config) => {
+    const accessToken = localStorage.getItem('serviceToken');
+    if (accessToken) {
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
     }
+    return config;
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );
 
-export default axiosInstance;
+axiosServices.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response.status === 401 && !window.location.href.includes('/login')) {
+      window.location.pathname = '/maintenance/500';
+    }
+    return Promise.reject((error.response && error.response.data) || 'Wrong Services');
+  }
+);
+
+export default axiosServices;
 
 export const fetcher = async (args) => {
   const [url, config] = Array.isArray(args) ? args : [args];
-  const res = await axiosInstance.get(url, { ...config });
+
+  const res = await axiosServices.get(url, { ...config });
+
   return res.data;
 };
 
 export const fetcherPost = async (args) => {
-  const [url, bodyOrConfig] = Array.isArray(args) ? args : [args];
-  const { data, ...config } = bodyOrConfig || {};
-  const res = await axiosInstance.post(url, data ?? bodyOrConfig, { ...config });
+  const [url, config] = Array.isArray(args) ? args : [args];
+
+  const res = await axiosServices.post(url, { ...config });
+
   return res.data;
 };

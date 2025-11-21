@@ -12,7 +12,6 @@ const chartsMap = {
   title: 'charts-map',
   icon: icons.PieChartOutlined,
   type: 'group',
-  roles: ['ADMIN', 'INSURANCE_COMPANY'],
   children: [
     {
       id: 'react-chart',

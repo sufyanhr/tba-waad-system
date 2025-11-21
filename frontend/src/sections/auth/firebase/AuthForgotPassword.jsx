@@ -14,7 +14,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import { useAuth } from 'modules/auth/useAuth';
+import useAuth from 'hooks/useAuth';
 import AnimateButton from 'components/@extended/AnimateButton';
 import { openSnackbar } from 'api/snackbar';
 

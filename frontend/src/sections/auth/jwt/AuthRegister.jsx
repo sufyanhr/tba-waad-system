@@ -22,7 +22,7 @@ import { Formik } from 'formik';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 
-import { useAuth } from 'modules/auth/useAuth';
+import useAuth from 'hooks/useAuth';
 import useScriptRef from 'hooks/useScriptRef';
 import { openSnackbar } from 'api/snackbar';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
@@ -64,58 +64,42 @@ export default function AuthRegister() {
     <>
       <Formik
         initialValues={{
-          username: '',
+          firstname: '',
+          lastname: '',
           email: '',
-          fullName: '',
+          company: '',
           password: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          username: Yup.string()
-            .min(3, 'Username must be at least 3 characters')
-            .max(50, 'Username must be less than 50 characters')
-            .required('Username is required'),
+          firstname: Yup.string().max(255).required('First Name is required'),
+          lastname: Yup.string().max(255).required('Last Name is required'),
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-          fullName: Yup.string()
-            .min(2, 'Full name must be at least 2 characters')
-            .max(100, 'Full name must be less than 100 characters')
-            .required('Full Name is required'),
           password: Yup.string()
             .required('Password is required')
-            .min(6, 'Password must be at least 6 characters')
             .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
-            .max(50, 'Password must be less than 50 characters')
+            .max(10, 'Password must be less than 10 characters')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
-            const formData = {
-              username: values.username.trim(),
-              email: values.email.trim(),
-              fullName: values.fullName.trim(),
-              password: values.password
-            };
-            
-            const result = await register(formData);
-            
-            if (result.success) {
-              if (scriptedRef.current) {
-                setStatus({ success: true });
-                setSubmitting(false);
-                openSnackbar({
-                  open: true,
-                  message: 'Your registration has been successfully completed.',
-                  variant: 'alert',
-                  alert: {
-                    color: 'success'
-                  }
-                });
+            const trimmedEmail = values.email.trim();
+            await register(trimmedEmail, values.password, values.firstname, values.lastname);
+            if (scriptedRef.current) {
+              setStatus({ success: true });
+              setSubmitting(false);
+              openSnackbar({
+                open: true,
+                message: 'Your registration has been successfully completed.',
+                variant: 'alert',
 
-                setTimeout(() => {
-                  navigate(auth ? `/${auth}/login?auth=jwt` : '/login', { replace: true });
-                }, 1500);
-              }
-            } else {
-              throw new Error(result.message);
+                alert: {
+                  color: 'success'
+                }
+              });
+
+              setTimeout(() => {
+                navigate(auth ? `/${auth}/login?auth=jwt` : '/login', { replace: true });
+              }, 1500);
             }
           } catch (err) {
             console.error(err);
@@ -128,45 +112,65 @@ export default function AuthRegister() {
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid size={12}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="username-signup">Username*</InputLabel>
+                  <InputLabel htmlFor="firstname-signup">First Name*</InputLabel>
                   <OutlinedInput
-                    id="username-signup"
-                    type="text"
-                    value={values.username}
-                    name="username"
+                    id="firstname-login"
+                    type="firstname"
+                    value={values.firstname}
+                    name="firstname"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Enter username"
+                    placeholder="John"
                     fullWidth
-                    error={Boolean(touched.username && errors.username)}
+                    error={Boolean(touched.firstname && errors.firstname)}
                   />
                 </Stack>
-                {touched.username && errors.username && (
-                  <FormHelperText error id="helper-text-username-signup">
-                    {errors.username}
+                {touched.firstname && errors.firstname && (
+                  <FormHelperText error id="helper-text-firstname-signup">
+                    {errors.firstname}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Stack sx={{ gap: 1 }}>
+                  <InputLabel htmlFor="lastname-signup">Last Name*</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    error={Boolean(touched.lastname && errors.lastname)}
+                    id="lastname-signup"
+                    type="lastname"
+                    value={values.lastname}
+                    name="lastname"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder="Doe"
+                  />
+                </Stack>
+                {touched.lastname && errors.lastname && (
+                  <FormHelperText error id="helper-text-lastname-signup">
+                    {errors.lastname}
                   </FormHelperText>
                 )}
               </Grid>
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="fullname-signup">Full Name*</InputLabel>
+                  <InputLabel htmlFor="company-signup">Company</InputLabel>
                   <OutlinedInput
                     fullWidth
-                    error={Boolean(touched.fullName && errors.fullName)}
-                    id="fullname-signup"
-                    type="text"
-                    value={values.fullName}
-                    name="fullName"
+                    error={Boolean(touched.company && errors.company)}
+                    id="company-signup"
+                    value={values.company}
+                    name="company"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Enter full name"
+                    placeholder="Demo Inc."
                   />
                 </Stack>
-                {touched.fullName && errors.fullName && (
-                  <FormHelperText error id="helper-text-fullname-signup">
-                    {errors.fullName}
+                {touched.company && errors.company && (
+                  <FormHelperText error id="helper-text-company-signup">
+                    {errors.company}
                   </FormHelperText>
                 )}
               </Grid>

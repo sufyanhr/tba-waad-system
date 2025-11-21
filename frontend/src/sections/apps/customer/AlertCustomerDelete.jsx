@@ -10,8 +10,8 @@ import Typography from '@mui/material/Typography';
 import Avatar from 'components/@extended/Avatar';
 import { PopupTransition } from 'components/@extended/Transitions';
 
-// NEW: React Query hook
-import { useDeleteCustomer } from 'modules/customers/useCustomers';
+import { deleteCustomer } from 'api/customer';
+import { openSnackbar } from 'api/snackbar';
 
 // assets
 import DeleteFilled from '@ant-design/icons/DeleteFilled';
@@ -19,16 +19,20 @@ import DeleteFilled from '@ant-design/icons/DeleteFilled';
 // ==============================|| CUSTOMER - DELETE ||============================== //
 
 export default function AlertCustomerDelete({ id, title, open, handleClose }) {
-  // NEW: React Query mutation
-  const deleteCustomer = useDeleteCustomer();
-
   const deletehandler = async () => {
-    try {
-      await deleteCustomer.mutateAsync(id);
+    await deleteCustomer(id).then(() => {
+      openSnackbar({
+        open: true,
+        message: 'Customer deleted successfully',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'alert',
+
+        alert: {
+          color: 'success'
+        }
+      });
       handleClose();
-    } catch (error) {
-      console.error('Delete error:', error);
-    }
+    });
   };
 
   return (

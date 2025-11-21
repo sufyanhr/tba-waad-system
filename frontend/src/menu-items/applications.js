@@ -1,4 +1,5 @@
 // project imports
+import { handlerCustomerDialog } from 'api/customer';
 import { NavActionType } from 'config';
 
 // assets
@@ -34,7 +35,6 @@ const applications = {
   title: 'applications',
   icon: icons.AppstoreAddOutlined,
   type: 'group',
-  roles: ['ADMIN', 'INSURANCE_COMPANY', 'REVIEW_COMPANY', 'HOSPITAL', 'EMPLOYER'],
   children: [
     {
       id: 'chat',
@@ -42,9 +42,7 @@ const applications = {
       type: 'item',
       url: '/apps/chat',
       icon: icons.MessageOutlined,
-      breadcrumbs: false,
-      roles: ['ADMIN', 'INSURANCE_COMPANY'],
-      permissions: ['chat.view']
+      breadcrumbs: false
     },
     {
       id: 'calendar',
@@ -52,7 +50,6 @@ const applications = {
       type: 'item',
       url: '/apps/calendar',
       icon: icons.CalendarOutlined,
-      permissions: ['calendar.view'],
       actions: [
         {
           type: NavActionType.LINK,
@@ -70,22 +67,27 @@ const applications = {
       icon: BuildOutlined,
       link: '/apps/kanban/:tab',
       url: '/apps/kanban/board',
-      breadcrumbs: false,
-      permissions: ['kanban.view']
+      breadcrumbs: false
     },
     {
       id: 'customer',
       title: 'customer',
       type: 'collapse',
       icon: icons.CustomerServiceOutlined,
-      roles: ['ADMIN', 'INSURANCE_COMPANY'],
-      permissions: ['customers.view'],
       children: [
         {
           id: 'customer-list',
           title: 'list',
           type: 'item',
-          url: '/apps/customer/customer-list'
+          url: '/apps/customer/customer-list',
+          actions: [
+            {
+              type: NavActionType.FUNCTION,
+              label: 'Add Customer',
+              function: () => handlerCustomerDialog(true),
+              icon: icons.PlusOutlined
+            }
+          ]
         },
         {
           id: 'customer-card',

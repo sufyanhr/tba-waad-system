@@ -19,7 +19,7 @@ import CustomerCard from 'sections/apps/customer/CustomerCard';
 import CustomerModal from 'sections/apps/customer/CustomerModal';
 
 import usePagination from 'hooks/usePagination';
-import { useGetCustomers } from 'modules/customers/useCustomers';
+import { useGetCustomer } from 'api/customer';
 
 // assets
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
@@ -70,14 +70,13 @@ function dataSort(data, sortBy) {
 }
 
 export default function CustomerCardPage() {
-  // NEW: Using React Query
-  const { data: customersData, isLoading: customersLoading } = useGetCustomers({ page: 0, size: 100 });
-  const lists = customersData?.content || [];
+  const { customers: lists } = useGetCustomer();
 
   const [sortBy, setSortBy] = useState('Default');
   const [globalFilter, setGlobalFilter] = useState('');
   const [userCard, setUserCard] = useState([]);
   const [page, setPage] = useState(1);
+  const [customerLoading, setCustomerLoading] = useState(true);
   const [customerModal, setCustomerModal] = useState(false);
 
   const handleChange = (event) => {
@@ -86,6 +85,7 @@ export default function CustomerCardPage() {
 
   // search
   useEffect(() => {
+    setCustomerLoading(true);
     if (lists && lists.length > 0) {
       const newData = lists.filter((value) => {
         if (globalFilter) {
@@ -95,6 +95,7 @@ export default function CustomerCardPage() {
         }
       });
       setUserCard(dataSort(newData, sortBy).reverse());
+      setCustomerLoading(false);
     }
   }, [globalFilter, lists, sortBy]);
 
@@ -148,7 +149,7 @@ export default function CustomerCardPage() {
         </Stack>
       </Box>
       <Grid container spacing={3}>
-        {!customersLoading && userCard.length > 0 ? (
+        {!customerLoading && userCard.length > 0 ? (
           _DATA.currentData().map((user, index) => (
             <Slide key={index} direction="up" in={true} timeout={50}>
               <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -157,7 +158,7 @@ export default function CustomerCardPage() {
             </Slide>
           ))
         ) : (
-          <EmptyUserCard title={customersLoading ? 'Loading...' : 'You have not created any customer yet.'} />
+          <EmptyUserCard title={customerLoading ? 'Loading...' : 'You have not created any customer yet.'} />
         )}
       </Grid>
       <Stack sx={{ gap: 2, alignItems: 'flex-end', p: 2.5, my: 0.5 }}>

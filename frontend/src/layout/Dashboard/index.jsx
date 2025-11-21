@@ -13,6 +13,7 @@ import Footer from './Footer';
 import HorizontalBar from './Drawer/HorizontalBar';
 import Loader from 'components/Loader';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import AddCustomer from 'sections/apps/customer/AddCustomer';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 
 import { MenuOrientation } from 'config';
@@ -65,7 +66,7 @@ export default function DashboardLayout() {
             <Footer />
           </Container>
         </Box>
-        {/* Removed demo AddCustomer floating action component */}
+        <AddCustomer />
       </Box>
     </AuthGuard>
   );

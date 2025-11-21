@@ -20,7 +20,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import { useAuth } from 'modules/auth/useAuth';
+import useAuth from 'hooks/useAuth';
 import FirebaseSocial from './FirebaseSocial';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';

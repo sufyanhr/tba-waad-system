@@ -1,17 +1,31 @@
 import PropTypes from 'prop-types';
+import { useMemo } from 'react';
 
 // material-ui
 import Modal from '@mui/material/Modal';
+import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
 
 // project imports
 import FormCustomerAdd from './FormCustomerAdd';
 import MainCard from 'components/MainCard';
 import SimpleBar from 'components/third-party/SimpleBar';
+import CircularWithPath from 'components/@extended/progress/CircularWithPath';
+
+import { useGetCustomer } from 'api/customer';
 
 // ==============================|| CUSTOMER ADD / EDIT ||============================== //
 
 export default function CustomerModal({ open, modalToggler, customer }) {
+  const { customersLoading: loading } = useGetCustomer();
+
   const closeModal = () => modalToggler(false);
+
+  const customerForm = useMemo(
+    () => !loading && <FormCustomerAdd customer={customer || null} closeModal={closeModal} />,
+    // eslint-disable-next-line
+    [customer, loading]
+  );
 
   return (
     <>
@@ -33,7 +47,15 @@ export default function CustomerModal({ open, modalToggler, customer }) {
             content={false}
           >
             <SimpleBar sx={{ maxHeight: `calc(100vh - 48px)`, '& .simplebar-content': { display: 'flex', flexDirection: 'column' } }}>
-              <FormCustomerAdd customer={customer || null} closeModal={closeModal} />
+              {loading ? (
+                <Box sx={{ p: 5 }}>
+                  <Stack direction="row" sx={{ justifyContent: 'center' }}>
+                    <CircularWithPath />
+                  </Stack>
+                </Box>
+              ) : (
+                customerForm
+              )}
             </SimpleBar>
           </MainCard>
         </Modal>

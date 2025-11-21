@@ -13,7 +13,6 @@ const widget = {
   title: 'widgets',
   icon: icons.IdcardOutlined,
   type: 'group',
-  roles: ['ADMIN', 'INSURANCE_COMPANY'],
   children: [
     {
       id: 'statistics',

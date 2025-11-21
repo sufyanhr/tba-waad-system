@@ -13,8 +13,7 @@ const samplePage = {
   title: 'sample-page',
   type: 'group',
   url: '/sample-page',
-  icon: icons.ChromeOutlined,
-  roles: ['ADMIN']
+  icon: icons.ChromeOutlined
 };
 
 export default samplePage;
