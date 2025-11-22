@@ -12,22 +12,22 @@ const authService = {
   async login(email, password) {
     try {
       const response = await httpClient.post('/auth/login', {
-        username: email, // Backend might use 'username' instead of 'email'
+        identifier: email, // Backend accepts username or email as 'identifier'
         password
       });
 
-      const { accessToken, refreshToken, user } = response;
+      const { token, user } = response;
+
+      // Backend returns 'token' not 'accessToken'
+      const accessToken = token;
 
       // Store tokens
       setAccessToken(accessToken);
-      if (refreshToken) {
-        setRefreshToken(refreshToken);
-      }
-
+      
       // Store user data
       localStorage.setItem('user', JSON.stringify(user));
 
-      return { user, accessToken, refreshToken };
+      return { user, accessToken, token };
     } catch (error) {
       console.error('Login error:', error);
       throw error;

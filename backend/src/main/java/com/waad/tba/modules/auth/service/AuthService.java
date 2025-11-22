@@ -40,11 +40,20 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        log.info("Login attempt for identifier: {}", request.getIdentifier());
+        String identifier = request.getIdentifier();
+        log.info("Login attempt for identifier: {}", identifier);
 
-        // Find user by username or email
-        User user = userRepository.findByUsernameOrEmail(request.getIdentifier(), request.getIdentifier())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        // Find user by username or email (identifier can be either)
+        User user = userRepository.findByUsernameOrEmail(identifier, identifier)
+                .orElseThrow(() -> {
+                    log.error("User not found with identifier: {}", identifier);
+                    return new RuntimeException("Invalid email or password");
+                });
+
+        if (!user.getActive()) {
+            log.error("Inactive user attempted login: {}", user.getEmail());
+            throw new RuntimeException("Account is not active");
+        }
 
         // Authenticate
         Authentication authentication = authenticationManager.authenticate(
@@ -52,7 +61,8 @@ public class AuthService {
         );
 
         if (!authentication.isAuthenticated()) {
-            throw new RuntimeException("Invalid credentials");
+            log.error("Authentication failed for user: {}", user.getEmail());
+            throw new RuntimeException("Invalid email or password");
         }
 
         // Extract roles and permissions

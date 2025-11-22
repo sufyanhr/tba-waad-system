@@ -102,18 +102,23 @@ public class DataInitializer {
                 .build();
         roleRepository.save(userRole);
 
-        // Create admin user
-        User admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin123"))
-                .fullName("System Administrator")
-                .email("admin@tba-waad.com")
-                .active(true)
-                .roles(new HashSet<>(Arrays.asList(adminRole)))
-                .build();
-        userRepository.save(admin);
+        // Create permanent admin user if not exists
+        if (!userRepository.existsByEmail("admin@tba.sa")) {
+            User admin = User.builder()
+                    .username("admin")
+                    .password(passwordEncoder.encode("Admin@123"))
+                    .fullName("System Administrator")
+                    .email("admin@tba.sa")
+                    .active(true)
+                    .roles(new HashSet<>(Arrays.asList(adminRole)))
+                    .build();
+            userRepository.save(admin);
+            log.info("Admin user created: admin@tba.sa");
+        } else {
+            log.info("Admin user already exists, skipping creation");
+        }
 
-        log.info("Seed data initialized successfully: {} permissions, 3 roles, 1 user", permissions.size());
+        log.info("Seed data initialized successfully: {} permissions, 3 roles", permissions.size());
     }
 
     private Permission createPermission(String name, String description) {

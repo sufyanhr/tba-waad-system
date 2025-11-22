@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
-import { fetcher } from 'utils/axios';
 
 // ==============================|| MENU API ||============================== //
 
+// Local menu state (no backend API needed)
+const defaultMenuState = {
+  menuMaster: {
+    isDashboardOpen: true,
+    openItem: null
+  }
+};
+
 export const endpoints = {
-  menu: '/api/menu'
+  menu: 'local://menu' // Local state, not a real API endpoint
 };
 
 export function useGetMenuMaster() {
-  const { data, error, isLoading } = useSWR(endpoints.menu, fetcher, {
-    fallbackData: { menuMaster: { isDashboardOpen: true } },
+  // Use local state instead of fetching from backend
+  const { data, error, isLoading } = useSWR(endpoints.menu, null, {
+    fallbackData: defaultMenuState,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
   });
