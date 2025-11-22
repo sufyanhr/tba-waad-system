@@ -12,7 +12,8 @@ import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
 
 // render - dashboard
-const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
+const TBADashboard = Loadable(lazy(() => import('pages/dashboard/TBADashboard')));
+// const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
 const DashboardAnalytics = Loadable(lazy(() => import('pages/dashboard/analytics')));
 
 // render - widget
@@ -125,13 +126,22 @@ const AppFaqs = Loadable(lazy(() => import('pages/faqs')));
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 const PricingPage = Loadable(lazy(() => import('pages/extra-pages/pricing')));
 
-// render - TBA pages
-const TBAClaims = Loadable(lazy(() => import('tba/pages/Claims')));
-const TBAMembers = Loadable(lazy(() => import('tba/pages/Members')));
-const TBAEmployers = Loadable(lazy(() => import('tba/pages/Employers')));
-const TBAInsuranceCompanies = Loadable(lazy(() => import('tba/pages/InsuranceCompanies')));
-const TBAReviewerCompanies = Loadable(lazy(() => import('tba/pages/ReviewerCompanies')));
-const TBAVisits = Loadable(lazy(() => import('tba/pages/Visits')));
+// render - TBA pages (Phase E)
+const ClaimsTable = Loadable(lazy(() => import('pages/claims/ClaimsTable')));
+const MembersTable = Loadable(lazy(() => import('pages/members/MembersTable')));
+const EmployersTable = Loadable(lazy(() => import('pages/employers/EmployersTable')));
+const InsuranceCompanies = Loadable(lazy(() => import('pages/insurance/InsuranceCompanies')));
+const ReviewersTable = Loadable(lazy(() => import('pages/reviewers/ReviewersTable')));
+const VisitsTable = Loadable(lazy(() => import('pages/visits/VisitsTable')));
+const RBACPage = Loadable(lazy(() => import('pages/rbac/RBACPage')));
+const SettingsPage = Loadable(lazy(() => import('pages/settings/SettingsPage')));
+// Old TBA pages (commented for reference)
+// const TBAClaims = Loadable(lazy(() => import('tba/pages/Claims')));
+// const TBAMembers = Loadable(lazy(() => import('tba/pages/Members')));
+// const TBAEmployers = Loadable(lazy(() => import('tba/pages/Employers')));
+// const TBAInsuranceCompanies = Loadable(lazy(() => import('tba/pages/InsuranceCompanies')));
+// const TBAReviewerCompanies = Loadable(lazy(() => import('tba/pages/ReviewerCompanies')));
+// const TBAVisits = Loadable(lazy(() => import('tba/pages/Visits')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -151,18 +161,21 @@ const MainRoutes = {
           children: [
             {
               path: 'default',
-              element: <DashboardDefault />
-            },
-            {
-              path: 'analytics',
-              element: <DashboardAnalytics />
-            },
-            {
-              path: 'invoice',
-              element: <AppInvoiceDashboard />
+              element: <TBADashboard />
             }
+            // Demo routes commented (DO NOT DELETE)
+            // {
+            //   path: 'analytics',
+            //   element: <DashboardAnalytics />
+            // },
+            // {
+            //   path: 'invoice',
+            //   element: <AppInvoiceDashboard />
+            // }
           ]
         },
+        // DEMO ROUTES COMMENTED - DO NOT DELETE FILES
+        /*
         {
           path: 'widget',
           children: [
@@ -180,6 +193,8 @@ const MainRoutes = {
             }
           ]
         },
+        */
+        /*
         {
           path: 'apps',
           children: [
@@ -333,6 +348,8 @@ const MainRoutes = {
             }
           ]
         },
+        */
+        /*
         {
           path: 'forms',
           children: [
@@ -392,6 +409,8 @@ const MainRoutes = {
             }
           ]
         },
+        */
+        /*
         {
           path: 'tables',
           children: [
@@ -499,6 +518,8 @@ const MainRoutes = {
             }
           ]
         },
+        */
+        /*
         {
           path: 'charts',
           children: [
@@ -512,46 +533,50 @@ const MainRoutes = {
             }
           ]
         },
+        */
+        /*
         {
           path: 'map',
           element: <Map />
         },
-        {
-          path: 'sample-page',
-          element: <SamplePage />
-        },
-        {
-          path: 'pricing',
-          element: <PricingPage />
-        },
+        */
+        // TBA ROUTES (Phase E)
         {
           path: 'tba',
           children: [
             {
               path: 'claims',
-              element: <TBAClaims />
+              element: <ClaimsTable />
             },
             {
               path: 'members',
-              element: <TBAMembers />
+              element: <MembersTable />
             },
             {
               path: 'employers',
-              element: <TBAEmployers />
+              element: <EmployersTable />
             },
             {
               path: 'insurance-companies',
-              element: <TBAInsuranceCompanies />
+              element: <InsuranceCompanies />
             },
             {
               path: 'reviewer-companies',
-              element: <TBAReviewerCompanies />
+              element: <ReviewersTable />
             },
             {
               path: 'visits',
-              element: <TBAVisits />
+              element: <VisitsTable />
             }
           ]
+        },
+        {
+          path: 'rbac',
+          element: <RBACPage />
+        },
+        {
+          path: 'settings',
+          element: <SettingsPage />
         }
       ]
     },
