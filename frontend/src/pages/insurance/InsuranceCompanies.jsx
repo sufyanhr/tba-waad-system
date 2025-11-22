@@ -14,9 +14,11 @@ import {
   TextField,
   Typography,
   IconButton,
-  Chip
+  Chip,
+  CircularProgress
 } from '@mui/material';
 import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { useInsuranceCompanies } from 'hooks/tba/useInsuranceCompanies';
 
 // ==============================|| INSURANCE COMPANIES TABLE ||============================== //
 
@@ -25,38 +27,18 @@ const InsuranceCompanies = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const mockInsuranceCompanies = useMemo(() => {
-    const companies = [
-      'Saudi Insurance', 'Tawuniya', 'AXA', 'Bupa Arabia', 'Medgulf',
-      'Al Rajhi Takaful', 'Walaa Insurance', 'SABB Takaful', 'Allianz',
-      'Chubb Arabia', 'Solidarity', 'Ace Arabia', 'SALAMA', 'Gulf Union',
-      'Al Ahlia', 'United Cooperative', 'Wataniya', 'Arabian Shield', 'Malath'
-    ];
-    
-    return companies.map((name, i) => ({
-      id: i + 1,
-      insuranceId: `INS-${String(i + 1).padStart(4, '0')}`,
-      companyName: name,
-      licenseNumber: `LIC-${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
-      contactPerson: `Manager ${i + 1}`,
-      email: `contact@${name.toLowerCase().replace(/\s+/g, '')}.com`,
-      phone: `+966 1${String(Math.floor(Math.random() * 10000000)).padStart(7, '0')}`,
-      totalMembers: Math.floor(Math.random() * 5000) + 500,
-      activePolicies: Math.floor(Math.random() * 100) + 20,
-      status: i % 6 === 0 ? 'Inactive' : 'Active',
-      contractDate: new Date(2023 + (i % 2), Math.floor(i / 3), (i % 28) + 1).toLocaleDateString()
-    }));
-  }, []);
+  // Fetch insurance companies from API
+  const { data: insuranceCompanies = [], isLoading, error } = useInsuranceCompanies();
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return mockInsuranceCompanies;
-    return mockInsuranceCompanies.filter(
+    if (!searchQuery) return insuranceCompanies;
+    return insuranceCompanies.filter(
       (company) =>
-        company.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        company.insuranceId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        company.licenseNumber.toLowerCase().includes(searchQuery.toLowerCase())
+        company.companyName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.insuranceId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.licenseNumber?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [mockInsuranceCompanies, searchQuery]);
+  }, [insuranceCompanies, searchQuery]);
 
   const paginatedData = useMemo(() => {
     return filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -91,66 +73,88 @@ const InsuranceCompanies = () => {
       </Paper>
 
       <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#fafafa' }}>
-              <TableCell><strong>Insurance ID</strong></TableCell>
-              <TableCell><strong>Company Name</strong></TableCell>
-              <TableCell><strong>License #</strong></TableCell>
-              <TableCell><strong>Contact Person</strong></TableCell>
-              <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Phone</strong></TableCell>
-              <TableCell align="right"><strong>Members</strong></TableCell>
-              <TableCell align="right"><strong>Policies</strong></TableCell>
-              <TableCell><strong>Status</strong></TableCell>
-              <TableCell align="center"><strong>Actions</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedData.map((company) => (
-              <TableRow key={company.id} hover>
-                <TableCell>{company.insuranceId}</TableCell>
-                <TableCell>{company.companyName}</TableCell>
-                <TableCell>{company.licenseNumber}</TableCell>
-                <TableCell>{company.contactPerson}</TableCell>
-                <TableCell>{company.email}</TableCell>
-                <TableCell>{company.phone}</TableCell>
-                <TableCell align="right">{company.totalMembers.toLocaleString()}</TableCell>
-                <TableCell align="right">{company.activePolicies}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={company.status}
-                    color={company.status === 'Active' ? 'success' : 'default'}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" color="primary">
-                    <EyeOutlined />
-                  </IconButton>
-                  <IconButton size="small" color="default">
-                    <EditOutlined />
-                  </IconButton>
-                  <IconButton size="small" color="error">
-                    <DeleteOutlined />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          count={filteredData.length}
-          page={page}
-          onPageChange={(e, newPage) => setPage(newPage)}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <Typography color="error">Error loading insurance companies: {error.message}</Typography>
+          </Box>
+        ) : (
+          <>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#fafafa' }}>
+                  <TableCell><strong>Insurance ID</strong></TableCell>
+                  <TableCell><strong>Company Name</strong></TableCell>
+                  <TableCell><strong>License #</strong></TableCell>
+                  <TableCell><strong>Contact Person</strong></TableCell>
+                  <TableCell><strong>Email</strong></TableCell>
+                  <TableCell><strong>Phone</strong></TableCell>
+                  <TableCell align="right"><strong>Members</strong></TableCell>
+                  <TableCell align="right"><strong>Policies</strong></TableCell>
+                  <TableCell><strong>Status</strong></TableCell>
+                  <TableCell align="center"><strong>Actions</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center">
+                      <Typography color="text.secondary" py={4}>
+                        No insurance companies found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedData.map((company) => (
+                    <TableRow key={company.id} hover>
+                      <TableCell>{company.insuranceId}</TableCell>
+                      <TableCell>{company.companyName}</TableCell>
+                      <TableCell>{company.licenseNumber}</TableCell>
+                      <TableCell>{company.contactPerson}</TableCell>
+                      <TableCell>{company.email}</TableCell>
+                      <TableCell>{company.phone}</TableCell>
+                      <TableCell align="right">{company.totalMembers?.toLocaleString()}</TableCell>
+                      <TableCell align="right">{company.activePolicies}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={company.status}
+                          color={company.status === 'Active' ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" color="primary">
+                          <EyeOutlined />
+                        </IconButton>
+                        <IconButton size="small" color="default">
+                          <EditOutlined />
+                        </IconButton>
+                        <IconButton size="small" color="error">
+                          <DeleteOutlined />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={filteredData.length}
+              page={page}
+              onPageChange={(e, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
+          </>
+        )}
       </TableContainer>
     </Box>
   );

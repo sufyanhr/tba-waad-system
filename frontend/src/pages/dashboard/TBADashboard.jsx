@@ -1,4 +1,4 @@
-import { Grid, Typography, Paper, Box } from '@mui/material';
+import { Grid, Typography, Paper, Box, CircularProgress } from '@mui/material';
 import {
   FileTextOutlined,
   UserOutlined,
@@ -7,58 +7,89 @@ import {
   AuditOutlined,
   MedicineBoxOutlined
 } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import httpClient from 'api/httpClient';
 
 // ==============================|| TBA DASHBOARD ||============================== //
 
 const TBADashboard = () => {
-  // Static JSON data (will be replaced with API in Phase F)
-  const dashboardData = {
-    totalClaims: 1247,
-    totalMembers: 3456,
-    totalVisits: 892,
-    totalEmployers: 156,
-    totalInsuranceCompanies: 23,
-    totalReviewerCompanies: 12
+  // Fetch dashboard summary from API
+  const { data: dashboardData, isLoading, error } = useQuery({
+    queryKey: ['dashboard-summary'],
+    queryFn: () => httpClient.get('/dashboard/summary'),
+    staleTime: 60000, // 1 minute
+    retry: 2
+  });
+
+  // Default values while loading or if API fails
+  const stats = {
+    totalClaims: dashboardData?.totalClaims || 0,
+    totalMembers: dashboardData?.totalMembers || 0,
+    totalVisits: dashboardData?.totalVisits || 0,
+    totalEmployers: dashboardData?.totalEmployers || 0,
+    totalInsuranceCompanies: dashboardData?.totalInsuranceCompanies || 0,
+    totalReviewerCompanies: dashboardData?.totalReviewerCompanies || 0
   };
 
   const cards = [
     {
       title: 'Total Claims',
-      value: dashboardData.totalClaims,
+      value: stats.totalClaims,
       icon: <FileTextOutlined style={{ fontSize: 40, color: '#1890ff' }} />,
       color: '#e6f7ff'
     },
     {
       title: 'Total Members',
-      value: dashboardData.totalMembers,
+      value: stats.totalMembers,
       icon: <UserOutlined style={{ fontSize: 40, color: '#52c41a' }} />,
       color: '#f6ffed'
     },
     {
       title: 'Total Visits',
-      value: dashboardData.totalVisits,
+      value: stats.totalVisits,
       icon: <MedicineBoxOutlined style={{ fontSize: 40, color: '#722ed1' }} />,
       color: '#f9f0ff'
     },
     {
       title: 'Total Employers',
-      value: dashboardData.totalEmployers,
+      value: stats.totalEmployers,
       icon: <TeamOutlined style={{ fontSize: 40, color: '#fa8c16' }} />,
       color: '#fff7e6'
     },
     {
       title: 'Insurance Companies',
-      value: dashboardData.totalInsuranceCompanies,
+      value: stats.totalInsuranceCompanies,
       icon: <SafetyOutlined style={{ fontSize: 40, color: '#eb2f96' }} />,
       color: '#fff0f6'
     },
     {
       title: 'Reviewer Companies',
-      value: dashboardData.totalReviewerCompanies,
+      value: stats.totalReviewerCompanies,
       icon: <AuditOutlined style={{ fontSize: 40, color: '#13c2c2' }} />,
       color: '#e6fffb'
     }
   ];
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight={400}>
+        <Typography color="error" variant="h6" gutterBottom>
+          Error loading dashboard data
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          {error.message}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Grid container spacing={3}>

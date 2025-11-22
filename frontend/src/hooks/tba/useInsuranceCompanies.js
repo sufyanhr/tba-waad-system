@@ -1,30 +1,81 @@
-// Mock hook for Insurance Companies - Phase F will connect to API
-export const useInsuranceCompanies = () => {
-  const companies = [
-    'Saudi Insurance', 'Tawuniya', 'AXA', 'Bupa Arabia', 'Medgulf',
-    'Al Rajhi Takaful', 'Walaa Insurance', 'SABB Takaful', 'Allianz',
-    'Chubb Arabia', 'Solidarity', 'Ace Arabia', 'SALAMA', 'Gulf Union',
-    'Al Ahlia', 'United Cooperative', 'Wataniya', 'Arabian Shield', 'Malath'
-  ];
-  
-  const mockData = companies.map((name, i) => ({
-    id: i + 1,
-    insuranceId: `INS-${String(i + 1).padStart(4, '0')}`,
-    companyName: name,
-    licenseNumber: `LIC-${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
-    contactPerson: `Manager ${i + 1}`,
-    email: `contact@${name.toLowerCase().replace(/\s+/g, '')}.com`,
-    phone: `+966 1${String(Math.floor(Math.random() * 10000000)).padStart(7, '0')}`,
-    totalMembers: Math.floor(Math.random() * 5000) + 500,
-    activePolicies: Math.floor(Math.random() * 100) + 20,
-    status: i % 6 === 0 ? 'Inactive' : 'Active',
-    contractDate: new Date(2023 + (i % 2), Math.floor(i / 3), (i % 28) + 1).toISOString()
-  }));
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import httpClient from 'api/httpClient';
+import { toast } from 'react-hot-toast';
 
-  return {
-    data: mockData,
-    isLoading: false,
-    error: null,
-    refetch: () => Promise.resolve(mockData)
-  };
+// ==============================|| INSURANCE COMPANIES API ||============================== //
+
+const insuranceCompaniesAPI = {
+  getAll: () => httpClient.get('/insurance-companies'),
+  getById: (id) => httpClient.get(`/insurance-companies/${id}`),
+  create: (data) => httpClient.post('/insurance-companies', data),
+  update: (id, data) => httpClient.put(`/insurance-companies/${id}`, data),
+  delete: (id) => httpClient.delete(`/insurance-companies/${id}`)
+};
+
+// ==============================|| HOOKS ||============================== //
+
+export const useInsuranceCompanies = () => {
+  return useQuery({
+    queryKey: ['insurance-companies'],
+    queryFn: insuranceCompaniesAPI.getAll,
+    staleTime: 30000,
+    retry: 2
+  });
+};
+
+export const useInsuranceCompanyById = (id) => {
+  return useQuery({
+    queryKey: ['insurance-company', id],
+    queryFn: () => insuranceCompaniesAPI.getById(id),
+    enabled: !!id,
+    staleTime: 30000
+  });
+};
+
+export const useCreateInsuranceCompany = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: insuranceCompaniesAPI.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['insurance-companies'] });
+      toast.success('Insurance company created successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to create insurance company';
+      toast.error(message);
+    }
+  });
+};
+
+export const useUpdateInsuranceCompany = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }) => insuranceCompaniesAPI.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['insurance-companies'] });
+      toast.success('Insurance company updated successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to update insurance company';
+      toast.error(message);
+    }
+  });
+};
+
+export const useDeleteInsuranceCompany = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: insuranceCompaniesAPI.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['insurance-companies'] });
+      toast.success('Insurance company deleted successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to delete insurance company';
+      toast.error(message);
+    }
+  });
 };

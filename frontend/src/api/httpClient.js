@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 // ==============================|| HTTP CLIENT - MAIN API ||============================== //
 
@@ -53,8 +54,9 @@ httpClient.interceptors.request.use(
 
 httpClient.interceptors.response.use(
   (response) => {
-    // Return data directly for cleaner API calls
-    return response.data;
+    // Return data.data if it exists (Spring Boot ApiResponse pattern)
+    // Otherwise return data directly
+    return response.data?.data !== undefined ? response.data.data : response.data;
   },
   async (error) => {
     const originalRequest = error.config;
@@ -80,6 +82,7 @@ httpClient.interceptors.response.use(
         if (!refreshToken) {
           // No refresh token, redirect to login
           clearTokens();
+          toast.error('Session expired. Please login again.');
           window.location.href = '/auth/login';
           return Promise.reject(error);
         }
@@ -91,22 +94,24 @@ httpClient.interceptors.response.use(
           { headers: { 'Content-Type': 'application/json' } }
         );
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { token, accessToken, refreshToken: newRefreshToken } = response.data?.data || response.data;
+        const newToken = token || accessToken;
         
-        setAccessToken(accessToken);
+        setAccessToken(newToken);
         if (newRefreshToken) {
           setRefreshToken(newRefreshToken);
         }
 
         isRefreshing = false;
-        onTokenRefreshed(accessToken);
+        onTokenRefreshed(newToken);
 
         // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return httpClient(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
         clearTokens();
+        toast.error('Session expired. Please login again.');
         window.location.href = '/auth/login';
         return Promise.reject(refreshError);
       }
@@ -114,24 +119,39 @@ httpClient.interceptors.response.use(
 
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
-      console.error('Access forbidden:', error.response.data?.message || 'Insufficient permissions');
-      // Optional: redirect to access denied page
-      // window.location.href = '/maintenance/403';
+      const message = error.response.data?.message || 'Access denied. Insufficient permissions.';
+      toast.error(message);
+      console.error('Access forbidden:', message);
     }
 
     // Handle 404 Not Found
     if (error.response?.status === 404) {
+      const message = error.response.data?.message || 'Resource not found';
+      toast.error(message);
       console.error('Resource not found:', error.config.url);
+    }
+
+    // Handle 400 Bad Request (validation errors)
+    if (error.response?.status === 400) {
+      const message = error.response.data?.message || 'Invalid request. Please check your input.';
+      toast.error(message);
+      console.error('Validation error:', error.response.data);
     }
 
     // Handle 500 Server Error
     if (error.response?.status === 500) {
-      console.error('Server error:', error.response.data?.message || 'Internal server error');
+      const message = error.response.data?.message || 'Internal server error. Please try again later.';
+      toast.error(message);
+      console.error('Server error:', message);
     }
 
     // Network or timeout errors
     if (!error.response) {
-      console.error('Network error or timeout:', error.message);
+      const message = error.code === 'ECONNABORTED' 
+        ? 'Request timeout. Please check your connection.' 
+        : 'Network error. Please check your connection.';
+      toast.error(message);
+      console.error('Network error:', error.message);
     }
 
     return Promise.reject(error);

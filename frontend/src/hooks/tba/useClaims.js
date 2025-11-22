@@ -1,60 +1,101 @@
-// Mock hook for Claims - Phase F will connect to API
-export const useClaims = () => {
-  // Static mock data
-  const mockData = Array.from({ length: 50 }, (_, i) => ({
-    id: i + 1,
-    claimNumber: `CLM-2025-${String(i + 1).padStart(4, '0')}`,
-    memberName: `Member ${i + 1}`,
-    employer: `Company ${Math.floor(i / 5) + 1}`,
-    insuranceCompany: ['Saudi Insurance', 'Tawuniya', 'AXA', 'Bupa'][i % 4],
-    claimAmount: (Math.random() * 10000 + 1000).toFixed(2),
-    status: ['Pending', 'Approved', 'Rejected', 'Under Review'][i % 4],
-    submissionDate: new Date(2025, 0, (i % 28) + 1).toISOString()
-  }));
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import httpClient from 'api/httpClient';
+import { toast } from 'react-hot-toast';
 
-  return {
-    data: mockData,
-    isLoading: false,
-    error: null,
-    refetch: () => Promise.resolve(mockData)
-  };
+// ==============================|| CLAIMS API ||============================== //
+
+const claimsAPI = {
+  getAll: () => httpClient.get('/claims'),
+  getById: (id) => httpClient.get(`/claims/${id}`),
+  create: (data) => httpClient.post('/claims', data),
+  update: (id, data) => httpClient.put(`/claims/${id}`, data),
+  delete: (id) => httpClient.delete(`/claims/${id}`),
+  uploadAttachment: (id, formData) => 
+    httpClient.post(`/claims/${id}/attachments`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+};
+
+// ==============================|| HOOKS ||============================== //
+
+export const useClaims = () => {
+  return useQuery({
+    queryKey: ['claims'],
+    queryFn: claimsAPI.getAll,
+    staleTime: 30000, // 30 seconds
+    retry: 2
+  });
 };
 
 export const useClaimById = (id) => {
-  const { data } = useClaims();
-  return {
-    data: data.find((claim) => claim.id === parseInt(id)),
-    isLoading: false,
-    error: null
-  };
+  return useQuery({
+    queryKey: ['claim', id],
+    queryFn: () => claimsAPI.getById(id),
+    enabled: !!id,
+    staleTime: 30000
+  });
 };
 
 export const useCreateClaim = () => {
-  return {
-    mutate: (newClaim) => {
-      console.log('Creating claim (mock):', newClaim);
-      return Promise.resolve({ ...newClaim, id: Date.now() });
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: claimsAPI.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      toast.success('Claim created successfully');
     },
-    isLoading: false
-  };
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to create claim';
+      toast.error(message);
+    }
+  });
 };
 
 export const useUpdateClaim = () => {
-  return {
-    mutate: (updatedClaim) => {
-      console.log('Updating claim (mock):', updatedClaim);
-      return Promise.resolve(updatedClaim);
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }) => claimsAPI.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      toast.success('Claim updated successfully');
     },
-    isLoading: false
-  };
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to update claim';
+      toast.error(message);
+    }
+  });
 };
 
 export const useDeleteClaim = () => {
-  return {
-    mutate: (id) => {
-      console.log('Deleting claim (mock):', id);
-      return Promise.resolve({ success: true });
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: claimsAPI.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      toast.success('Claim deleted successfully');
     },
-    isLoading: false
-  };
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to delete claim';
+      toast.error(message);
+    }
+  });
+};
+
+export const useUploadClaimAttachment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, formData }) => claimsAPI.uploadAttachment(id, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      toast.success('Attachment uploaded successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to upload attachment';
+      toast.error(message);
+    }
+  });
 };

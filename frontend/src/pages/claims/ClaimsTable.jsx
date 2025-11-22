@@ -18,7 +18,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  CircularProgress
 } from '@mui/material';
 import {
   EyeOutlined,
@@ -27,6 +28,7 @@ import {
   UploadOutlined,
   SearchOutlined
 } from '@ant-design/icons';
+import { useClaims } from 'hooks/tba/useClaims';
 
 // ==============================|| CLAIMS TABLE ||============================== //
 
@@ -37,30 +39,19 @@ const ClaimsTable = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  // Static mock data (Phase F will connect to API)
-  const mockClaims = useMemo(() => {
-    return Array.from({ length: 50 }, (_, i) => ({
-      id: i + 1,
-      claimNumber: `CLM-2025-${String(i + 1).padStart(4, '0')}`,
-      memberName: `Member ${i + 1}`,
-      employer: `Company ${Math.floor(i / 5) + 1}`,
-      insuranceCompany: ['Saudi Insurance', 'Tawuniya', 'AXA', 'Bupa'][i % 4],
-      claimAmount: (Math.random() * 10000 + 1000).toFixed(2),
-      status: ['Pending', 'Approved', 'Rejected', 'Under Review'][i % 4],
-      submissionDate: new Date(2025, 0, (i % 28) + 1).toLocaleDateString()
-    }));
-  }, []);
+  // Fetch claims from API
+  const { data: claims = [], isLoading, error } = useClaims();
 
   // Filter data based on search
   const filteredData = useMemo(() => {
-    if (!searchQuery) return mockClaims;
-    return mockClaims.filter(
+    if (!searchQuery) return claims;
+    return claims.filter(
       (claim) =>
-        claim.claimNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        claim.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        claim.employer.toLowerCase().includes(searchQuery.toLowerCase())
+        claim.claimNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        claim.memberName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        claim.employer?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [mockClaims, searchQuery]);
+  }, [claims, searchQuery]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -130,55 +121,77 @@ const ClaimsTable = () => {
 
       {/* Table */}
       <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#fafafa' }}>
-              <TableCell><strong>Claim #</strong></TableCell>
-              <TableCell><strong>Member</strong></TableCell>
-              <TableCell><strong>Employer</strong></TableCell>
-              <TableCell><strong>Insurance</strong></TableCell>
-              <TableCell align="right"><strong>Amount (SAR)</strong></TableCell>
-              <TableCell><strong>Status</strong></TableCell>
-              <TableCell><strong>Date</strong></TableCell>
-              <TableCell align="center"><strong>Actions</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedData.map((claim) => (
-              <TableRow key={claim.id} hover>
-                <TableCell>{claim.claimNumber}</TableCell>
-                <TableCell>{claim.memberName}</TableCell>
-                <TableCell>{claim.employer}</TableCell>
-                <TableCell>{claim.insuranceCompany}</TableCell>
-                <TableCell align="right">{claim.claimAmount}</TableCell>
-                <TableCell>
-                  <Chip label={claim.status} color={getStatusColor(claim.status)} size="small" />
-                </TableCell>
-                <TableCell>{claim.submissionDate}</TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" color="primary">
-                    <EyeOutlined />
-                  </IconButton>
-                  <IconButton size="small" color="default">
-                    <EditOutlined />
-                  </IconButton>
-                  <IconButton size="small" color="error">
-                    <DeleteOutlined />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          count={filteredData.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <Typography color="error">Error loading claims: {error.message}</Typography>
+          </Box>
+        ) : (
+          <>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#fafafa' }}>
+                  <TableCell><strong>Claim #</strong></TableCell>
+                  <TableCell><strong>Member</strong></TableCell>
+                  <TableCell><strong>Employer</strong></TableCell>
+                  <TableCell><strong>Insurance</strong></TableCell>
+                  <TableCell align="right"><strong>Amount (SAR)</strong></TableCell>
+                  <TableCell><strong>Status</strong></TableCell>
+                  <TableCell><strong>Date</strong></TableCell>
+                  <TableCell align="center"><strong>Actions</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">
+                      <Typography color="text.secondary" py={4}>
+                        No claims found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedData.map((claim) => (
+                    <TableRow key={claim.id} hover>
+                      <TableCell>{claim.claimNumber}</TableCell>
+                      <TableCell>{claim.memberName}</TableCell>
+                      <TableCell>{claim.employer}</TableCell>
+                      <TableCell>{claim.insuranceCompany}</TableCell>
+                      <TableCell align="right">{claim.claimAmount}</TableCell>
+                      <TableCell>
+                        <Chip label={claim.status} color={getStatusColor(claim.status)} size="small" />
+                      </TableCell>
+                      <TableCell>{claim.submissionDate}</TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" color="primary">
+                          <EyeOutlined />
+                        </IconButton>
+                        <IconButton size="small" color="default">
+                          <EditOutlined />
+                        </IconButton>
+                        <IconButton size="small" color="error">
+                          <DeleteOutlined />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={filteredData.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
+          </>
+        )}
       </TableContainer>
 
       {/* Upload Dialog */}

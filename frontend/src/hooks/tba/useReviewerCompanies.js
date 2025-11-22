@@ -1,23 +1,81 @@
-// Mock hook for Reviewer Companies - Phase F will connect to API
-export const useReviewerCompanies = () => {
-  const mockData = Array.from({ length: 25 }, (_, i) => ({
-    id: i + 1,
-    reviewerId: `REV-${String(i + 1).padStart(4, '0')}`,
-    companyName: `Reviewer Company ${i + 1}`,
-    specialization: ['General Medicine', 'Cardiology', 'Orthopedics', 'Pediatrics', 'Dermatology'][i % 5],
-    contactPerson: `Reviewer ${i + 1}`,
-    email: `reviewer${i + 1}@company${i + 1}.com`,
-    phone: `+966 1${String(Math.floor(Math.random() * 10000000)).padStart(7, '0')}`,
-    totalReviews: Math.floor(Math.random() * 1000) + 100,
-    rating: (Math.random() * 2 + 3).toFixed(1),
-    status: i % 5 === 0 ? 'Inactive' : 'Active',
-    contractDate: new Date(2024, Math.floor(i / 3), (i % 28) + 1).toISOString()
-  }));
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import httpClient from 'api/httpClient';
+import { toast } from 'react-hot-toast';
 
-  return {
-    data: mockData,
-    isLoading: false,
-    error: null,
-    refetch: () => Promise.resolve(mockData)
-  };
+// ==============================|| REVIEWER COMPANIES API ||============================== //
+
+const reviewerCompaniesAPI = {
+  getAll: () => httpClient.get('/reviewer-companies'),
+  getById: (id) => httpClient.get(`/reviewer-companies/${id}`),
+  create: (data) => httpClient.post('/reviewer-companies', data),
+  update: (id, data) => httpClient.put(`/reviewer-companies/${id}`, data),
+  delete: (id) => httpClient.delete(`/reviewer-companies/${id}`)
+};
+
+// ==============================|| HOOKS ||============================== //
+
+export const useReviewerCompanies = () => {
+  return useQuery({
+    queryKey: ['reviewer-companies'],
+    queryFn: reviewerCompaniesAPI.getAll,
+    staleTime: 30000,
+    retry: 2
+  });
+};
+
+export const useReviewerCompanyById = (id) => {
+  return useQuery({
+    queryKey: ['reviewer-company', id],
+    queryFn: () => reviewerCompaniesAPI.getById(id),
+    enabled: !!id,
+    staleTime: 30000
+  });
+};
+
+export const useCreateReviewerCompany = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: reviewerCompaniesAPI.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviewer-companies'] });
+      toast.success('Reviewer company created successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to create reviewer company';
+      toast.error(message);
+    }
+  });
+};
+
+export const useUpdateReviewerCompany = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }) => reviewerCompaniesAPI.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviewer-companies'] });
+      toast.success('Reviewer company updated successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to update reviewer company';
+      toast.error(message);
+    }
+  });
+};
+
+export const useDeleteReviewerCompany = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: reviewerCompaniesAPI.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviewer-companies'] });
+      toast.success('Reviewer company deleted successfully');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to delete reviewer company';
+      toast.error(message);
+    }
+  });
 };

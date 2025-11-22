@@ -14,9 +14,11 @@ import {
   TextField,
   Typography,
   IconButton,
-  Chip
+  Chip,
+  CircularProgress
 } from '@mui/material';
 import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { useReviewerCompanies } from 'hooks/tba/useReviewerCompanies';
 
 // ==============================|| REVIEWERS TABLE ||============================== //
 
@@ -25,31 +27,18 @@ const ReviewersTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const mockReviewers = useMemo(() => {
-    return Array.from({ length: 25 }, (_, i) => ({
-      id: i + 1,
-      reviewerId: `REV-${String(i + 1).padStart(4, '0')}`,
-      companyName: `Reviewer Company ${i + 1}`,
-      specialization: ['General Medicine', 'Cardiology', 'Orthopedics', 'Pediatrics', 'Dermatology'][i % 5],
-      contactPerson: `Reviewer ${i + 1}`,
-      email: `reviewer${i + 1}@company${i + 1}.com`,
-      phone: `+966 1${String(Math.floor(Math.random() * 10000000)).padStart(7, '0')}`,
-      totalReviews: Math.floor(Math.random() * 1000) + 100,
-      rating: (Math.random() * 2 + 3).toFixed(1),
-      status: i % 5 === 0 ? 'Inactive' : 'Active',
-      contractDate: new Date(2024, Math.floor(i / 3), (i % 28) + 1).toLocaleDateString()
-    }));
-  }, []);
+  // Fetch reviewer companies from API
+  const { data: reviewers = [], isLoading, error } = useReviewerCompanies();
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return mockReviewers;
-    return mockReviewers.filter(
+    if (!searchQuery) return reviewers;
+    return reviewers.filter(
       (reviewer) =>
-        reviewer.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        reviewer.reviewerId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        reviewer.specialization.toLowerCase().includes(searchQuery.toLowerCase())
+        reviewer.companyName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        reviewer.reviewerId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        reviewer.specialization?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [mockReviewers, searchQuery]);
+  }, [reviewers, searchQuery]);
 
   const paginatedData = useMemo(() => {
     return filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -84,68 +73,90 @@ const ReviewersTable = () => {
       </Paper>
 
       <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#fafafa' }}>
-              <TableCell><strong>Reviewer ID</strong></TableCell>
-              <TableCell><strong>Company Name</strong></TableCell>
-              <TableCell><strong>Specialization</strong></TableCell>
-              <TableCell><strong>Contact Person</strong></TableCell>
-              <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Phone</strong></TableCell>
-              <TableCell align="right"><strong>Reviews</strong></TableCell>
-              <TableCell align="center"><strong>Rating</strong></TableCell>
-              <TableCell><strong>Status</strong></TableCell>
-              <TableCell align="center"><strong>Actions</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedData.map((reviewer) => (
-              <TableRow key={reviewer.id} hover>
-                <TableCell>{reviewer.reviewerId}</TableCell>
-                <TableCell>{reviewer.companyName}</TableCell>
-                <TableCell>{reviewer.specialization}</TableCell>
-                <TableCell>{reviewer.contactPerson}</TableCell>
-                <TableCell>{reviewer.email}</TableCell>
-                <TableCell>{reviewer.phone}</TableCell>
-                <TableCell align="right">{reviewer.totalReviews}</TableCell>
-                <TableCell align="center">
-                  <Chip label={`⭐ ${reviewer.rating}`} color="primary" size="small" variant="outlined" />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={reviewer.status}
-                    color={reviewer.status === 'Active' ? 'success' : 'default'}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" color="primary">
-                    <EyeOutlined />
-                  </IconButton>
-                  <IconButton size="small" color="default">
-                    <EditOutlined />
-                  </IconButton>
-                  <IconButton size="small" color="error">
-                    <DeleteOutlined />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          count={filteredData.length}
-          page={page}
-          onPageChange={(e, newPage) => setPage(newPage)}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <Typography color="error">Error loading reviewers: {error.message}</Typography>
+          </Box>
+        ) : (
+          <>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#fafafa' }}>
+                  <TableCell><strong>Reviewer ID</strong></TableCell>
+                  <TableCell><strong>Company Name</strong></TableCell>
+                  <TableCell><strong>Specialization</strong></TableCell>
+                  <TableCell><strong>Contact Person</strong></TableCell>
+                  <TableCell><strong>Email</strong></TableCell>
+                  <TableCell><strong>Phone</strong></TableCell>
+                  <TableCell align="right"><strong>Reviews</strong></TableCell>
+                  <TableCell align="center"><strong>Rating</strong></TableCell>
+                  <TableCell><strong>Status</strong></TableCell>
+                  <TableCell align="center"><strong>Actions</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center">
+                      <Typography color="text.secondary" py={4}>
+                        No reviewers found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedData.map((reviewer) => (
+                    <TableRow key={reviewer.id} hover>
+                      <TableCell>{reviewer.reviewerId}</TableCell>
+                      <TableCell>{reviewer.companyName}</TableCell>
+                      <TableCell>{reviewer.specialization}</TableCell>
+                      <TableCell>{reviewer.contactPerson}</TableCell>
+                      <TableCell>{reviewer.email}</TableCell>
+                      <TableCell>{reviewer.phone}</TableCell>
+                      <TableCell align="right">{reviewer.totalReviews}</TableCell>
+                      <TableCell align="center">
+                        <Chip label={`⭐ ${reviewer.rating}`} color="primary" size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={reviewer.status}
+                          color={reviewer.status === 'Active' ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" color="primary">
+                          <EyeOutlined />
+                        </IconButton>
+                        <IconButton size="small" color="default">
+                          <EditOutlined />
+                        </IconButton>
+                        <IconButton size="small" color="error">
+                          <DeleteOutlined />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={filteredData.length}
+              page={page}
+              onPageChange={(e, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
+          </>
+        )}
       </TableContainer>
     </Box>
   );
