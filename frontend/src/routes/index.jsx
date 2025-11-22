@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
 
 // project imports
 import MainRoutes from './MainRoutes';
@@ -15,8 +15,8 @@ const PagesLanding = Loadable(lazy(() => import('pages/landing')));
 
 // ==============================|| ROUTING RENDER ||============================== //
 
-const router = createBrowserRouter(
-  [
+export default function Routes() {
+  return useRoutes([
     {
       path: '/',
       element: <SimpleLayout layout={SimpleLayoutType.LANDING} enableElevationScroll />,
@@ -30,8 +30,5 @@ const router = createBrowserRouter(
     LoginRoutes,
     ComponentsRoutes,
     MainRoutes
-  ],
-  { basename: import.meta.env.VITE_APP_BASE_NAME }
-);
-
-export default router;
+  ]);
+}

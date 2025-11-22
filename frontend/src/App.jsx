@@ -1,45 +1,23 @@
-import PropTypes from 'prop-types';
-import { Toaster } from 'react-hot-toast';
+import { BrowserRouter } from 'react-router-dom';
 
 // project imports
+import Routes from 'routes';
 import ThemeCustomization from 'themes';
-import { ConfigProvider } from 'contexts/ConfigContext';
+import ScrollTop from 'components/ScrollTop';
 import { JWTProvider } from 'contexts/JWTContext';
 
-import Locales from 'components/Locales';
-import RTLLayout from 'components/RTLLayout';
-import ScrollTop from 'components/ScrollTop';
-import Snackbar from 'components/@extended/Snackbar';
-import Notistack from 'components/third-party/Notistack';
-import Metrics from 'metrics';
+// ==============================|| APP - MANTIS STRUCTURE ||============================== //
 
-// ==============================|| APP - THEME, ROUTER, LOCAL ||============================== //
-
-export default function App({ children }) {
+export default function App() {
   return (
-    <>
+    <BrowserRouter basename={import.meta.env.VITE_APP_BASE_NAME}>
       <JWTProvider>
-        <ConfigProvider>
-          <ThemeCustomization>
-            <RTLLayout>
-              <Locales>
-                <ScrollTop>
-                  <Notistack>
-                    {children}
-                    <Snackbar />
-                    <Toaster position="top-right" gutter={8} toastOptions={{ duration: 4000 }} />
-                  </Notistack>
-                </ScrollTop>
-              </Locales>
-            </RTLLayout>
-          </ThemeCustomization>
-        </ConfigProvider>
+        <ThemeCustomization>
+          <ScrollTop>
+            <Routes />
+          </ScrollTop>
+        </ThemeCustomization>
       </JWTProvider>
-      <Metrics />
-    </>
+    </BrowserRouter>
   );
 }
-
-App.propTypes = {
-  children: PropTypes.node
-};

@@ -41,20 +41,14 @@ import '@fontsource/public-sans/700.css';
 
 // project imports
 import App from './App';
-import router from 'routes';
 import reportWebVitals from './reportWebVitals';
-import { RouterProvider } from 'react-router-dom';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 // ==============================|| MAIN - REACT DOM RENDER ||============================== //
 
-root.render(
-  <App>
-    <RouterProvider router={router} />
-  </App>
-);
+root.render(<App />);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
