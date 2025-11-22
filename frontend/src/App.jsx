@@ -1,7 +1,7 @@
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 
 // project imports
-import Routes from 'routes';
+import router from 'routes';
 import ThemeCustomization from 'themes';
 import ScrollTop from 'components/ScrollTop';
 import { JWTProvider } from 'contexts/JWTContext';
@@ -10,14 +10,12 @@ import { JWTProvider } from 'contexts/JWTContext';
 
 export default function App() {
   return (
-    <BrowserRouter basename={import.meta.env.VITE_APP_BASE_NAME}>
-      <JWTProvider>
-        <ThemeCustomization>
-          <ScrollTop>
-            <Routes />
-          </ScrollTop>
-        </ThemeCustomization>
-      </JWTProvider>
-    </BrowserRouter>
+    <JWTProvider>
+      <ThemeCustomization>
+        <ScrollTop>
+          <RouterProvider router={router} />
+        </ScrollTop>
+      </ThemeCustomization>
+    </JWTProvider>
   );
 }

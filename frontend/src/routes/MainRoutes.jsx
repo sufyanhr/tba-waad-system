@@ -146,34 +146,63 @@ const SettingsPage = Loadable(lazy(() => import('pages/settings/SettingsPage')))
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
-  path: '/',
+  path: 'dashboard',
   children: [
     {
-      path: '/',
-      element: (
-        <AuthGuard>
-          <DashboardLayout />
-        </AuthGuard>
-      ),
-      children: [
-        {
-          path: 'dashboard',
-          children: [
-            {
-              path: 'default',
-              element: <TBADashboard />
-            }
-            // Demo routes commented (DO NOT DELETE)
-            // {
-            //   path: 'analytics',
-            //   element: <DashboardAnalytics />
-            // },
-            // {
-            //   path: 'invoice',
-            //   element: <AppInvoiceDashboard />
-            // }
-          ]
-        },
+      path: 'default',
+      element: <TBADashboard />
+    }
+    // Demo routes commented (DO NOT DELETE)
+    // {
+    //   path: 'analytics',
+    //   element: <DashboardAnalytics />
+    // },
+    // {
+    //   path: 'invoice',
+    //   element: <AppInvoiceDashboard />
+    // }
+  ]
+};
+
+const TBARoutes = {
+  path: 'tba',
+  children: [
+    {
+      path: 'claims',
+      element: <ClaimsTable />
+    },
+    {
+      path: 'members',
+      element: <MembersTable />
+    },
+    {
+      path: 'employers',
+      element: <EmployersTable />
+    },
+    {
+      path: 'insurance-companies',
+      element: <InsuranceCompanies />
+    },
+    {
+      path: 'reviewer-companies',
+      element: <ReviewersTable />
+    },
+    {
+      path: 'visits',
+      element: <VisitsTable />
+    }
+  ]
+};
+
+const OtherRoutes = [
+  {
+    path: 'rbac',
+    element: <RBACPage />
+  },
+  {
+    path: 'settings',
+    element: <SettingsPage />
+  }
         // DEMO ROUTES COMMENTED - DO NOT DELETE FILES
         /*
         {
@@ -540,133 +569,6 @@ const MainRoutes = {
           element: <Map />
         },
         */
-        // TBA ROUTES (Phase E)
-        {
-          path: 'tba',
-          children: [
-            {
-              path: 'claims',
-              element: <ClaimsTable />
-            },
-            {
-              path: 'members',
-              element: <MembersTable />
-            },
-            {
-              path: 'employers',
-              element: <EmployersTable />
-            },
-            {
-              path: 'insurance-companies',
-              element: <InsuranceCompanies />
-            },
-            {
-              path: 'reviewer-companies',
-              element: <ReviewersTable />
-            },
-            {
-              path: 'visits',
-              element: <VisitsTable />
-            }
-          ]
-        },
-        {
-          path: 'rbac',
-          element: <RBACPage />
-        },
-        {
-          path: 'settings',
-          element: <SettingsPage />
-        }
-      ]
-    },
-    {
-      path: '/maintenance',
-      element: <PagesLayout />,
-      children: [
-        {
-          path: '404',
-          element: <MaintenanceError />
-        },
-        {
-          path: '500',
-          element: <MaintenanceError500 />
-        },
-        {
-          path: 'under-construction',
-          element: <MaintenanceUnderConstruction />
-        },
-        {
-          path: 'coming-soon',
-          element: <MaintenanceComingSoon />
-        },
-        {
-          path: 'join-waitlist',
-          element: <MaintenanceJoinWaitList />
-        }
-      ]
-    },
-    {
-      path: '/auth',
-      element: <PagesLayout />,
-      children: [
-        {
-          path: 'login',
-          element: <AuthLogin />
-        },
-        {
-          path: 'register',
-          element: <AuthRegister />
-        },
-        {
-          path: 'forgot-password',
-          element: <AuthForgotPassword />
-        },
-        {
-          path: 'reset-password',
-          element: <AuthResetPassword />
-        },
-        {
-          path: 'check-mail',
-          element: <AuthCheckMail />
-        },
-        {
-          path: 'code-verification',
-          element: <AuthCodeVerification />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'change-log',
-          element: <ChangeLog />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} enableElevationScroll />,
-      children: [
-        {
-          path: 'contact-us',
-          element: <AppContactUS />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'faqs',
-          element: <AppFaqs />
-        }
-      ]
-    }
-  ]
-};
+];
 
-export default MainRoutes;
+export { MainRoutes, TBARoutes, OtherRoutes };

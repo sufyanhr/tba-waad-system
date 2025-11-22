@@ -49,66 +49,61 @@ const SupabaseAuthCheckMail = Loadable(lazy(() => import('pages/auth/supabase/ch
 
 const LoginRoutes = {
   path: '/',
+  element: <AuthLayout />,
   children: [
     {
-      path: '/',
-      element: <AuthLayout />,
+      path: APP_AUTH === AuthProvider.JWT ? '/' : 'jwt',
       children: [
-        {
-          path: APP_AUTH === AuthProvider.JWT ? '/' : 'jwt',
-          children: [
-            { path: 'login', element: <JwtAuthLogin /> },
-            { path: 'register', element: <JwtAuthRegister /> },
-            { path: 'forgot-password', element: <JwtAuthForgotPassword /> },
-            { path: 'check-mail', element: <JwtAuthCheckMail /> },
-            { path: 'reset-password', element: <JwtAuthResetPassword /> },
-            { path: 'code-verification', element: <JwtAuthCodeVerification /> }
-          ]
-        },
-        {
-          path: APP_AUTH === AuthProvider.FIREBASE ? '/' : 'firebase',
-          children: [
-            { path: 'login', element: <FirebaseAuthLogin /> },
-            { path: 'register', element: <FirebaseAuthRegister /> },
-            { path: 'forgot-password', element: <FirebaseAuthForgotPassword /> },
-            { path: 'reset-password', element: <FirebaseAuthResetPassword /> },
-            { path: 'code-verification', element: <FirebaseAuthCodeVerification /> },
-            { path: 'check-mail', element: <FirebaseAuthCheckMail /> }
-          ]
-        },
-        {
-          path: APP_AUTH === AuthProvider.AUTH0 ? '/' : 'auth0',
-          children: [
-            { path: 'login', element: <Auth0AuthLogin /> },
-            { path: 'register', element: <Auth0AuthRegister /> },
-            { path: 'forgot-password', element: <Auth0AuthForgotPassword /> },
-            { path: 'reset-password', element: <Auth0AuthResetPassword /> },
-            { path: 'code-verification', element: <Auth0AuthCodeVerification /> },
-            { path: 'check-mail', element: <Auth0AuthCheckMail /> }
-          ]
-        },
-        {
-          path: APP_AUTH === AuthProvider.AWS ? '/' : 'aws',
-          children: [
-            { path: 'login', element: <AwsAuthLogin /> },
-            { path: 'register', element: <AwsAuthRegister /> },
-            { path: 'forgot-password', element: <AwsAuthForgotPassword /> },
-            { path: 'reset-password', element: <AwsAuthResetPassword /> },
-            { path: 'code-verification', element: <AwsAuthCodeVerification /> },
-            { path: 'check-mail', element: <AwsAuthCheckMail /> }
-          ]
-        },
-        {
-          path: APP_AUTH === AuthProvider.SUPABASE ? '/' : 'supabase',
-          children: [
-            { path: 'login', element: <SupabaseAuthLogin /> },
-            { path: 'register', element: <SupabaseAuthRegister /> },
-            { path: 'forgot-password', element: <SupabaseAuthForgotPassword /> },
-            { path: 'reset-password', element: <SupabaseAuthResetPassword /> },
-            { path: 'code-verification', element: <SupabaseAuthCodeVerification /> },
-            { path: 'check-mail', element: <SupabaseAuthCheckMail /> }
-          ]
-        }
+        { path: 'login', element: <JwtAuthLogin /> },
+        { path: 'register', element: <JwtAuthRegister /> },
+        { path: 'forgot-password', element: <JwtAuthForgotPassword /> },
+        { path: 'check-mail', element: <JwtAuthCheckMail /> },
+        { path: 'reset-password', element: <JwtAuthResetPassword /> },
+        { path: 'code-verification', element: <JwtAuthCodeVerification /> }
+      ]
+    },
+    {
+      path: APP_AUTH === AuthProvider.FIREBASE ? '/' : 'firebase',
+      children: [
+        { path: 'login', element: <FirebaseAuthLogin /> },
+        { path: 'register', element: <FirebaseAuthRegister /> },
+        { path: 'forgot-password', element: <FirebaseAuthForgotPassword /> },
+        { path: 'reset-password', element: <FirebaseAuthResetPassword /> },
+        { path: 'code-verification', element: <FirebaseAuthCodeVerification /> },
+        { path: 'check-mail', element: <FirebaseAuthCheckMail /> }
+      ]
+    },
+    {
+      path: APP_AUTH === AuthProvider.AUTH0 ? '/' : 'auth0',
+      children: [
+        { path: 'login', element: <Auth0AuthLogin /> },
+        { path: 'register', element: <Auth0AuthRegister /> },
+        { path: 'forgot-password', element: <Auth0AuthForgotPassword /> },
+        { path: 'reset-password', element: <Auth0AuthResetPassword /> },
+        { path: 'code-verification', element: <Auth0AuthCodeVerification /> },
+        { path: 'check-mail', element: <Auth0AuthCheckMail /> }
+      ]
+    },
+    {
+      path: APP_AUTH === AuthProvider.AWS ? '/' : 'aws',
+      children: [
+        { path: 'login', element: <AwsAuthLogin /> },
+        { path: 'register', element: <AwsAuthRegister /> },
+        { path: 'forgot-password', element: <AwsAuthForgotPassword /> },
+        { path: 'reset-password', element: <AwsAuthResetPassword /> },
+        { path: 'code-verification', element: <AwsAuthCodeVerification /> },
+        { path: 'check-mail', element: <AwsAuthCheckMail /> }
+      ]
+    },
+    {
+      path: APP_AUTH === AuthProvider.SUPABASE ? '/' : 'supabase',
+      children: [
+        { path: 'login', element: <SupabaseAuthLogin /> },
+        { path: 'register', element: <SupabaseAuthRegister /> },
+        { path: 'forgot-password', element: <SupabaseAuthForgotPassword /> },
+        { path: 'reset-password', element: <SupabaseAuthResetPassword /> },
+        { path: 'code-verification', element: <SupabaseAuthCodeVerification /> },
+        { path: 'check-mail', element: <SupabaseAuthCheckMail /> }
       ]
     }
   ]

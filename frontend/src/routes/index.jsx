@@ -1,34 +1,32 @@
-import { lazy } from 'react';
-import { useRoutes } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 // project imports
-import MainRoutes from './MainRoutes';
+import { MainRoutes, TBARoutes, OtherRoutes } from './MainRoutes';
 import LoginRoutes from './LoginRoutes';
-import ComponentsRoutes from './ComponentsRoutes';
-
-import { SimpleLayoutType } from 'config';
-import SimpleLayout from 'layout/Simple';
-import Loadable from 'components/Loadable';
-
-// render - landing page
-const PagesLanding = Loadable(lazy(() => import('pages/landing')));
+import AuthGuard from 'utils/route-guard/AuthGuard';
+import DashboardLayout from 'layout/Dashboard';
 
 // ==============================|| ROUTING RENDER ||============================== //
 
-export default function Routes() {
-  return useRoutes([
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.LANDING} enableElevationScroll />,
-      children: [
-        {
-          index: true,
-          element: <PagesLanding />
-        }
-      ]
-    },
-    LoginRoutes,
-    ComponentsRoutes,
-    MainRoutes
-  ]);
-}
+const router = createBrowserRouter([
+  LoginRoutes,
+  {
+    path: '/',
+    element: (
+      <AuthGuard>
+        <DashboardLayout />
+      </AuthGuard>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/dashboard/default" replace />
+      },
+      MainRoutes,
+      TBARoutes,
+      ...OtherRoutes
+    ]
+  }
+]);
+
+export default router;
