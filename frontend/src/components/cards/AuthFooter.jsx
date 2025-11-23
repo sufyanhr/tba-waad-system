@@ -1,17 +1,48 @@
-import { Typography, Stack, Link } from '@mui/material';
+// material-ui
+import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
-const AuthFooter = () => {
+// ==============================|| FOOTER - AUTHENTICATION ||============================== //
+
+export default function AuthFooter() {
   return (
-    <Stack direction="row" justifyContent="space-between" sx={{ mt: 3 }}>
-      <Typography variant="body2" color="text.secondary">
-        © {new Date().getFullYear()} TBA WAAD System
-      </Typography>
-      <Stack direction="row" spacing={2}>
-        <Link href="#" variant="body2" underline="hover">Privacy</Link>
-        <Link href="#" variant="body2" underline="hover">Terms</Link>
-      </Stack>
-    </Stack>
-  );
-};
+    <Container maxWidth="xl">
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{ gap: 2, justifyContent: { xs: 'center', sm: 'space-between', textAlign: { xs: 'center', sm: 'inherit' } } }}
+      >
+        <Typography variant="subtitle2" color="secondary">
+          © Made with love by Team{' '}
+          <Link href="https://codedthemes.com/" target="_blank" underline="hover">
+            CodedThemes
+          </Link>
+        </Typography>
 
-export default AuthFooter;
+        <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ gap: { xs: 1, sm: 3 }, textAlign: { xs: 'center', sm: 'inherit' } }}>
+          <Typography
+            variant="subtitle2"
+            color="secondary"
+            component={Link}
+            href="https://mui.com/store/terms/"
+            target="_blank"
+            underline="hover"
+          >
+            Terms and Conditions
+          </Typography>
+          <Typography
+            variant="subtitle2"
+            color="secondary"
+            component={Link}
+            href="https://mui.com/legal/privacy/"
+            target="_blank"
+            underline="hover"
+          >
+            Privacy Policy
+          </Typography>
+        </Stack>
+      </Stack>
+    </Container>
+  );
+}

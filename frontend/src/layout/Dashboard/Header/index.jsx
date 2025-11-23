@@ -1,30 +1,85 @@
-import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+import { useMemo } from 'react';
 
-// ==============================|| HEADER ||============================== //
+// material-ui
+import useMediaQuery from '@mui/material/useMediaQuery';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
 
-const Header = () => {
-  return (
-    <AppBar
-      position="fixed"
-      sx={{
-        zIndex: 1201,
-        bgcolor: 'background.paper',
-        color: 'text.primary',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        boxShadow: 'none'
-      }}
-    >
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          TBA WAAD System
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* Header content will be added later */}
-        </Box>
-      </Toolbar>
-    </AppBar>
+// project imports
+import AppBarStyled from './AppBarStyled';
+import HeaderContent from './HeaderContent';
+import IconButton from 'components/@extended/IconButton';
+
+import useConfig from 'hooks/useConfig';
+import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import { MenuOrientation, DRAWER_WIDTH, MINI_DRAWER_WIDTH } from 'config';
+
+// assets
+import MenuFoldOutlined from '@ant-design/icons/MenuFoldOutlined';
+import MenuUnfoldOutlined from '@ant-design/icons/MenuUnfoldOutlined';
+
+// ==============================|| MAIN LAYOUT - HEADER ||============================== //
+
+export default function Header() {
+  const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const { state } = useConfig();
+
+  const { menuMaster } = useGetMenuMaster();
+  const drawerOpen = menuMaster.isDashboardDrawerOpened;
+
+  const isHorizontal = state.menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
+
+  // header content
+  const headerContent = useMemo(() => <HeaderContent />, []);
+
+  // common header
+  const mainHeader = (
+    <Toolbar>
+      {!isHorizontal ? (
+        <IconButton
+          aria-label="open drawer"
+          onClick={() => handlerDrawerOpen(!drawerOpen)}
+          edge="start"
+          color="secondary"
+          variant="light"
+          sx={(theme) => ({
+            color: 'text.primary',
+            bgcolor: drawerOpen ? 'transparent' : 'grey.100',
+            ...theme.applyStyles('dark', { bgcolor: drawerOpen ? 'transparent' : 'background.default' }),
+            ml: { xs: 0, lg: -2 }
+          })}
+        >
+          {!drawerOpen ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        </IconButton>
+      ) : null}
+      {headerContent}
+    </Toolbar>
   );
-};
 
-export default Header;
+  // app-bar params
+  const appBar = {
+    position: 'fixed',
+    color: 'inherit',
+    elevation: 0,
+    sx: {
+      borderBottom: '1px solid',
+      borderBottomColor: 'divider',
+      zIndex: 1200,
+      width: isHorizontal
+        ? '100%'
+        : { xs: '100%', lg: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : `calc(100% - ${MINI_DRAWER_WIDTH}px)` }
+    }
+  };
+
+  return (
+    <>
+      {!downLG ? (
+        <AppBarStyled open={drawerOpen} {...appBar}>
+          {mainHeader}
+        </AppBarStyled>
+      ) : (
+        <AppBar {...appBar}>{mainHeader}</AppBar>
+      )}
+    </>
+  );
+}

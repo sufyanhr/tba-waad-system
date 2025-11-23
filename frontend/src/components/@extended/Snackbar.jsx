@@ -1,36 +1,135 @@
-import { Alert, Snackbar as MuiSnackbar } from '@mui/material';
-import { useState, useEffect } from 'react';
+// material-ui
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Fade from '@mui/material/Fade';
+import Grow from '@mui/material/Grow';
+import Slide from '@mui/material/Slide';
+import MuiSnackbar from '@mui/material/Snackbar';
+
+// project imports
+import IconButton from './IconButton';
+import { closeSnackbar, useGetSnackbar } from 'api/snackbar';
+
+// assets
+import CloseOutlined from '@ant-design/icons/CloseOutlined';
+
+// animation function
+function TransitionSlideLeft(props) {
+  return <Slide {...props} direction="left" />;
+}
+
+function TransitionSlideUp(props) {
+  return <Slide {...props} direction="up" />;
+}
+
+function TransitionSlideRight(props) {
+  return <Slide {...props} direction="right" />;
+}
+
+function TransitionSlideDown(props) {
+  return <Slide {...props} direction="down" />;
+}
+
+function GrowTransition(props) {
+  return <Grow {...props} />;
+}
+
+// animation options
+const animation = {
+  SlideLeft: TransitionSlideLeft,
+  SlideUp: TransitionSlideUp,
+  SlideRight: TransitionSlideRight,
+  SlideDown: TransitionSlideDown,
+  Grow: GrowTransition,
+  Fade
+};
 
 // ==============================|| SNACKBAR ||============================== //
 
-const Snackbar = () => {
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState('');
-  const [severity, setSeverity] = useState('info');
+export default function Snackbar() {
+  const { snackbar } = useGetSnackbar();
 
-  useEffect(() => {
-    // Listen for custom snackbar events
-    const handleSnackbar = (event) => {
-      setMessage(event.detail.message);
-      setSeverity(event.detail.severity || 'info');
-      setOpen(true);
-    };
-
-    window.addEventListener('showSnackbar', handleSnackbar);
-    return () => window.removeEventListener('showSnackbar', handleSnackbar);
-  }, []);
-
-  const handleClose = () => {
-    setOpen(false);
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    closeSnackbar();
   };
 
   return (
-    <MuiSnackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-      <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
-        {message}
-      </Alert>
-    </MuiSnackbar>
+    <>
+      {/* default snackbar */}
+      {snackbar.variant === 'default' && (
+        <MuiSnackbar
+          anchorOrigin={snackbar.anchorOrigin}
+          open={snackbar.open}
+          autoHideDuration={1500}
+          onClose={handleClose}
+          message={snackbar.message}
+          slots={{ transition: animation[snackbar.transition] }}
+          action={
+            <>
+              <Button size="small" onClick={handleClose}>
+                UNDO
+              </Button>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose} sx={{ mt: 0.25 }}>
+                <CloseOutlined />
+              </IconButton>
+            </>
+          }
+        />
+      )}
+      {/* alert snackbar */}
+      {snackbar.variant === 'alert' && (
+        <MuiSnackbar
+          anchorOrigin={snackbar.anchorOrigin}
+          open={snackbar.open}
+          autoHideDuration={1500}
+          onClose={handleClose}
+          slots={{ transition: animation[snackbar.transition] }}
+        >
+          <Alert
+            variant={snackbar.alert.variant}
+            color={snackbar.alert.color}
+            action={
+              <>
+                {snackbar.actionButton !== false && (
+                  <>
+                    <Button color={snackbar.alert.color} size="small" onClick={handleClose}>
+                      UNDO
+                    </Button>
+                    <IconButton
+                      sx={{ mt: 0.25 }}
+                      size="small"
+                      aria-label="close"
+                      variant="contained"
+                      color={snackbar.alert.color}
+                      onClick={handleClose}
+                    >
+                      <CloseOutlined />
+                    </IconButton>
+                  </>
+                )}
+                {snackbar.actionButton === false && snackbar.close && (
+                  <IconButton
+                    sx={{ mt: 0.25, '&:hover': { bgcolor: 'transparent' } }}
+                    size="small"
+                    aria-label="close"
+                    variant="contained"
+                    color={snackbar.alert.color}
+                    onClick={handleClose}
+                  >
+                    <CloseOutlined />
+                  </IconButton>
+                )}
+              </>
+            }
+            sx={{ ...(snackbar.alert.variant === 'outlined' && { bgcolor: 'grey.0' }) }}
+          >
+            {snackbar.message}
+          </Alert>
+        </MuiSnackbar>
+      )}
+    </>
   );
-};
-
-export default Snackbar;
+}

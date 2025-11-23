@@ -1,52 +1,102 @@
-import { useState, useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
+import { useMemo } from 'react';
 
-// ==============================|| MENU API ||============================== //
+// Project-imports
+import { fetcher } from 'utils/axios';
 
-// Local menu state (no backend API needed)
-const defaultMenuState = {
-  menuMaster: {
-    isDashboardOpen: true,
-    openItem: null
-  }
+const initialState = {
+  isDashboardDrawerOpened: false,
+  isComponentDrawerOpened: true
 };
 
-export const endpoints = {
-  menu: 'local://menu' // Local state, not a real API endpoint
+const endpoints = {
+  key: 'api/menu',
+  master: 'master',
+  dashboard: '/dashboard' // server URL
 };
 
-export function useGetMenuMaster() {
-  // Use local state instead of fetching from backend
-  const { data, error, isLoading } = useSWR(endpoints.menu, null, {
-    fallbackData: defaultMenuState,
+const staticMenuItem = {
+  id: 'invoice1',
+  title: 'invoice',
+  type: 'item',
+  url: '/dashboard/invoice',
+  breadcrumbs: false
+};
+
+export function useGetMenu() {
+  const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.dashboard, fetcher, {
+    revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
   });
 
-  return {
-    menuMaster: data?.menuMaster || { isDashboardOpen: true },
-    menuMasterLoading: isLoading,
-    menuMasterError: error,
-    menuMasterValidating: !error && !data,
-    menuMasterEmpty: !isLoading && !data?.menuMaster
-  };
+  const memoizedValue = useMemo(() => {
+    let updatedMenu = data?.dashboard;
+
+    if (updatedMenu && Array.isArray(updatedMenu.children) && updatedMenu.children.length > 0) {
+      updatedMenu = {
+        ...updatedMenu,
+        children: updatedMenu.children.map((group) => {
+          if (Array.isArray(group.children)) {
+            return {
+              ...group,
+              children: [...group.children, staticMenuItem]
+            };
+          }
+          return group;
+        })
+      };
+    }
+
+    return {
+      menu: updatedMenu,
+      menuLoading: isLoading,
+      menuError: error,
+      menuValidating: isValidating,
+      menuEmpty: !isLoading && !data?.length
+    };
+  }, [data, error, isLoading, isValidating]);
+
+  return memoizedValue;
 }
 
-export function handlerDrawerOpen(isOpen) {
+export function useGetMenuMaster() {
+  const { data, isLoading } = useSWR(endpoints.key + endpoints.master, () => initialState, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
+
+  const memoizedValue = useMemo(
+    () => ({
+      menuMaster: data,
+      menuMasterLoading: isLoading
+    }),
+    [data, isLoading]
+  );
+
+  return memoizedValue;
+}
+
+export function handlerComponentDrawer(isComponentDrawerOpened) {
+  // to update local state based on key
+
   mutate(
-    endpoints.menu,
-    (currentData) => {
-      return { menuMaster: { ...(currentData?.menuMaster || {}), isDashboardOpen: isOpen } };
+    endpoints.key + endpoints.master,
+    (currentMenuMaster) => {
+      return { ...currentMenuMaster, isComponentDrawerOpened };
     },
     false
   );
 }
 
-export function handlerActiveItem(openItem) {
+export function handlerDrawerOpen(isDashboardDrawerOpened) {
+  // to update local state based on key
+
   mutate(
-    endpoints.menu,
-    (currentData) => {
-      return { menuMaster: { ...(currentData?.menuMaster || {}), openItem } };
+    endpoints.key + endpoints.master,
+    (currentMenuMaster) => {
+      return { ...currentMenuMaster, isDashboardDrawerOpened };
     },
     false
   );

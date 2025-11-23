@@ -1,55 +1,30 @@
-import { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Box, Typography, Button } from '@mui/material';
+import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 
-// ==============================|| ERROR BOUNDARY ||============================== //
+// material-ui
+import Alert from '@mui/material/Alert';
 
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+// ==============================|| ELEMENT ERROR - COMMON ||============================== //
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
+export default function ErrorBoundary() {
+  const error = useRouteError();
 
-  componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            p: 3
-          }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Something went wrong
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            {this.state.error?.message || 'An unexpected error occurred'}
-          </Typography>
-          <Button variant="contained" onClick={() => window.location.reload()}>
-            Reload Page
-          </Button>
-        </Box>
-      );
+  if (isRouteErrorResponse(error)) {
+    if (error.status === 404) {
+      return <Alert color="error">Error 404 - This page doesn't exist!</Alert>;
     }
 
-    return this.props.children;
+    if (error.status === 401) {
+      return <Alert color="error">Error 401 - You aren't authorized to see this</Alert>;
+    }
+
+    if (error.status === 503) {
+      return <Alert color="error">Error 503 - Looks like our API is down</Alert>;
+    }
+
+    if (error.status === 418) {
+      return <Alert color="error">Error 418 - Contact administrator</Alert>;
+    }
   }
+
+  return <Alert color="error">Under Maintenance</Alert>;
 }
-
-ErrorBoundary.propTypes = {
-  children: PropTypes.node
-};
-
-export default ErrorBoundary;

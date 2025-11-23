@@ -3,7 +3,6 @@ import { lazy } from 'react';
 // project imports
 import ErrorBoundary from './ErrorBoundary';
 import Loadable from 'components/Loadable';
-import AuthGuard from 'utils/route-guard/AuthGuard';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import SimpleLayout from 'layout/Simple';
@@ -12,8 +11,7 @@ import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
 
 // render - dashboard
-const TBADashboard = Loadable(lazy(() => import('pages/dashboard/TBADashboard')));
-// const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
+const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
 const DashboardAnalytics = Loadable(lazy(() => import('pages/dashboard/analytics')));
 
 // render - widget
@@ -126,85 +124,32 @@ const AppFaqs = Loadable(lazy(() => import('pages/faqs')));
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 const PricingPage = Loadable(lazy(() => import('pages/extra-pages/pricing')));
 
-// render - TBA pages (Phase E)
-const ClaimsTable = Loadable(lazy(() => import('pages/claims/ClaimsTable')));
-const MembersTable = Loadable(lazy(() => import('pages/members/MembersTable')));
-const EmployersTable = Loadable(lazy(() => import('pages/employers/EmployersTable')));
-const InsuranceCompanies = Loadable(lazy(() => import('pages/insurance/InsuranceCompanies')));
-const ReviewersTable = Loadable(lazy(() => import('pages/reviewers/ReviewersTable')));
-const VisitsTable = Loadable(lazy(() => import('pages/visits/VisitsTable')));
-const RBACPage = Loadable(lazy(() => import('pages/rbac/RBACPage')));
-const SettingsPage = Loadable(lazy(() => import('pages/settings/SettingsPage')));
-// Old TBA pages (commented for reference)
-// const TBAClaims = Loadable(lazy(() => import('tba/pages/Claims')));
-// const TBAMembers = Loadable(lazy(() => import('tba/pages/Members')));
-// const TBAEmployers = Loadable(lazy(() => import('tba/pages/Employers')));
-// const TBAInsuranceCompanies = Loadable(lazy(() => import('tba/pages/InsuranceCompanies')));
-// const TBAReviewerCompanies = Loadable(lazy(() => import('tba/pages/ReviewerCompanies')));
-// const TBAVisits = Loadable(lazy(() => import('tba/pages/Visits')));
-
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
-  path: 'dashboard',
+  path: '/',
   children: [
     {
-      path: 'default',
-      element: <TBADashboard />
-    }
-    // Demo routes commented (DO NOT DELETE)
-    // {
-    //   path: 'analytics',
-    //   element: <DashboardAnalytics />
-    // },
-    // {
-    //   path: 'invoice',
-    //   element: <AppInvoiceDashboard />
-    // }
-  ]
-};
-
-const TBARoutes = {
-  path: 'tba',
-  children: [
-    {
-      path: 'claims',
-      element: <ClaimsTable />
-    },
-    {
-      path: 'members',
-      element: <MembersTable />
-    },
-    {
-      path: 'employers',
-      element: <EmployersTable />
-    },
-    {
-      path: 'insurance-companies',
-      element: <InsuranceCompanies />
-    },
-    {
-      path: 'reviewer-companies',
-      element: <ReviewersTable />
-    },
-    {
-      path: 'visits',
-      element: <VisitsTable />
-    }
-  ]
-};
-
-const OtherRoutes = [
-  {
-    path: 'rbac',
-    element: <RBACPage />
-  },
-  {
-    path: 'settings',
-    element: <SettingsPage />
-  }
-        // DEMO ROUTES COMMENTED - DO NOT DELETE FILES
-        /*
+      path: '/',
+      element: <DashboardLayout />,
+      children: [
+        {
+          path: 'dashboard',
+          children: [
+            {
+              path: 'default',
+              element: <DashboardDefault />
+            },
+            {
+              path: 'analytics',
+              element: <DashboardAnalytics />
+            },
+            {
+              path: 'invoice',
+              element: <AppInvoiceDashboard />
+            }
+          ]
+        },
         {
           path: 'widget',
           children: [
@@ -222,8 +167,6 @@ const OtherRoutes = [
             }
           ]
         },
-        */
-        /*
         {
           path: 'apps',
           children: [
@@ -377,8 +320,6 @@ const OtherRoutes = [
             }
           ]
         },
-        */
-        /*
         {
           path: 'forms',
           children: [
@@ -438,8 +379,6 @@ const OtherRoutes = [
             }
           ]
         },
-        */
-        /*
         {
           path: 'tables',
           children: [
@@ -547,8 +486,6 @@ const OtherRoutes = [
             }
           ]
         },
-        */
-        /*
         {
           path: 'charts',
           children: [
@@ -562,13 +499,107 @@ const OtherRoutes = [
             }
           ]
         },
-        */
-        /*
         {
           path: 'map',
           element: <Map />
         },
-        */
-];
+        {
+          path: 'sample-page',
+          element: <SamplePage />
+        },
+        {
+          path: 'pricing',
+          element: <PricingPage />
+        }
+      ]
+    },
+    {
+      path: '/maintenance',
+      element: <PagesLayout />,
+      children: [
+        {
+          path: '404',
+          element: <MaintenanceError />
+        },
+        {
+          path: '500',
+          element: <MaintenanceError500 />
+        },
+        {
+          path: 'under-construction',
+          element: <MaintenanceUnderConstruction />
+        },
+        {
+          path: 'coming-soon',
+          element: <MaintenanceComingSoon />
+        },
+        {
+          path: 'join-waitlist',
+          element: <MaintenanceJoinWaitList />
+        }
+      ]
+    },
+    {
+      path: '/auth',
+      element: <PagesLayout />,
+      children: [
+        {
+          path: 'login',
+          element: <AuthLogin />
+        },
+        {
+          path: 'register',
+          element: <AuthRegister />
+        },
+        {
+          path: 'forgot-password',
+          element: <AuthForgotPassword />
+        },
+        {
+          path: 'reset-password',
+          element: <AuthResetPassword />
+        },
+        {
+          path: 'check-mail',
+          element: <AuthCheckMail />
+        },
+        {
+          path: 'code-verification',
+          element: <AuthCodeVerification />
+        }
+      ]
+    },
+    {
+      path: '/',
+      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
+      children: [
+        {
+          path: 'change-log',
+          element: <ChangeLog />
+        }
+      ]
+    },
+    {
+      path: '/',
+      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} enableElevationScroll />,
+      children: [
+        {
+          path: 'contact-us',
+          element: <AppContactUS />
+        }
+      ]
+    },
+    {
+      path: '/',
+      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
+      children: [
+        {
+          path: 'faqs',
+          element: <AppFaqs />
+        }
+      ]
+    }
+  ]
+};
 
-export { MainRoutes, TBARoutes, OtherRoutes };
+export default MainRoutes;

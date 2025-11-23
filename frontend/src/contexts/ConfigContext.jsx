@@ -1,44 +1,22 @@
-import { createContext, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { createContext, useMemo } from 'react';
 
-// ==============================|| CONFIG CONTEXT & PROVIDER ||============================== //
+// project imports
+import config from 'config';
+import { useLocalStorage } from 'hooks/useLocalStorage';
 
-const initialState = {
-  fontFamily: `'Public Sans', sans-serif`,
-  borderRadius: 8,
-  mode: 'light',
-  presetColor: 'default',
-  navType: 'light',
-  outlinedFilled: true,
-  miniDrawer: false,
-  container: false,
-  themeDirection: 'ltr',
-  menuOrientation: 'vertical',
-  onChangeMenuOrientation: () => {},
-  onChangeMode: () => {},
-  onChangePresetColor: () => {},
-  onChangeMiniDrawer: () => {},
-  onChangeContainer: () => {},
-  onChangeFontFamily: () => {},
-  onChangeBorderRadius: () => {},
-  onChangeOutlinedField: () => {}
-};
+// ==============================|| CONFIG CONTEXT ||============================== //
 
-export const ConfigContext = createContext(initialState);
+export const ConfigContext = createContext(undefined);
+
+// ==============================|| CONFIG PROVIDER ||============================== //
 
 export function ConfigProvider({ children }) {
-  const config = useMemo(
-    () => ({
-      ...initialState
-    }),
-    []
-  );
+  const { state, setState, setField, resetState } = useLocalStorage('mantis-react-js-config', config);
 
-  return <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>;
+  const memoizedValue = useMemo(() => ({ state, setState, setField, resetState }), [state, setField, setState, resetState]);
+
+  return <ConfigContext.Provider value={memoizedValue}>{children}</ConfigContext.Provider>;
 }
 
-ConfigProvider.propTypes = {
-  children: PropTypes.node
-};
-
-export default ConfigProvider;
+ConfigProvider.propTypes = { children: PropTypes.node };

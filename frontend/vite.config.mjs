@@ -24,20 +24,8 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
-        pages: path.resolve(__dirname, 'src/pages'),
-        components: path.resolve(__dirname, 'src/components'),
-        layout: path.resolve(__dirname, 'src/layout'),
-        routes: path.resolve(__dirname, 'src/routes'),
-        api: path.resolve(__dirname, 'src/api'),
-        utils: path.resolve(__dirname, 'src/utils'),
-        contexts: path.resolve(__dirname, 'src/contexts'),
-        hooks: path.resolve(__dirname, 'src/hooks'),
-        sections: path.resolve(__dirname, 'src/sections'),
-        assets: path.resolve(__dirname, 'src/assets'),
-        themes: path.resolve(__dirname, 'src/themes'),
-        'menu-items': path.resolve(__dirname, 'src/menu-items'),
         '@ant-design/icons': path.resolve(__dirname, 'node_modules/@ant-design/icons')
+        // Add more aliases as needed
       }
     },
     plugins: [react(), jsconfigPaths()],

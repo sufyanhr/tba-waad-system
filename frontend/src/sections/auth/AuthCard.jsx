@@ -1,26 +1,28 @@
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+// material-ui
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 
-const AuthCard = ({ children, ...other }) => {
+// project imports
+import MainCard from 'components/MainCard';
+
+// ==============================|| AUTHENTICATION - CARD WRAPPER ||============================== //
+
+export default function AuthCard({ children, ...other }) {
+  const theme = useTheme();
+
   return (
-    <Box
-      sx={{
-        maxWidth: { xs: 400, lg: 475 },
-        margin: { xs: 2.5, md: 3 },
-        '& > *': {
-          flexGrow: 1,
-          flexBasis: '50%'
-        }
-      }}
+    <MainCard
+      sx={{ maxWidth: { xs: 400, sm: 475 }, margin: { xs: 2.5, md: 3 }, '& > *': { flexGrow: 1, flexBasis: '50%' } }}
+      content={false}
       {...other}
+      border={false}
+      boxShadow
+      shadow={theme.vars.customShadows.z1}
     >
-      {children}
-    </Box>
+      <Box sx={{ p: { xs: 2, sm: 3, md: 4, xl: 5 } }}>{children}</Box>
+    </MainCard>
   );
-};
+}
 
-AuthCard.propTypes = {
-  children: PropTypes.node
-};
-
-export default AuthCard;
+AuthCard.propTypes = { children: PropTypes.any, other: PropTypes.any };

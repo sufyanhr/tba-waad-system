@@ -1,6 +1,7 @@
 import { createContext, useEffect, useReducer } from 'react';
 
 // third-party
+import { Chance } from 'chance';
 import { jwtDecode } from 'jwt-decode';
 
 // reducer - state management
@@ -9,8 +10,9 @@ import authReducer from 'contexts/auth-reducer/auth';
 
 // project imports
 import Loader from 'components/Loader';
-import authService from 'services/authService';
-import { getAccessToken } from 'api/httpClient';
+import axios from 'utils/axios';
+
+const chance = new Chance();
 
 // constant
 const initialState = {
@@ -23,11 +25,20 @@ const verifyToken = (serviceToken) => {
   if (!serviceToken) {
     return false;
   }
-  try {
-    const decoded = jwtDecode(serviceToken);
-    return decoded.exp > Date.now() / 1000;
-  } catch (error) {
-    return false;
+  const decoded = jwtDecode(serviceToken);
+  /**
+   * Property 'exp' does not exist on type '<T = unknown>(token: string, options?: JwtDecodeOptions | undefined) => T'.
+   */
+  return decoded.exp > Date.now() / 1000;
+};
+
+const setSession = (serviceToken) => {
+  if (serviceToken) {
+    localStorage.setItem('serviceToken', serviceToken);
+    axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
+  } else {
+    localStorage.removeItem('serviceToken');
+    delete axios.defaults.headers.common.Authorization;
   }
 };
 
@@ -41,57 +52,25 @@ export const JWTProvider = ({ children }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const accessToken = getAccessToken();
-        
-        if (accessToken && verifyToken(accessToken)) {
-          // Get user from localStorage first (faster)
-          const storedUser = authService.getUser();
-          
-          if (storedUser) {
-            dispatch({
-              type: LOGIN,
-              payload: {
-                isLoggedIn: true,
-                user: storedUser
-              }
-            });
-            
-            // Optionally refresh user data from backend
-            try {
-              const response = await authService.getCurrentUser();
-              const user = response.user || response;
-              
-              dispatch({
-                type: LOGIN,
-                payload: {
-                  isLoggedIn: true,
-                  user
-                }
-              });
-            } catch (err) {
-              console.error('Failed to refresh user data:', err);
-              // Keep using stored user data
+        const serviceToken = window.localStorage.getItem('serviceToken');
+        if (serviceToken && verifyToken(serviceToken)) {
+          setSession(serviceToken);
+          const response = await axios.get('/api/account/me');
+          const { user } = response.data;
+          dispatch({
+            type: LOGIN,
+            payload: {
+              isLoggedIn: true,
+              user
             }
-          } else {
-            // No stored user, fetch from backend
-            const response = await authService.getCurrentUser();
-            const user = response.user || response;
-            
-            dispatch({
-              type: LOGIN,
-              payload: {
-                isLoggedIn: true,
-                user
-              }
-            });
-          }
+          });
         } else {
           dispatch({
             type: LOGOUT
           });
         }
       } catch (err) {
-        console.error('Auth initialization error:', err);
+        console.error(err);
         dispatch({
           type: LOGOUT
         });
@@ -102,91 +81,62 @@ export const JWTProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const { user } = await authService.login(email, password);
-      
-      dispatch({
-        type: LOGIN,
-        payload: {
-          isLoggedIn: true,
-          user
-        }
-      });
-      
-      return user;
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
+    const response = await axios.post('/api/account/login', { email, password });
+    const { serviceToken, user } = response.data;
+    setSession(serviceToken);
+    dispatch({
+      type: LOGIN,
+      payload: {
+        isLoggedIn: true,
+        user
+      }
+    });
   };
 
   const register = async (email, password, firstName, lastName) => {
-    try {
-      const response = await authService.register({
-        email,
-        password,
-        firstName,
-        lastName
-      });
-      
-      return response;
-    } catch (error) {
-      console.error('Registration failed:', error);
-      throw error;
+    // todo: this flow need to be recode as it not verified
+    const id = chance.bb_pin();
+    const response = await axios.post('/api/account/register', {
+      id,
+      email,
+      password,
+      firstName,
+      lastName
+    });
+    let users = response.data;
+
+    if (window.localStorage.getItem('users') !== undefined && window.localStorage.getItem('users') !== null) {
+      const localUsers = window.localStorage.getItem('users');
+      users = [
+        ...JSON.parse(localUsers),
+        {
+          id,
+          email,
+          password,
+          name: `${firstName} ${lastName}`
+        }
+      ];
     }
+
+    window.localStorage.setItem('users', JSON.stringify(users));
   };
 
   const logout = () => {
-    authService.logout();
+    setSession(null);
     dispatch({ type: LOGOUT });
   };
 
-  const resetPassword = async (email, otp, newPassword) => {
-    try {
-      const response = await authService.resetPassword(email, otp, newPassword);
-      return response;
-    } catch (error) {
-      console.error('Reset password failed:', error);
-      throw error;
-    }
+  const resetPassword = async (email) => {
+    console.log('email - ', email);
   };
 
-  const updateProfile = async (userData) => {
-    try {
-      const response = await authService.updateProfile(userData);
-      const user = response.user || response;
-      
-      dispatch({
-        type: LOGIN,
-        payload: {
-          isLoggedIn: true,
-          user
-        }
-      });
-      
-      return user;
-    } catch (error) {
-      console.error('Update profile failed:', error);
-      throw error;
-    }
-  };
+  const updateProfile = () => {};
 
   if (state.isInitialized !== undefined && !state.isInitialized) {
     return <Loader />;
   }
 
-  return (
-    <JWTContext.Provider value={{ 
-      ...state, 
-      login, 
-      logout, 
-      register, 
-      resetPassword, 
-      updateProfile 
-    }}>
-      {children}
-    </JWTContext.Provider>
-  );
+  return <JWTContext value={{ ...state, login, logout, register, resetPassword, updateProfile }}>{children}</JWTContext>;
 };
 
 export default JWTContext;

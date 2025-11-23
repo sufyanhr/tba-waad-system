@@ -1,27 +1,29 @@
 import { useState } from 'react';
 
-const usePagination = (items, itemsPerPage = 10) => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(itemsPerPage);
+// ==============================|| CARD - PAGINATION ||============================== //
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+export default function usePagination(data, itemsPerPage) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const maxPage = Math.ceil(data.length / itemsPerPage);
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  function currentData() {
+    const begin = (currentPage - 1) * itemsPerPage;
+    const end = begin + itemsPerPage;
+    return data.slice(begin, end);
+  }
 
-  const paginatedItems = items.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  function next() {
+    setCurrentPage((currentPage) => Math.min(currentPage + 1, maxPage));
+  }
 
-  return {
-    page,
-    rowsPerPage,
-    paginatedItems,
-    handleChangePage,
-    handleChangeRowsPerPage
-  };
-};
+  function prev() {
+    setCurrentPage((currentPage) => Math.max(currentPage - 1, 1));
+  }
 
-export default usePagination;
+  function jump(page) {
+    const pageNumber = Math.max(1, page);
+    setCurrentPage(() => Math.min(pageNumber, maxPage));
+  }
+
+  return { next, prev, jump, currentData, currentPage, maxPage };
+}

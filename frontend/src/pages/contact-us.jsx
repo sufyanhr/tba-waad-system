@@ -1,5 +1,24 @@
-import { Typography, Box } from '@mui/material';
-const ContactUs = () => (
-  <Box><Typography variant="h3">Contact Us</Typography></Box>
-);
-export default ContactUs;
+// material-ui
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+
+// project imports
+import ContactForm from 'sections/contact-us/ContactForm';
+import ContactHeader from 'sections/contact-us/ContactHeader';
+
+// ==============================|| CONTACT US - MAIN ||============================== //
+
+export default function ContactUS() {
+  return (
+    <Grid container spacing={12} sx={{ mb: 12, justifyContent: 'center', alignItems: 'center' }}>
+      <Grid size={12}>
+        <ContactHeader />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 10, lg: 9 }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 0, sm: 2 } }}>
+          <ContactForm />
+        </Container>
+      </Grid>
+    </Grid>
+  );
+}

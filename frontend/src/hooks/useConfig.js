@@ -1,28 +1,12 @@
-import { useContext } from 'react';
+import { use } from 'react';
 import { ConfigContext } from 'contexts/ConfigContext';
 
 // ==============================|| CONFIG - HOOKS ||============================== //
 
-const useConfig = () => {
-  const context = useContext(ConfigContext);
+export default function useConfig() {
+  const context = use(ConfigContext);
 
-  if (!context) throw new Error('useConfig must be used within ConfigProvider');
+  if (!context) throw new Error('useConfig must be use inside ConfigProvider');
 
-  return {
-    ...context,
-    state: {
-      fontFamily: context.fontFamily,
-      borderRadius: context.borderRadius,
-      mode: context.mode,
-      presetColor: context.presetColor,
-      navType: context.navType,
-      outlinedFilled: context.outlinedFilled,
-      miniDrawer: context.miniDrawer,
-      container: context.container,
-      themeDirection: context.themeDirection,
-      menuOrientation: context.menuOrientation
-    }
-  };
-};
-
-export default useConfig;
+  return context;
+}

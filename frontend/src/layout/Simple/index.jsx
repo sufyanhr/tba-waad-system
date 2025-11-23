@@ -1,26 +1,29 @@
 import PropTypes from 'prop-types';
+import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box } from '@mui/material';
 
-// ==============================|| SIMPLE LAYOUT ||============================== //
+// project imports
+import Loader from 'components/Loader';
+import { SimpleLayoutType } from 'config';
 
-const SimpleLayout = ({ layout = 'simple', enableElevationScroll = false }) => {
+const Header = lazy(() => import('components/pages/Header'));
+const Footer = lazy(() => import('components/pages/Footer'));
+
+// ==============================|| LAYOUT - SIMPLE / LANDING ||============================== //
+
+export default function SimpleLayout({ layout = SimpleLayoutType.SIMPLE, enableElevationScroll = false }) {
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
+    <Suspense fallback={<Loader />}>
+      <Header enableElevationScroll={enableElevationScroll} />
       <Outlet />
-    </Box>
+      <Footer isFull={layout === SimpleLayoutType.LANDING} />
+    </Suspense>
   );
-};
+}
 
 SimpleLayout.propTypes = {
-  layout: PropTypes.string,
+  layout: PropTypes.any,
+  SimpleLayoutType: PropTypes.any,
+  SIMPLE: PropTypes.any,
   enableElevationScroll: PropTypes.bool
 };
-
-export default SimpleLayout;

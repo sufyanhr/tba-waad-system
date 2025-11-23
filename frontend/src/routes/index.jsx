@@ -1,32 +1,37 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { lazy } from 'react';
+import { createBrowserRouter } from 'react-router-dom';
 
 // project imports
-import { MainRoutes, TBARoutes, OtherRoutes } from './MainRoutes';
+import MainRoutes from './MainRoutes';
 import LoginRoutes from './LoginRoutes';
-import AuthGuard from 'utils/route-guard/AuthGuard';
-import DashboardLayout from 'layout/Dashboard';
+import ComponentsRoutes from './ComponentsRoutes';
+
+import { SimpleLayoutType } from 'config';
+import SimpleLayout from 'layout/Simple';
+import Loadable from 'components/Loadable';
+
+// render - landing page
+const PagesLanding = Loadable(lazy(() => import('pages/landing')));
 
 // ==============================|| ROUTING RENDER ||============================== //
 
-const router = createBrowserRouter([
-  LoginRoutes,
-  {
-    path: '/',
-    element: (
-      <AuthGuard>
-        <DashboardLayout />
-      </AuthGuard>
-    ),
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/dashboard/default" replace />
-      },
-      MainRoutes,
-      TBARoutes,
-      ...OtherRoutes
-    ]
-  }
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <SimpleLayout layout={SimpleLayoutType.LANDING} enableElevationScroll />,
+      children: [
+        {
+          index: true,
+          element: <PagesLanding />
+        }
+      ]
+    },
+    LoginRoutes,
+    ComponentsRoutes,
+    MainRoutes
+  ],
+  { basename: import.meta.env.VITE_APP_BASE_NAME }
+);
 
 export default router;

@@ -1,14 +1,17 @@
-// Placeholder for image URL helper
-export const getImageUrl = (name, path = '') => {
-  // Return a placeholder image or generate a data URI
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
-};
+export let ImagePath;
 
-// Image path constants
-export const ImagePath = {
-  USERS: 'users',
-  AVATAR: 'avatar',
-  PRODUCTS: 'products'
-};
+(function (ImagePath) {
+  ImagePath['LANDING'] = 'landing';
+  ImagePath['USERS'] = 'users';
+  ImagePath['ECOMMERCE'] = 'e-commerce';
+  ImagePath['PROFILE'] = 'profile';
+  ImagePath['CLIENTS'] = 'clients';
+  ImagePath['CHANGELOG'] = 'change-log';
+  ImagePath['WORKSPACE'] = 'workspace';
+})(ImagePath || (ImagePath = {}));
 
-export default getImageUrl;
+// ==============================|| NEW URL - GET IMAGE URL ||============================== //
+
+export function getImageUrl(name, path) {
+  return new URL(`/src/assets/images/${path}/${name}`, import.meta.url).href;
+}
