@@ -14,10 +14,14 @@ public class EmployerMapper {
         return EmployerResponseDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
+                .code(entity.getCode())
+                .companyId(entity.getCompanyId())
                 .contactName(entity.getContactName())
                 .contactPhone(entity.getContactPhone())
                 .contactEmail(entity.getContactEmail())
                 .address(entity.getAddress())
+                .phone(entity.getPhone())
+                .email(entity.getEmail())
                 .active(entity.getActive())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -29,11 +33,15 @@ public class EmployerMapper {
         
         return Employer.builder()
                 .name(dto.getName())
+                .code(dto.getCode())
+                .companyId(dto.getCompanyId())
                 .contactName(dto.getContactName())
                 .contactPhone(dto.getContactPhone())
                 .contactEmail(dto.getContactEmail())
                 .address(dto.getAddress())
-                .active(true)
+                .phone(dto.getPhone())
+                .email(dto.getEmail())
+                .active(dto.getActive() != null ? dto.getActive() : true)
                 .build();
     }
 
@@ -41,9 +49,16 @@ public class EmployerMapper {
         if (dto == null) return;
         
         entity.setName(dto.getName());
+        entity.setCode(dto.getCode());
+        entity.setCompanyId(dto.getCompanyId());
         entity.setContactName(dto.getContactName());
         entity.setContactPhone(dto.getContactPhone());
         entity.setContactEmail(dto.getContactEmail());
         entity.setAddress(dto.getAddress());
+        entity.setPhone(dto.getPhone());
+        entity.setEmail(dto.getEmail());
+        if (dto.getActive() != null) {
+            entity.setActive(dto.getActive());
+        }
     }
 }

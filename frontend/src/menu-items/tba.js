@@ -39,7 +39,7 @@ const tba = {
       url: '/tba/employers',
       icon: icons.TeamOutlined,
       breadcrumbs: false,
-      requiredPermissions: ['READ_EMPLOYER']
+      requiredPermissions: ['MANAGE_EMPLOYERS']
     },
     {
       id: 'insurance-companies',

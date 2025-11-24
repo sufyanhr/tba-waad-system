@@ -14,10 +14,14 @@ import java.time.LocalDateTime;
 public class EmployerResponseDto {
     private Long id;
     private String name;
+    private String code;
+    private Long companyId;
     private String contactName;
     private String contactPhone;
     private String contactEmail;
     private String address;
+    private String phone;
+    private String email;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

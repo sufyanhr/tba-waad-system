@@ -60,7 +60,7 @@ const tools = {
       id: 'system-settings',
       title: 'System Settings',
       type: 'item',
-      url: '/tools/settings',
+      url: '/tools/settings/general',
       icon: icons.SettingOutlined,
       breadcrumbs: false
     }

@@ -6,6 +6,7 @@ import com.waad.tba.modules.rbac.entity.User;
 import com.waad.tba.modules.rbac.repository.PermissionRepository;
 import com.waad.tba.modules.rbac.repository.RoleRepository;
 import com.waad.tba.modules.rbac.repository.UserRepository;
+import com.waad.tba.security.AppPermission;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +39,20 @@ public class DataInitializer {
 
         log.info("Initializing seed data...");
 
-        // Create permissions
-        List<Permission> permissions = Arrays.asList(
+        // Create permissions from AppPermission enum + legacy permissions
+        List<Permission> newPermissions = Arrays.asList(
+                // AppPermission enum values
+                createPermission(AppPermission.MANAGE_SYSTEM_SETTINGS.name(), AppPermission.MANAGE_SYSTEM_SETTINGS.getDescription()),
+                createPermission(AppPermission.MANAGE_USERS.name(), AppPermission.MANAGE_USERS.getDescription()),
+                createPermission(AppPermission.MANAGE_ROLES.name(), AppPermission.MANAGE_ROLES.getDescription()),
+                createPermission(AppPermission.MANAGE_MEMBERS.name(), AppPermission.MANAGE_MEMBERS.getDescription()),
+                createPermission(AppPermission.MANAGE_EMPLOYERS.name(), AppPermission.MANAGE_EMPLOYERS.getDescription()),
+                createPermission(AppPermission.MANAGE_PROVIDERS.name(), AppPermission.MANAGE_PROVIDERS.getDescription()),
+                createPermission(AppPermission.MANAGE_CLAIMS.name(), AppPermission.MANAGE_CLAIMS.getDescription()),
+                createPermission(AppPermission.MANAGE_VISITS.name(), AppPermission.MANAGE_VISITS.getDescription()),
+                createPermission(AppPermission.MANAGE_REPORTS.name(), AppPermission.MANAGE_REPORTS.getDescription()),
+                
+                // Legacy permissions (for backward compatibility)
                 createPermission("rbac.view", "View RBAC settings"),
                 createPermission("rbac.manage", "Manage RBAC settings"),
                 createPermission("user.view", "View users"),
@@ -64,13 +77,24 @@ public class DataInitializer {
                 createPermission("claim.reject", "Reject claims"),
                 createPermission("dashboard.view", "View dashboard")
         );
-        permissionRepository.saveAll(permissions);
+        List<Permission> permissions = permissionRepository.saveAll(newPermissions);
 
-        // Create ADMIN role with all permissions
+        // Create SUPER_ADMIN role with ALL permissions
+        Role superAdminRole = Role.builder()
+                .name("SUPER_ADMIN")
+                .description("Super Administrator with full system access")
+                .permissions(new HashSet<>(permissions))
+                .build();
+        roleRepository.save(superAdminRole);
+        log.info("Created SUPER_ADMIN role with {} permissions", permissions.size());
+
+        // Create ADMIN role with most permissions (except MANAGE_SYSTEM_SETTINGS)
+        Set<Permission> adminPermissions = new HashSet<>(permissions);
+        adminPermissions.removeIf(p -> p.getName().equals("MANAGE_SYSTEM_SETTINGS"));
         Role adminRole = Role.builder()
                 .name("ADMIN")
                 .description("Administrator with full access")
-                .permissions(new HashSet<>(permissions))
+                .permissions(adminPermissions)
                 .build();
         roleRepository.save(adminRole);
 
@@ -102,23 +126,33 @@ public class DataInitializer {
                 .build();
         roleRepository.save(userRole);
 
-        // Create permanent admin user if not exists
+        // Create super admin user with SUPER_ADMIN role
         if (!userRepository.existsByEmail("admin@tba.sa")) {
-            User admin = User.builder()
+            User superAdmin = User.builder()
                     .username("admin")
                     .password(passwordEncoder.encode("Admin@123"))
-                    .fullName("System Administrator")
+                    .fullName("Super Administrator")
                     .email("admin@tba.sa")
+                    .phone("+966500000000")
                     .active(true)
-                    .roles(new HashSet<>(Arrays.asList(adminRole)))
+                    .roles(new HashSet<>(Arrays.asList(superAdminRole)))
                     .build();
-            userRepository.save(admin);
-            log.info("Admin user created: admin@tba.sa");
+            userRepository.save(superAdmin);
+            log.info("Super admin user created: admin@tba.sa / Admin@123");
         } else {
-            log.info("Admin user already exists, skipping creation");
+            log.info("Admin user already exists, ensuring SUPER_ADMIN role...");
+            User existingAdmin = userRepository.findByEmail("admin@tba.sa").orElseThrow();
+            boolean hasRole = existingAdmin.getRoles().stream()
+                    .anyMatch(role -> "SUPER_ADMIN".equals(role.getName()));
+            
+            if (!hasRole) {
+                existingAdmin.getRoles().add(superAdminRole);
+                userRepository.save(existingAdmin);
+                log.info("Added SUPER_ADMIN role to existing admin user");
+            }
         }
 
-        log.info("Seed data initialized successfully: {} permissions, 3 roles", permissions.size());
+        log.info("Seed data initialized successfully: {} permissions, 4 roles (SUPER_ADMIN, ADMIN, MANAGER, USER)", permissions.size());
     }
 
     private Permission createPermission(String name, String description) {

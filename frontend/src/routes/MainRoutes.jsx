@@ -6,6 +6,7 @@ import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import SimpleLayout from 'layout/Simple';
+import RBACGuard from 'components/tba/RBACGuard';
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
@@ -28,9 +29,23 @@ const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
 const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
 const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
 
+// render - Employers module
+const EmployersList = Loadable(lazy(() => import('pages/tba/employers/EmployersList')));
+const EmployerCreate = Loadable(lazy(() => import('pages/tba/employers/EmployerCreate')));
+const EmployerEdit = Loadable(lazy(() => import('pages/tba/employers/EmployerEdit')));
+const EmployerView = Loadable(lazy(() => import('pages/tba/employers/EmployerView')));
+
 // render - Tools pages
 const ToolsReports = Loadable(lazy(() => import('pages/tools/reports')));
-const ToolsSettings = Loadable(lazy(() => import('pages/tools/settings')));
+
+// render - System Settings
+const SystemSettings = Loadable(lazy(() => import('pages/system-settings/SystemSettings')));
+const SystemSettingsTabGeneral = Loadable(lazy(() => import('sections/tools/system-settings/TabGeneral')));
+const SystemSettingsTabCompanyInfo = Loadable(lazy(() => import('sections/tools/system-settings/TabCompanyInfo')));
+const SystemSettingsTabNotifications = Loadable(lazy(() => import('sections/tools/system-settings/TabNotifications')));
+const SystemSettingsTabIntegrations = Loadable(lazy(() => import('sections/tools/system-settings/TabIntegrations')));
+const SystemSettingsTabSecurity = Loadable(lazy(() => import('sections/tools/system-settings/TabSecurity')));
+const SystemSettingsTabAuditLog = Loadable(lazy(() => import('sections/tools/system-settings/TabAuditLog')));
 
 // render - applications
 const AppChat = Loadable(lazy(() => import('pages/apps/chat')));
@@ -185,7 +200,35 @@ const MainRoutes = {
             },
             {
               path: 'employers',
-              element: <TbaEmployers />
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                  <EmployersList />
+                </RBACGuard>
+              )
+            },
+            {
+              path: 'employers/create',
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                  <EmployerCreate />
+                </RBACGuard>
+              )
+            },
+            {
+              path: 'employers/edit/:id',
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                  <EmployerEdit />
+                </RBACGuard>
+              )
+            },
+            {
+              path: 'employers/view/:id',
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                  <EmployerView />
+                </RBACGuard>
+              )
             },
             {
               path: 'claims',
@@ -206,7 +249,33 @@ const MainRoutes = {
             },
             {
               path: 'settings',
-              element: <ToolsSettings />
+              element: <SystemSettings />,
+              children: [
+                {
+                  path: 'general',
+                  element: <SystemSettingsTabGeneral />
+                },
+                {
+                  path: 'company-info',
+                  element: <SystemSettingsTabCompanyInfo />
+                },
+                {
+                  path: 'notifications',
+                  element: <SystemSettingsTabNotifications />
+                },
+                {
+                  path: 'integrations',
+                  element: <SystemSettingsTabIntegrations />
+                },
+                {
+                  path: 'security',
+                  element: <SystemSettingsTabSecurity />
+                },
+                {
+                  path: 'audit-log',
+                  element: <SystemSettingsTabAuditLog />
+                }
+              ]
             }
           ]
         },

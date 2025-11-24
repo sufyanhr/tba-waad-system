@@ -40,8 +40,14 @@ public class EmployerService {
 
     @Transactional
     public EmployerResponseDto create(EmployerCreateDto dto) {
+        // Validate unique code
+        if (repository.existsByCode(dto.getCode())) {
+            throw new IllegalArgumentException("Employer code already exists: " + dto.getCode());
+        }
+        
         Employer entity = mapper.toEntity(dto);
         Employer saved = repository.save(entity);
+        log.info("Created employer: {} with code: {}", saved.getName(), saved.getCode());
         return mapper.toResponseDto(saved);
     }
 
@@ -50,8 +56,15 @@ public class EmployerService {
         Employer entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employer", "id", id));
 
+        // Validate unique code (exclude current employer)
+        if (repository.existsByCodeAndIdNot(dto.getCode(), id)) {
+            throw new IllegalArgumentException("Employer code already exists: " + dto.getCode());
+        }
+
         mapper.updateEntityFromDto(entity, dto);
-        return mapper.toResponseDto(repository.save(entity));
+        Employer updated = repository.save(entity);
+        log.info("Updated employer: {} with code: {}", updated.getName(), updated.getCode());
+        return mapper.toResponseDto(updated);
     }
 
     @Transactional
@@ -60,6 +73,7 @@ public class EmployerService {
             throw new ResourceNotFoundException("Employer", "id", id);
         }
         repository.deleteById(id);
+        log.info("Deleted employer with id: {}", id);
     }
 
     @Transactional(readOnly = true)
@@ -69,17 +83,26 @@ public class EmployerService {
                 .toList();
     }
 
-    // ✅ النسخة النهائية الصحيحة
     @Transactional(readOnly = true)
-    public PaginationResponse<EmployerResponseDto> findAllPaginated(Pageable pageable, String search) {
-
+    public PaginationResponse<EmployerResponseDto> findAllPaginated(Pageable pageable, String search, Long companyId) {
         Page<Employer> page;
 
-        if (search != null && !search.isEmpty()) {
-            String q = "%" + search.toLowerCase() + "%";
-            page = repository.searchPaged(q, pageable);
+        if (companyId != null) {
+            // Filter by companyId
+            if (search != null && !search.isEmpty()) {
+                String q = search.toLowerCase();
+                page = repository.searchPagedByCompany(companyId, q, pageable);
+            } else {
+                page = repository.findByCompanyId(companyId, pageable);
+            }
         } else {
-            page = repository.findAll(pageable);
+            // No company filter (SUPER_ADMIN)
+            if (search != null && !search.isEmpty()) {
+                String q = search.toLowerCase();
+                page = repository.searchPaged(q, pageable);
+            } else {
+                page = repository.findAll(pageable);
+            }
         }
 
         List<EmployerResponseDto> items = page.getContent()

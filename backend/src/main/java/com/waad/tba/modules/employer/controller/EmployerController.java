@@ -31,7 +31,7 @@ public class EmployerController {
      */
     @Deprecated
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('employer.view')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "List all employers", description = "Returns all employers.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employers retrieved successfully"),
@@ -47,7 +47,7 @@ public class EmployerController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('employer.view')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Get employer by ID", description = "Returns an employer by ID.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employer retrieved successfully"),
@@ -63,7 +63,7 @@ public class EmployerController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('employer.manage')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Create employer", description = "Creates a new employer.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Employer created successfully"),
@@ -80,7 +80,7 @@ public class EmployerController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('employer.manage')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Update employer", description = "Updates an existing employer by ID.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employer updated successfully"),
@@ -99,7 +99,7 @@ public class EmployerController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('employer.manage')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Delete employer", description = "Deletes an employer by ID.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employer deleted successfully"),
@@ -119,7 +119,7 @@ public class EmployerController {
      */
     @Deprecated
     @GetMapping("/search")
-    @PreAuthorize("hasAuthority('employer.view')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Search employers", description = "Search employers by query string.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employers retrieved successfully"),
@@ -134,7 +134,7 @@ public class EmployerController {
     }
 
     @GetMapping("/paginate")
-    @PreAuthorize("hasAuthority('employer.view')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Paginate employers", description = "Returns a page of employers.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employers page retrieved successfully"),
@@ -146,27 +146,28 @@ public class EmployerController {
             @RequestParam(defaultValue = "0") int page,
             @Parameter(name = "size", description = "Page size")
             @RequestParam(defaultValue = "10") int size) {
-        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(PageRequest.of(page, size), null);
+        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(PageRequest.of(page, size), null, null);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('employer.view')")
-    @Operation(summary = "Paginate employers", description = "Returns a page of employers with pagination and optional search.")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
+    @Operation(summary = "List employers", description = "Returns a paginated list of employers with optional search and company filter.")
     public ResponseEntity<ApiResponse<com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto>>> list(
             @Parameter(name = "page", description = "Page number (1-based)") @RequestParam(defaultValue = "1") int page,
             @Parameter(name = "size", description = "Page size") @RequestParam(defaultValue = "10") int size,
             @Parameter(name = "search", description = "Search query") @RequestParam(required = false) String search,
+            @Parameter(name = "companyId", description = "Company ID filter") @RequestParam(required = false) Long companyId,
             @Parameter(name = "sortBy", description = "Sort by field") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(name = "sortDir", description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDir) {
         org.springframework.data.domain.Pageable pageable = PageRequest.of(Math.max(0, page - 1), size,
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.fromString(sortDir), sortBy));
-        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(pageable, search);
+        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(pageable, search, companyId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/count")
-    @PreAuthorize("hasAuthority('employer.view')")
+    @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
     @Operation(summary = "Count employers", description = "Returns total number of employers")
     public ResponseEntity<ApiResponse<Long>> count() {
         long total = service.count();
