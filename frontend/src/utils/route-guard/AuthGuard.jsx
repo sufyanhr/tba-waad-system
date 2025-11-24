@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // project imports
 import useAuth from 'hooks/useAuth';
 
-// ==============================|| AUTH GUARD ||============================== //
+// ==============================|| AUTH GUARD - PROTECTED ROUTES ||============================== //
 
 export default function AuthGuard({ children }) {
   const { isLoggedIn } = useAuth();
@@ -14,7 +14,7 @@ export default function AuthGuard({ children }) {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('login', {
+      navigate('/login', {
         state: {
           from: location.pathname
         },
@@ -26,4 +26,6 @@ export default function AuthGuard({ children }) {
   return children;
 }
 
-AuthGuard.propTypes = { children: PropTypes.any };
+AuthGuard.propTypes = { 
+  children: PropTypes.node 
+};

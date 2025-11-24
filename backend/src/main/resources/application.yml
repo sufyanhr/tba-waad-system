@@ -30,7 +30,7 @@ spring:
             trust: smtp.hostinger.com
   
 server:
-  port: 9092
+  port: 8080
   error:
     include-message: always
     include-stacktrace: on_param

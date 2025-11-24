@@ -13,8 +13,10 @@ import menuItem from 'menu-items';
 import { MenuFromAPI } from 'menu-items/dashboard';
 
 import useConfig from 'hooks/useConfig';
+import useAuth from 'hooks/useAuth';
 import { HORIZONTAL_MAX_ITEM, MenuOrientation } from 'config';
 import { useGetMenu, useGetMenuMaster } from 'api/menu';
+import { filterMenuByPermissions } from 'utils/rbac';
 
 function isFound(arr, str) {
   return arr.items.some((element) => {
@@ -29,6 +31,7 @@ function isFound(arr, str) {
 
 export default function Navigation() {
   const { state } = useConfig();
+  const { user } = useAuth();
   const { menuLoading } = useGetMenu();
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
@@ -42,17 +45,23 @@ export default function Navigation() {
   const dashboardMenu = MenuFromAPI();
 
   useLayoutEffect(() => {
+    let rawMenuItems = { items: [] };
+    
     if (menuLoading && !isFound(menuItem, 'group-dashboard-loading')) {
       menuItem.items.splice(0, 0, dashboardMenu);
-      setMenuItems({ items: [...menuItem.items] });
+      rawMenuItems = { items: [...menuItem.items] };
     } else if (!menuLoading && dashboardMenu?.id !== undefined && !isFound(menuItem, 'group-dashboard')) {
       menuItem.items.splice(0, 1, dashboardMenu);
-      setMenuItems({ items: [...menuItem.items] });
+      rawMenuItems = { items: [...menuItem.items] };
     } else {
-      setMenuItems({ items: [...menuItem.items] });
+      rawMenuItems = { items: [...menuItem.items] };
     }
+    
+    // Filter menu items based on user permissions
+    const filteredItems = filterMenuByPermissions(rawMenuItems.items, user);
+    setMenuItems({ items: filteredItems });
     // eslint-disable-next-line
-  }, [menuLoading]);
+  }, [menuLoading, user]);
 
   const isHorizontal = state.menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
 

@@ -55,28 +55,27 @@ export default function AuthLogin({ isDemo = false }) {
     <>
       <Formik
         initialValues={{
-          email: 'info@codedthemes.com',
-          password: '123456',
+          email: '',
+          password: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+          email: Yup.string().max(255).required('Email or Username is required'),
           password: Yup.string()
             .required('Password is required')
             .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
-            .max(10, 'Password must be less than 10 characters')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
-            const trimmedEmail = values.email.trim();
-            await login(trimmedEmail, values.password);
+            // Backend expects identifier (username or email) and password
+            const trimmedIdentifier = values.email.trim();
+            await login(trimmedIdentifier, values.password);
             setStatus({ success: true });
             setSubmitting(false);
-            preload('api/menu/dashboard', fetcher); // load menu on login success
           } catch (err) {
-            console.error(err);
+            console.error('Login error:', err);
             setStatus({ success: false });
-            setErrors({ submit: err.message });
+            setErrors({ submit: err.message || 'Invalid credentials. Please try again.' });
             setSubmitting(false);
           }
         }}
@@ -86,15 +85,15 @@ export default function AuthLogin({ isDemo = false }) {
             <Grid container spacing={3}>
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="email-login">Email Address</InputLabel>
+                  <InputLabel htmlFor="email-login">Email Address or Username</InputLabel>
                   <OutlinedInput
                     id="email-login"
-                    type="email"
+                    type="text"
                     value={values.email}
                     name="email"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Enter email address"
+                    placeholder="Enter email address or username"
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
                   />

@@ -1,3 +1,22 @@
+/**
+ * CHAT API - TBA-WAAD INTERNAL OFFICE CHAT
+ * 
+ * Domain Purpose:
+ * - Internal staff communication only (NOT member-facing)
+ * - Used by Claims Reviewers, Medical Staff, and Admin teams
+ * - Facilitates quick discussions about claims, providers, or member cases
+ * 
+ * Current Status: Mock template with SWR state management
+ * 
+ * Future Integration:
+ * - Backend: WebSocket service for real-time messaging
+ * - Channels: Claims Review, Provider Network, Member Services, General
+ * - Features: File attachments, @mentions, claim/member references
+ * 
+ * @note This is NOT a member-facing chat system
+ * @see For member communications, use dedicated support ticket system
+ */
+
 import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
 

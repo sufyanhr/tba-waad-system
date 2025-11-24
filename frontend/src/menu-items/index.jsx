@@ -1,4 +1,5 @@
 // project imports
+import tba from './tba';
 import applications from './applications';
 import widget from './widget';
 import formsTables from './forms-tables';
@@ -10,7 +11,7 @@ import pages from './pages';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [widget, applications, formsTables, chartsMap, samplePage, pages, other]
+  items: [tba, widget, applications, formsTables, chartsMap, samplePage, pages, other]
 };
 
 export default menuItems;

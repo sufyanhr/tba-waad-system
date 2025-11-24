@@ -19,6 +19,14 @@ const WidgetStatistics = Loadable(lazy(() => import('pages/widget/statistics')))
 const WidgetData = Loadable(lazy(() => import('pages/widget/data')));
 const WidgetChart = Loadable(lazy(() => import('pages/widget/chart')));
 
+// render - TBA pages
+const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
+const TbaMembers = Loadable(lazy(() => import('pages/tba/members')));
+const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
+const TbaInsuranceCompanies = Loadable(lazy(() => import('pages/tba/insurance-companies')));
+const TbaReviewerCompanies = Loadable(lazy(() => import('pages/tba/reviewer-companies')));
+const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
+
 // render - applications
 const AppChat = Loadable(lazy(() => import('pages/apps/chat')));
 const AppCalendar = Loadable(lazy(() => import('pages/apps/calendar')));
@@ -112,17 +120,8 @@ const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/jwt/code-ver
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
-const MaintenanceUnderConstruction = Loadable(lazy(() => import('pages/maintenance/under-construction')));
-const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/coming-soon')));
-const MaintenanceJoinWaitList = Loadable(lazy(() => import('pages/maintenance/join-waitlist')));
 
-const AppContactUS = Loadable(lazy(() => import('pages/contact-us')));
-const ChangeLog = Loadable(lazy(() => import('pages/change-log')));
-const AppFaqs = Loadable(lazy(() => import('pages/faqs')));
-
-// render - sample page
-const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
-const PricingPage = Loadable(lazy(() => import('pages/extra-pages/pricing')));
+// Note: Landing, demo, and extra template pages removed - TBA admin only
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -164,6 +163,35 @@ const MainRoutes = {
             {
               path: 'chart',
               element: <WidgetChart />
+            }
+          ]
+        },
+        {
+          path: 'tba',
+          children: [
+            {
+              path: 'claims',
+              element: <TbaClaims />
+            },
+            {
+              path: 'members',
+              element: <TbaMembers />
+            },
+            {
+              path: 'employers',
+              element: <TbaEmployers />
+            },
+            {
+              path: 'insurance-companies',
+              element: <TbaInsuranceCompanies />
+            },
+            {
+              path: 'reviewer-companies',
+              element: <TbaReviewerCompanies />
+            },
+            {
+              path: 'visits',
+              element: <TbaVisits />
             }
           ]
         },
@@ -502,14 +530,6 @@ const MainRoutes = {
         {
           path: 'map',
           element: <Map />
-        },
-        {
-          path: 'sample-page',
-          element: <SamplePage />
-        },
-        {
-          path: 'pricing',
-          element: <PricingPage />
         }
       ]
     },
@@ -524,18 +544,6 @@ const MainRoutes = {
         {
           path: '500',
           element: <MaintenanceError500 />
-        },
-        {
-          path: 'under-construction',
-          element: <MaintenanceUnderConstruction />
-        },
-        {
-          path: 'coming-soon',
-          element: <MaintenanceComingSoon />
-        },
-        {
-          path: 'join-waitlist',
-          element: <MaintenanceJoinWaitList />
         }
       ]
     },
@@ -566,36 +574,6 @@ const MainRoutes = {
         {
           path: 'code-verification',
           element: <AuthCodeVerification />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'change-log',
-          element: <ChangeLog />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} enableElevationScroll />,
-      children: [
-        {
-          path: 'contact-us',
-          element: <AppContactUS />
-        }
-      ]
-    },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'faqs',
-          element: <AppFaqs />
         }
       ]
     }

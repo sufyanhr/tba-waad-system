@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { APP_DEFAULT_PATH } from 'config';
 import useAuth from 'hooks/useAuth';
 
-// ==============================|| GUEST GUARD ||============================== //
+// ==============================|| GUEST GUARD - PUBLIC ROUTES ||============================== //
 
 export default function GuestGuard({ children }) {
   const { isLoggedIn } = useAuth();
@@ -27,4 +27,6 @@ export default function GuestGuard({ children }) {
   return children;
 }
 
-GuestGuard.propTypes = { children: PropTypes.any };
+GuestGuard.propTypes = { 
+  children: PropTypes.node 
+};

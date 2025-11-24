@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-const axiosServices = axios.create({ baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:3010/' });
+// ==============================|| AXIOS CLIENT - TBA BACKEND INTEGRATION ||============================== //
 
-// ==============================|| AXIOS - FOR MOCK SERVICES ||============================== //
+const axiosServices = axios.create({ 
+  baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:9092',
+  timeout: 30000
+});
+
+// ==============================|| REQUEST INTERCEPTOR ||============================== //
 
 axiosServices.interceptors.request.use(
   async (config) => {
@@ -17,30 +22,39 @@ axiosServices.interceptors.request.use(
   }
 );
 
+// ==============================|| RESPONSE INTERCEPTOR ||============================== //
+
 axiosServices.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response.status === 401 && !window.location.href.includes('/login')) {
-      window.location.pathname = '/maintenance/500';
+    // Handle 401 Unauthorized - redirect to login
+    if (error.response?.status === 401 && !window.location.href.includes('/login')) {
+      localStorage.removeItem('serviceToken');
+      window.location.pathname = '/login';
     }
-    return Promise.reject((error.response && error.response.data) || 'Wrong Services');
+    
+    // Return structured error
+    const errorMessage = error.response?.data?.message || error.message || 'Network Error';
+    return Promise.reject({
+      message: errorMessage,
+      status: error.response?.status,
+      data: error.response?.data
+    });
   }
 );
 
 export default axiosServices;
 
+// ==============================|| UTILITY FETCHERS ||============================== //
+
 export const fetcher = async (args) => {
   const [url, config] = Array.isArray(args) ? args : [args];
-
   const res = await axiosServices.get(url, { ...config });
-
   return res.data;
 };
 
 export const fetcherPost = async (args) => {
   const [url, config] = Array.isArray(args) ? args : [args];
-
   const res = await axiosServices.post(url, { ...config });
-
   return res.data;
 };
