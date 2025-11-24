@@ -1,13 +1,9 @@
 // assets
-import DollarOutlined from '@ant-design/icons/DollarOutlined';
 import LoginOutlined from '@ant-design/icons/LoginOutlined';
-import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
-import HistoryOutlined from '@ant-design/icons/HistoryOutlined';
-import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
 import RocketOutlined from '@ant-design/icons/RocketOutlined';
 
 // icons
-const icons = { DollarOutlined, LoginOutlined, PhoneOutlined, RocketOutlined, HistoryOutlined, QuestionCircleOutlined };
+const icons = { LoginOutlined, RocketOutlined };
 
 // ==============================|| MENU ITEMS - PAGES ||============================== //
 
@@ -86,53 +82,8 @@ const pages = {
           type: 'item',
           url: '/maintenance/500',
           target: true
-        },
-        {
-          id: 'coming-soon',
-          title: 'coming-soon',
-          type: 'item',
-          url: '/maintenance/coming-soon',
-          target: true
-        },
-        {
-          id: 'under-construction',
-          title: 'under-construction',
-          type: 'item',
-          url: '/maintenance/under-construction',
-          target: true
-        },
-        {
-          id: 'join-waitlist',
-          title: 'join-waitlist',
-          type: 'item',
-          url: '/maintenance/join-waitlist',
-          target: true
         }
       ]
-    },
-    { id: 'change-log', title: 'change-log', type: 'item', url: '/change-log', icon: icons.HistoryOutlined, target: true },
-    {
-      id: 'contact-us',
-      title: 'contact-us',
-      type: 'item',
-      url: '/contact-us',
-      icon: icons.PhoneOutlined,
-      target: true
-    },
-    {
-      id: 'faqs',
-      title: 'faqs',
-      type: 'item',
-      url: '/faqs',
-      icon: icons.QuestionCircleOutlined,
-      target: true
-    },
-    {
-      id: 'pricing',
-      title: 'pricing',
-      type: 'item',
-      url: '/pricing',
-      icon: icons.DollarOutlined
     }
   ]
 };

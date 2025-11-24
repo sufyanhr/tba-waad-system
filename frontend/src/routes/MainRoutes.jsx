@@ -20,12 +20,17 @@ const WidgetData = Loadable(lazy(() => import('pages/widget/data')));
 const WidgetChart = Loadable(lazy(() => import('pages/widget/chart')));
 
 // render - TBA pages
-const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
+const TbaMedicalServices = Loadable(lazy(() => import('pages/tba/medical-services')));
+const TbaMedicalCategories = Loadable(lazy(() => import('pages/tba/medical-categories')));
+const TbaProviders = Loadable(lazy(() => import('pages/tba/providers')));
 const TbaMembers = Loadable(lazy(() => import('pages/tba/members')));
 const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
-const TbaInsuranceCompanies = Loadable(lazy(() => import('pages/tba/insurance-companies')));
-const TbaReviewerCompanies = Loadable(lazy(() => import('pages/tba/reviewer-companies')));
+const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
 const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
+
+// render - Tools pages
+const ToolsReports = Loadable(lazy(() => import('pages/tools/reports')));
+const ToolsSettings = Loadable(lazy(() => import('pages/tools/settings')));
 
 // render - applications
 const AppChat = Loadable(lazy(() => import('pages/apps/chat')));
@@ -61,17 +66,10 @@ const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/ac
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
 const AppECommProductList = Loadable(lazy(() => import('pages/apps/e-commerce/products-list')));
-const AppECommCheckout = Loadable(lazy(() => import('pages/apps/e-commerce/checkout')));
 const AppECommAddProduct = Loadable(lazy(() => import('pages/apps/e-commerce/add-product')));
 
 // render - forms & tables
 const FormsValidation = Loadable(lazy(() => import('pages/forms/validation')));
-const FormsWizard = Loadable(lazy(() => import('pages/forms/wizard')));
-
-const FormsLayoutBasic = Loadable(lazy(() => import('pages/forms/layouts/basic')));
-const FormsLayoutMultiColumn = Loadable(lazy(() => import('pages/forms/layouts/multi-column')));
-const FormsLayoutActionBar = Loadable(lazy(() => import('pages/forms/layouts/action-bar')));
-const FormsLayoutStickyBar = Loadable(lazy(() => import('pages/forms/layouts/sticky-bar')));
 
 const FormsPluginsMask = Loadable(lazy(() => import('pages/forms/plugins/mask')));
 const FormsPluginsClipboard = Loadable(lazy(() => import('pages/forms/plugins/clipboard')));
@@ -170,8 +168,16 @@ const MainRoutes = {
           path: 'tba',
           children: [
             {
-              path: 'claims',
-              element: <TbaClaims />
+              path: 'medical-services',
+              element: <TbaMedicalServices />
+            },
+            {
+              path: 'medical-categories',
+              element: <TbaMedicalCategories />
+            },
+            {
+              path: 'providers',
+              element: <TbaProviders />
             },
             {
               path: 'members',
@@ -182,16 +188,25 @@ const MainRoutes = {
               element: <TbaEmployers />
             },
             {
-              path: 'insurance-companies',
-              element: <TbaInsuranceCompanies />
-            },
-            {
-              path: 'reviewer-companies',
-              element: <TbaReviewerCompanies />
+              path: 'claims',
+              element: <TbaClaims />
             },
             {
               path: 'visits',
               element: <TbaVisits />
+            }
+          ]
+        },
+        {
+          path: 'tools',
+          children: [
+            {
+              path: 'reports',
+              element: <ToolsReports />
+            },
+            {
+              path: 'settings',
+              element: <ToolsSettings />
             }
           ]
         },
@@ -339,10 +354,6 @@ const MainRoutes = {
                 {
                   path: 'add-new-product',
                   element: <AppECommAddProduct />
-                },
-                {
-                  path: 'checkout',
-                  element: <AppECommCheckout />
                 }
               ]
             }
@@ -354,31 +365,6 @@ const MainRoutes = {
             {
               path: 'validation',
               element: <FormsValidation />
-            },
-            {
-              path: 'wizard',
-              element: <FormsWizard />
-            },
-            {
-              path: 'layout',
-              children: [
-                {
-                  path: 'basic',
-                  element: <FormsLayoutBasic />
-                },
-                {
-                  path: 'multi-column',
-                  element: <FormsLayoutMultiColumn />
-                },
-                {
-                  path: 'action-bar',
-                  element: <FormsLayoutActionBar />
-                },
-                {
-                  path: 'sticky-bar',
-                  element: <FormsLayoutStickyBar />
-                }
-              ]
             },
             {
               path: 'plugins',
