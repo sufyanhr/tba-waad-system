@@ -2,8 +2,10 @@ import axios from 'axios';
 
 // ==============================|| AXIOS CLIENT - TBA BACKEND INTEGRATION ||============================== //
 
+// baseURL should be the backend origin (no trailing /)
+// All requests should be made with a leading /api prefix (or will be normalized by helper below)
 const axiosServices = axios.create({ 
-  baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:9092',
+  baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:8080',
   timeout: 30000
 });
 
@@ -47,14 +49,27 @@ export default axiosServices;
 
 // ==============================|| UTILITY FETCHERS ||============================== //
 
+// Normalize API url so it always uses the configured API root
+const normalizeUrl = (url) => {
+  if (!url || typeof url !== 'string') return url;
+  // If it's a full URL already, do nothing
+  if (/^https?:\/\//i.test(url)) return url;
+  // Add leading slash if missing
+  if (!url.startsWith('/')) url = '/' + url;
+  // If it already contains the api prefix, return as-is
+  if (url.startsWith('/api/')) return url;
+  // If it contains '/api' after slash (eg '/apix'), return '/api/...' otherwise prefix '/api'
+  return `/api${url}`;
+};
+
 export const fetcher = async (args) => {
   const [url, config] = Array.isArray(args) ? args : [args];
-  const res = await axiosServices.get(url, { ...config });
+  const res = await axiosServices.get(normalizeUrl(url), { ...config });
   return res.data;
 };
 
 export const fetcherPost = async (args) => {
-  const [url, config] = Array.isArray(args) ? args : [args];
-  const res = await axiosServices.post(url, { ...config });
+  const [url, data, config] = Array.isArray(args) ? args : [args];
+  const res = await axiosServices.post(normalizeUrl(url), data, { ...config });
   return res.data;
 };

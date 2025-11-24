@@ -210,7 +210,7 @@ export default function MegaMenuSection() {
                                 </ListSubheader>
                               }
                             >
-                              <ListItemButton disableRipple component={Link} target="_blank" to="/">
+                              <ListItemButton disableRipple component={Link} target="_blank" to="/dashboard/default">
                                 <ListItemIcon>
                                   <Dot size={7} color="secondary" variant="outlined" />
                                 </ListItemIcon>
@@ -266,7 +266,7 @@ export default function MegaMenuSection() {
                                 </ListItemIcon>
                                 <ListItemText primary="404 Error" />
                               </ListItemButton>
-                              <ListItemButton disableRipple component={Link} target="_blank" to="/">
+                              <ListItemButton disableRipple component={Link} target="_blank" to="/dashboard/default">
                                 <ListItemIcon>
                                   <Dot size={7} color="secondary" variant="outlined" />
                                 </ListItemIcon>

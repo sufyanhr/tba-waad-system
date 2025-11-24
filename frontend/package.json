@@ -91,6 +91,8 @@
   },
   "scripts": {
     "start": "vite",
+    "clean:vite": "rm -rf node_modules/.vite || true",
+    "reset:config": "yarn clean:vite && yarn build",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",

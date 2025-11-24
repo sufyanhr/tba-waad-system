@@ -293,13 +293,13 @@ export default function Header({
         <Toolbar sx={{ px: { xs: 1.5, md: 0, lg: 0 }, py: 2 }}>
           <Stack direction="row" sx={{ alignItems: 'center', flexGrow: 1, display: { xs: 'none', md: 'block' } }}>
             <Typography sx={{ textAlign: 'left', display: 'inline-block' }}>
-              <Logo reverse to="/" />
+              <Logo reverse to={APP_DEFAULT_PATH} />
             </Typography>
           </Stack>
           {getDesktopLinks()}
           <Box sx={{ width: '100%', alignItems: 'center', justifyContent: 'space-between', display: { xs: 'flex', md: 'none' } }}>
             <Typography sx={{ textAlign: 'left', display: 'inline-block' }}>
-              <Logo reverse to="/" />
+              <Logo reverse to={APP_DEFAULT_PATH} />
             </Typography>
             {getMobileMenu()}
             {getDrawerContent()}

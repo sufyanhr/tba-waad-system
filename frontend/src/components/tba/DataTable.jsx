@@ -30,7 +30,6 @@ import {
 
 // project imports
 import MainCard from 'components/MainCard';
-import ScrollX from 'components/ScrollX';
 
 // assets
 import EditOutlined from '@ant-design/icons/EditOutlined';
@@ -160,7 +159,7 @@ export default function DataTable({
         </Box>
       )}
 
-      <ScrollX>
+      <Box sx={{ overflowX: 'auto' }}>
         <TableContainer>
           <Table>
             <TableHead>
@@ -234,7 +233,7 @@ export default function DataTable({
             </TableBody>
           </Table>
         </TableContainer>
-      </ScrollX>
+      </Box>
 
       {enablePagination && !loading && data.length > 0 && (
         <TablePagination

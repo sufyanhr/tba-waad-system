@@ -15,6 +15,7 @@ import { FormattedMessage } from 'react-intl';
 // project imports
 import MainCard from 'components/MainCard';
 import navigation from 'menu-items';
+import { APP_DEFAULT_PATH } from 'config';
 import { ThemeDirection } from 'config';
 
 // assets
@@ -137,7 +138,7 @@ export default function Breadcrumbs({
           >
             <Grid>
               <MuiBreadcrumbs aria-label="breadcrumb" maxItems={maxItems || 8} separator={separatorIcon}>
-                <Typography component={Link} to="/" color="text.secondary" variant="h6" sx={{ textDecoration: 'none' }}>
+                <Typography component={Link} to={APP_DEFAULT_PATH} color="text.secondary" variant="h6" sx={{ textDecoration: 'none' }}>
                   {icons && <HomeOutlined style={iconSX} />}
                   {icon && !icons && <HomeFilled style={{ ...iconSX, marginRight: 0 }} />}
                   {(!icon || icons) && <FormattedMessage id="home" />}
@@ -173,7 +174,7 @@ export default function Breadcrumbs({
 
     let tempContent = (
       <MuiBreadcrumbs aria-label="breadcrumb" maxItems={maxItems || 8} separator={separatorIcon}>
-        <Typography component={Link} to="/" color="text.secondary" variant="h6" sx={{ textDecoration: 'none' }}>
+        <Typography component={Link} to={APP_DEFAULT_PATH} color="text.secondary" variant="h6" sx={{ textDecoration: 'none' }}>
           {icons && <HomeOutlined style={iconSX} />}
           {icon && !icons && <HomeFilled style={{ ...iconSX, marginRight: 0 }} />}
           {(!icon || icons) && <FormattedMessage id="home" />}

@@ -278,21 +278,7 @@ export async function deleteInvoice(invoiceId) {
     throw error;
   }
 }
-      const nonDeletedInvoice = currentInvoice.invoice.filter((invoice) => invoice.id !== invoiceId);
 
-      return {
-        ...currentInvoice,
-        invoice: nonDeletedInvoice
-      };
-    },
-    false
-  );
-
-  // to hit server
-  // you may need to refetch latest data after server hit and based on your logic
-  //   const data = { invoiceId };
-  //   await axios.post(endpoints.key + endpoints.delete, data);
-}
 
 export function useGetInvoiceMaster() {
   const { data, isLoading } = useSWR(endpoints.key + endpoints.actions, () => initialState, {

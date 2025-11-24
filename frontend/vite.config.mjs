@@ -10,14 +10,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: API_URL,
+    // Force host to localhost and disable auto open to avoid external preview links (Codespaces previews)
     server: {
-      open: true,
+      open: false,
       port: PORT,
-      host: true
+      host: 'localhost'
     },
     preview: {
-      open: true,
-      host: true
+      open: false,
+      host: 'localhost'
     },
     define: {
       global: 'window' // Only if you need it for legacy packages
