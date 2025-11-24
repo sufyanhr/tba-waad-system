@@ -163,7 +163,7 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
         // 2) Generate 6-digit OTP
-        String otp = String.format("%06d", new Random().nextInt(1_000_000));
+        String otp = "%06d".formatted(new Random().nextInt(1_000_000));
 
         // 3) Compute expiry = now + 10 minutes
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(10);
@@ -182,13 +182,19 @@ public class AuthService {
         // 6) Send email using EmailService
         String subject = "TBA-WAAD Password Reset OTP";
         String body = String.format(
-                "Dear %s,\n\n" +
-                "You have requested to reset your password.\n\n" +
-                "Your OTP code is: %s\n\n" +
-                "This code will expire in 10 minutes.\n\n" +
-                "If you did not request this, please ignore this email.\n\n" +
-                "Best regards,\n" +
-                "TBA-WAAD System",
+                """
+                Dear %s,
+                
+                You have requested to reset your password.
+                
+                Your OTP code is: %s
+                
+                This code will expire in 10 minutes.
+                
+                If you did not request this, please ignore this email.
+                
+                Best regards,
+                TBA-WAAD System""",
                 user.getFullName(), otp
         );
 

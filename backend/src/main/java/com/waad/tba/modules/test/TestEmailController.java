@@ -32,9 +32,13 @@ public class TestEmailController {
             @RequestParam String to) {
         try {
             emailService.send(to, "Test Email from TBA-WAAD", 
-                "This is a test email from TBA-WAAD system.\n\n" +
-                "If you received this, SMTP configuration is working correctly!\n\n" +
-                "Best regards,\nTBA-WAAD Team");
+                """
+                This is a test email from TBA-WAAD system.
+                
+                If you received this, SMTP configuration is working correctly!
+                
+                Best regards,
+                TBA-WAAD Team""");
             return ResponseEntity.ok("✅ Email sent successfully to: " + to);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("❌ Failed to send email: " + e.getMessage());
