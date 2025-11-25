@@ -57,7 +57,7 @@ public class DashboardService {
     public List<ClaimsPerDayDto> getClaimsPerDay(LocalDate startDate, LocalDate endDate) {
         log.debug("Fetching claims per day from {} to {}", startDate, endDate);
         
-        List<Object[]> results = claimRepository.countClaimsPerDay(startDate, endDate);
+        List<Object[]> results = claimRepository.getDailyStatistics(startDate, endDate);
         
         return results.stream()
                 .map(row -> ClaimsPerDayDto.builder()

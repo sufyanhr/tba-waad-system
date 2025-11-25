@@ -81,13 +81,19 @@ public class SystemAdminService {
 
         // Member
         Member member = Member.builder()
-                .fullName("Fatima Al-Mahdi")
+                .firstName("Fatima")
+                .lastName("Al-Mahdi")
                 .civilId("198912345678")
-                .policyNumber("MBR-0001")
+                .cardNumber("MBR-0001")
                 .phone("+218942345678")
                 .email("fatima.mahdi@example.ly")
-                .employerId(employer.getId())
+                .employer(employer)
                 .companyId(1L)
+                .relation(Member.MemberRelation.SELF)
+                .status(Member.MemberStatus.ACTIVE)
+                .gender(Member.Gender.FEMALE)
+                .dateOfBirth(LocalDate.of(1989, 1, 1))
+                .startDate(LocalDate.now())
                 .active(true)
                 .build();
         memberRepository.save(member);
@@ -121,15 +127,18 @@ public class SystemAdminService {
                 .build();
         visitRepository.save(visit);
 
-        // Claim referencing Visit
+        // Claim referencing Member
         Claim claim = Claim.builder()
                 .claimNumber("CLM-001")
-                .claimDate(LocalDate.now())
-                .requestedAmount(new java.math.BigDecimal("2500.00"))
-                .approvedAmount(null)
+                .member(member)
+                .claimType(Claim.ClaimType.OUTPATIENT)
+                .serviceDate(LocalDate.now())
+                .submissionDate(LocalDate.now())
+                .totalClaimed(new java.math.BigDecimal("2500.00"))
+                .totalApproved(null)
                 .status(Claim.ClaimStatus.PENDING)
                 .notes("Initial dental surgery claim")
-                .visit(visit)
+                .active(true)
                 .build();
         claimRepository.save(claim);
 

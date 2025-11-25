@@ -2,14 +2,14 @@ package com.waad.tba.modules.claim.service;
 
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.claim.dto.ClaimCreateDto;
-import com.waad.tba.modules.claim.dto.ClaimUpdateDto;
 import com.waad.tba.modules.claim.dto.ClaimResponseDto;
 import com.waad.tba.modules.claim.entity.Claim;
-
 import com.waad.tba.modules.claim.mapper.ClaimMapper;
 import com.waad.tba.modules.claim.repository.ClaimRepository;
-import com.waad.tba.modules.visit.entity.Visit;
-import com.waad.tba.modules.visit.repository.VisitRepository;
+import com.waad.tba.modules.member.entity.Member;
+import com.waad.tba.modules.member.repository.MemberRepository;
+import com.waad.tba.modules.rbac.entity.User;
+import com.waad.tba.modules.rbac.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,8 @@ import java.util.stream.Collectors;
 public class ClaimService {
 
     private final ClaimRepository repository;
-    private final VisitRepository visitRepository;
+    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final ClaimMapper mapper;
 
     @Transactional(readOnly = true)
@@ -46,14 +48,30 @@ public class ClaimService {
         return mapper.toResponseDto(entity);
     }
 
+    @Transactional(readOnly = true)
+    public List<ClaimResponseDto> findByMember(Long memberId) {
+        log.debug("Finding claims for member: {}", memberId);
+        return repository.findByMemberId(memberId).stream()
+                .map(mapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClaimResponseDto> findByProvider(Long providerId) {
+        log.debug("Finding claims for provider: {}", providerId);
+        return repository.findByProviderId(providerId).stream()
+                .map(mapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public ClaimResponseDto create(ClaimCreateDto dto) {
-        log.info("Creating new claim for visit id: {}", dto.getVisitId());
+        log.info("Creating new claim for member id: {}", dto.getMemberId());
 
-        Visit visit = visitRepository.findById(dto.getVisitId())
-                .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", dto.getVisitId()));
+        Member member = memberRepository.findById(dto.getMemberId())
+                .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
 
-        Claim entity = mapper.toEntity(dto, visit);
+        Claim entity = mapper.toEntity(dto, member);
         Claim saved = repository.save(entity);
         
         log.info("Claim created successfully with id: {} and claim number: {}", saved.getId(), saved.getClaimNumber());
@@ -67,10 +85,10 @@ public class ClaimService {
         Claim entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", id));
 
-        Visit visit = visitRepository.findById(dto.getVisitId())
-                .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", dto.getVisitId()));
+        Member member = memberRepository.findById(dto.getMemberId())
+                .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
 
-        mapper.updateEntityFromDto(entity, dto, visit);
+        mapper.updateEntityFromDto(entity, dto, member);
         Claim updated = repository.save(entity);
         
         log.info("Claim updated successfully: {}", id);
@@ -121,19 +139,30 @@ public class ClaimService {
     }
 
     @Transactional
-    public ClaimResponseDto approveClaim(Long id, BigDecimal approvedAmount) {
-        log.info("Approving claim with id: {}", id);
+    public ClaimResponseDto approveClaim(Long id, Long reviewerId, BigDecimal approvedAmount) {
+        log.info("Approving claim with id: {} by reviewer: {}", id, reviewerId);
         
         Claim entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", id));
 
-        if (entity.getStatus() != Claim.ClaimStatus.PENDING) {
-            throw new IllegalStateException("Only pending claims can be approved");
+        if (entity.getStatus() != Claim.ClaimStatus.PENDING && 
+            entity.getStatus() != Claim.ClaimStatus.UNDER_MEDICAL_REVIEW &&
+            entity.getStatus() != Claim.ClaimStatus.UNDER_FINANCIAL_REVIEW) {
+            throw new IllegalStateException("Claim cannot be approved in current status: " + entity.getStatus());
         }
 
+        User reviewer = userRepository.findById(reviewerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", reviewerId));
+
         entity.setStatus(Claim.ClaimStatus.APPROVED);
-        entity.setApprovedAmount(approvedAmount);
+        entity.setTotalApproved(approvedAmount);
+        entity.setFinancialReviewer(reviewer);
+        entity.setFinancialReviewedAt(LocalDateTime.now());
+        entity.setFinancialReviewStatus(Claim.ReviewStatus.APPROVED);
         entity.setRejectionReason(null);
+        
+        // Calculate net payable
+        entity.setNetPayable(approvedAmount.subtract(entity.getMemberCoPayment() != null ? entity.getMemberCoPayment() : BigDecimal.ZERO));
         
         Claim updated = repository.save(entity);
         
@@ -142,23 +171,91 @@ public class ClaimService {
     }
 
     @Transactional
-    public ClaimResponseDto rejectClaim(Long id, String rejectionReason) {
-        log.info("Rejecting claim with id: {}", id);
+    public ClaimResponseDto rejectClaim(Long id, Long reviewerId, String rejectionReason) {
+        log.info("Rejecting claim with id: {} by reviewer: {}", id, reviewerId);
         
         Claim entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", id));
 
-        if (entity.getStatus() != Claim.ClaimStatus.PENDING) {
-            throw new IllegalStateException("Only pending claims can be rejected");
+        if (entity.getStatus() != Claim.ClaimStatus.PENDING &&
+            entity.getStatus() != Claim.ClaimStatus.UNDER_MEDICAL_REVIEW &&
+            entity.getStatus() != Claim.ClaimStatus.UNDER_FINANCIAL_REVIEW) {
+            throw new IllegalStateException("Claim cannot be rejected in current status: " + entity.getStatus());
         }
+
+        User reviewer = userRepository.findById(reviewerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", reviewerId));
 
         entity.setStatus(Claim.ClaimStatus.REJECTED);
         entity.setRejectionReason(rejectionReason);
-        entity.setApprovedAmount(BigDecimal.ZERO);
+        entity.setTotalApproved(BigDecimal.ZERO);
+        entity.setTotalRejected(entity.getTotalClaimed());
+        entity.setFinancialReviewer(reviewer);
+        entity.setFinancialReviewedAt(LocalDateTime.now());
+        entity.setFinancialReviewStatus(Claim.ReviewStatus.REJECTED);
         
         Claim updated = repository.save(entity);
         
         log.info("Claim rejected successfully: {}", id);
+        return mapper.toResponseDto(updated);
+    }
+
+    @Transactional
+    public ClaimResponseDto updateFinancialReview(Long id, Long reviewerId, BigDecimal newTotalApproved, String notes) {
+        log.info("Updating financial review for claim: {}", id);
+        
+        Claim entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", id));
+
+        User reviewer = userRepository.findById(reviewerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", reviewerId));
+
+        entity.setTotalApproved(newTotalApproved);
+        entity.setTotalRejected(entity.getTotalClaimed().subtract(newTotalApproved));
+        entity.setFinancialReviewer(reviewer);
+        entity.setFinancialReviewedAt(LocalDateTime.now());
+        entity.setFinancialReviewNotes(notes);
+        
+        // Calculate net payable
+        entity.setNetPayable(newTotalApproved.subtract(entity.getMemberCoPayment() != null ? entity.getMemberCoPayment() : BigDecimal.ZERO));
+        
+        Claim updated = repository.save(entity);
+        
+        log.info("Financial review updated successfully");
+        return mapper.toResponseDto(updated);
+    }
+
+    @Transactional
+    public ClaimResponseDto markUnderMedicalReview(Long id, Long reviewerId) {
+        log.info("Marking claim {} as under medical review", id);
+        
+        Claim entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", id));
+
+        User reviewer = userRepository.findById(reviewerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", reviewerId));
+
+        entity.setStatus(Claim.ClaimStatus.UNDER_MEDICAL_REVIEW);
+        entity.setMedicalReviewer(reviewer);
+        
+        Claim updated = repository.save(entity);
+        return mapper.toResponseDto(updated);
+    }
+
+    @Transactional
+    public ClaimResponseDto markUnderFinancialReview(Long id, Long reviewerId) {
+        log.info("Marking claim {} as under financial review", id);
+        
+        Claim entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", id));
+
+        User reviewer = userRepository.findById(reviewerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", reviewerId));
+
+        entity.setStatus(Claim.ClaimStatus.UNDER_FINANCIAL_REVIEW);
+        entity.setFinancialReviewer(reviewer);
+        
+        Claim updated = repository.save(entity);
         return mapper.toResponseDto(updated);
     }
 }

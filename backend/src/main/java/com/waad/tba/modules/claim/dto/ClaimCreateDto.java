@@ -1,6 +1,7 @@
 package com.waad.tba.modules.claim.dto;
 
 import com.waad.tba.modules.claim.entity.Claim;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,20 +17,36 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ClaimCreateDto {
     
-    @NotNull(message = "Visit ID is required")
-    private Long visitId;
+    @NotNull(message = "Member ID is required")
+    private Long memberId;
+    
+    @NotNull(message = "Provider ID is required")
+    private Long providerId;
+    
+    private String providerName;
     
     private String claimNumber;
     
-    @NotNull(message = "Claim date is required")
-    private LocalDate claimDate;
+    @NotNull(message = "Claim type is required")
+    private String claimType;
     
-    @NotNull(message = "Requested amount is required")
-    private BigDecimal requestedAmount;
+    @NotNull(message = "Service date is required")
+    private LocalDate serviceDate;
     
-    private BigDecimal approvedAmount;
+    private LocalDate submissionDate;
+    
+    @NotNull(message = "Total claimed amount is required")
+    private BigDecimal totalClaimed;
+    
+    private BigDecimal totalApproved;
     
     private Claim.ClaimStatus status;
+    
+    private String diagnosisCode;
+    
+    private String diagnosisDescription;
+    
+    private String preAuthNumber;
     
     private String rejectionReason;
     

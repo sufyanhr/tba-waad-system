@@ -150,7 +150,7 @@ public class ClaimController {
             @Parameter(name = "page", description = "Page number (1-based)") @RequestParam(defaultValue = "1") int page,
             @Parameter(name = "size", description = "Page size") @RequestParam(defaultValue = "10") int size,
             @Parameter(name = "search", description = "Search query") @RequestParam(required = false) String search,
-            @Parameter(name = "sortBy", description = "Sort by field") @RequestParam(defaultValue = "claimDate") String sortBy,
+            @Parameter(name = "sortBy", description = "Sort by field") @RequestParam(defaultValue = "serviceDate") String sortBy,
             @Parameter(name = "sortDir", description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDir) {
         org.springframework.data.domain.Pageable pageable = PageRequest.of(Math.max(0, page - 1), size,
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.fromString(sortDir), sortBy));
@@ -201,14 +201,21 @@ public class ClaimController {
     public ResponseEntity<ApiResponse<ClaimResponseDto>> approveClaim(
             @Parameter(name = "id", description = "Claim ID", required = true)
             @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body containing approvedAmount")
-            @RequestBody Map<String, BigDecimal> request) {
-        BigDecimal approvedAmount = request.get("approvedAmount");
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body containing reviewerId and approvedAmount")
+            @RequestBody Map<String, Object> request) {
+        
+        Long reviewerId = request.get("reviewerId") != null ? 
+            ((Number) request.get("reviewerId")).longValue() : 1L;
+        
+        BigDecimal approvedAmount = request.get("approvedAmount") != null ? 
+            new BigDecimal(request.get("approvedAmount").toString()) : null;
+        
         if (approvedAmount == null) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Approved amount is required"));
         }
-        ClaimResponseDto approved = service.approveClaim(id, approvedAmount);
+        
+        ClaimResponseDto approved = service.approveClaim(id, reviewerId, approvedAmount);
         return ResponseEntity.ok(ApiResponse.success("Claim approved successfully", approved));
     }
 
@@ -225,14 +232,21 @@ public class ClaimController {
     public ResponseEntity<ApiResponse<ClaimResponseDto>> rejectClaim(
             @Parameter(name = "id", description = "Claim ID", required = true)
             @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body containing rejectionReason")
-            @RequestBody Map<String, String> request) {
-        String rejectionReason = request.get("rejectionReason");
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body containing reviewerId and rejectionReason")
+            @RequestBody Map<String, Object> request) {
+        
+        Long reviewerId = request.get("reviewerId") != null ? 
+            ((Number) request.get("reviewerId")).longValue() : 1L;
+        
+        String rejectionReason = request.get("rejectionReason") != null ?
+            request.get("rejectionReason").toString() : null;
+        
         if (rejectionReason == null || rejectionReason.isBlank()) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Rejection reason is required"));
         }
-        ClaimResponseDto rejected = service.rejectClaim(id, rejectionReason);
+        
+        ClaimResponseDto rejected = service.rejectClaim(id, reviewerId, rejectionReason);
         return ResponseEntity.ok(ApiResponse.success("Claim rejected successfully", rejected));
     }
 }

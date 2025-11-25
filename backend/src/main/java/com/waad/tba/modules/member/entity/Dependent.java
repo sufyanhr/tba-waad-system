@@ -1,9 +1,6 @@
 package com.waad.tba.modules.member.entity;
 
-import com.waad.tba.modules.employer.entity.Employer;
-import com.waad.tba.modules.policy.entity.Policy;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,34 +15,26 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "members", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "civilId", name = "uk_member_civil_id"),
-    @UniqueConstraint(columnNames = "cardNumber", name = "uk_member_card_number")
+@Table(name = "dependents", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "civilId", name = "uk_dependent_civil_id"),
+    @UniqueConstraint(columnNames = "cardNumber", name = "uk_dependent_card_number")
 })
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Member {
+public class Dependent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relations
-    @NotNull(message = "Employer is required")
+    // Main Member (parent relationship)
+    @NotNull(message = "Main member is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employer_id", nullable = false)
-    private Employer employer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id")
-    private Policy policy;
-
-    @NotNull(message = "Company ID is required")
-    @Column(nullable = false)
-    private Long companyId;
+    @JoinColumn(name = "main_member_id", nullable = false)
+    private Member mainMember;
 
     // Personal Information
     @NotBlank(message = "First name is required")
@@ -70,36 +59,25 @@ public class Member {
     @Column(unique = true, nullable = false, length = 50)
     private String cardNumber;
 
-    // Relation Type (SELF for main member, others for dependents)
+    // Relation to main member
     @Enumerated(EnumType.STRING)
-    @Builder.Default
+    @NotNull(message = "Relation is required")
     @Column(nullable = false, length = 20)
-    private MemberRelation relation = MemberRelation.SELF;
+    private Member.MemberRelation relation;
 
     @NotNull(message = "Date of birth is required")
     @Column(nullable = false)
     private LocalDate dateOfBirth;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private Gender gender;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private MaritalStatus maritalStatus;
-    
-    @Column(length = 20)
-    private String phone;
-    
-    @Email(message = "Invalid email format")
-    @Column(length = 255)
-    private String email;
+    @Column(nullable = false, length = 10)
+    private Member.Gender gender;
 
     // Membership Details
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false, length = 20)
-    private MemberStatus status = MemberStatus.ACTIVE;
+    private Member.MemberStatus status = Member.MemberStatus.ACTIVE;
 
     @Column(nullable = false)
     private LocalDate startDate;
@@ -124,14 +102,8 @@ public class Member {
     @Column(length = 2000)
     private String notes;
 
-    @Column(length = 500)
-    private String address;
-
     @Column(length = 100)
     private String nationality;
-
-    @Column(length = 100)
-    private String occupation;
 
     @Builder.Default
     @Column(nullable = false)
@@ -148,21 +120,5 @@ public class Member {
     @Transient
     public String getFullName() {
         return firstName + " " + lastName;
-    }
-
-    public enum Gender {
-        MALE, FEMALE
-    }
-
-    public enum MaritalStatus {
-        SINGLE, MARRIED, DIVORCED, WIDOWED
-    }
-
-    public enum MemberRelation {
-        SELF, SPOUSE, SON, DAUGHTER, FATHER, MOTHER, OTHER
-    }
-
-    public enum MemberStatus {
-        ACTIVE, SUSPENDED, TERMINATED, PENDING
     }
 }

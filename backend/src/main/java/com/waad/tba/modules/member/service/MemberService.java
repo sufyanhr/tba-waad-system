@@ -45,9 +45,9 @@ public class MemberService {
             throw new IllegalArgumentException("Civil ID already exists: " + dto.getCivilId());
         }
         
-        // Validate unique policyNumber
-        if (repository.existsByPolicyNumber(dto.getPolicyNumber())) {
-            throw new IllegalArgumentException("Policy number already exists: " + dto.getPolicyNumber());
+        // Validate unique cardNumber (policyNumber)
+        if (repository.existsByCardNumber(dto.getPolicyNumber())) {
+            throw new IllegalArgumentException("Card number already exists: " + dto.getPolicyNumber());
         }
 
         Member entity = mapper.toEntity(dto);
@@ -74,9 +74,9 @@ public class MemberService {
             throw new IllegalArgumentException("Civil ID already exists: " + dto.getCivilId());
         }
         
-        // Validate unique policyNumber (excluding current member)
-        if (repository.existsByPolicyNumberAndIdNot(dto.getPolicyNumber(), id)) {
-            throw new IllegalArgumentException("Policy number already exists: " + dto.getPolicyNumber());
+        // Validate unique cardNumber (excluding current member)
+        if (repository.existsByCardNumberAndIdNot(dto.getPolicyNumber(), id)) {
+            throw new IllegalArgumentException("Card number already exists: " + dto.getPolicyNumber());
         }
 
         mapper.updateEntityFromDto(entity, dto);
