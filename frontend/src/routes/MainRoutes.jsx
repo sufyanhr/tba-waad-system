@@ -29,6 +29,12 @@ const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
 const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
 const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
 
+// render - Members module
+const MembersList = Loadable(lazy(() => import('pages/tba/members/MembersList')));
+const MemberCreate = Loadable(lazy(() => import('pages/tba/members/MemberCreate')));
+const MemberEdit = Loadable(lazy(() => import('pages/tba/members/MemberEdit')));
+const MemberView = Loadable(lazy(() => import('pages/tba/members/MemberView')));
+
 // render - Employers module
 const EmployersList = Loadable(lazy(() => import('pages/tba/employers/EmployersList')));
 const EmployerCreate = Loadable(lazy(() => import('pages/tba/employers/EmployerCreate')));
@@ -196,7 +202,35 @@ const MainRoutes = {
             },
             {
               path: 'members',
-              element: <TbaMembers />
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                  <MembersList />
+                </RBACGuard>
+              )
+            },
+            {
+              path: 'members/create',
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                  <MemberCreate />
+                </RBACGuard>
+              )
+            },
+            {
+              path: 'members/edit/:id',
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                  <MemberEdit />
+                </RBACGuard>
+              )
+            },
+            {
+              path: 'members/view/:id',
+              element: (
+                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                  <MemberView />
+                </RBACGuard>
+              )
             },
             {
               path: 'employers',

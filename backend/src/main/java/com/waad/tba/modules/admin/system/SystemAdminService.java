@@ -81,13 +81,14 @@ public class SystemAdminService {
 
         // Member
         Member member = Member.builder()
-                .firstName("Fatima")
-                .lastName("Al-Mahdi")
-                .nationalId("198912345678")
-                .memberNumber("MBR-0001")
+                .fullName("Fatima Al-Mahdi")
+                .civilId("198912345678")
+                .policyNumber("MBR-0001")
                 .phone("+218942345678")
                 .email("fatima.mahdi@example.ly")
-                .employer(employer)
+                .employerId(employer.getId())
+                .companyId(1L)
+                .active(true)
                 .build();
         memberRepository.save(member);
 

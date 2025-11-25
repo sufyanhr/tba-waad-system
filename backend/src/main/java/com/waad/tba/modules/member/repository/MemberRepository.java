@@ -8,27 +8,30 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByMemberNumber(String memberNumber);
-    Optional<Member> findByNationalId(String nationalId);
-    Boolean existsByMemberNumber(String memberNumber);
-    Boolean existsByNationalId(String nationalId);
+    
+    Optional<Member> findByCivilId(String civilId);
+    Optional<Member> findByPolicyNumber(String policyNumber);
+    
+    boolean existsByCivilId(String civilId);
+    boolean existsByPolicyNumber(String policyNumber);
+    boolean existsByCivilIdAndIdNot(String civilId, Long id);
+    boolean existsByPolicyNumberAndIdNot(String policyNumber, Long id);
+    
+    Page<Member> findByCompanyId(Long companyId, Pageable pageable);
+    
+    @Query("SELECT m FROM Member m WHERE m.companyId = :companyId AND (" +
+           "LOWER(m.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.policyNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Member> searchPagedByCompany(@Param("companyId") Long companyId, @Param("search") String search, Pageable pageable);
     
     @Query("SELECT m FROM Member m WHERE " +
-           "LOWER(m.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(m.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(m.memberNumber) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(m.nationalId) LIKE LOWER(CONCAT('%', :query, '%'))")
-    List<Member> search(String query);
-
-    @Query("SELECT m FROM Member m WHERE " +
-           "LOWER(m.firstName) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(m.lastName) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(m.memberNumber) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(m.nationalId) LIKE LOWER(CONCAT('%', :q, '%'))")
-    Page<Member> searchPaged(@Param("q") String q, Pageable pageable);
+           "LOWER(m.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.policyNumber) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<Member> searchPaged(@Param("search") String search, Pageable pageable);
 }

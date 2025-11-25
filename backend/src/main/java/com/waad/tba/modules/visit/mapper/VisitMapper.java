@@ -15,8 +15,8 @@ public class VisitMapper {
         String memberName = null;
         String memberNumber = null;
         if (entity.getMember() != null) {
-            memberName = entity.getMember().getFirstName() + " " + entity.getMember().getLastName();
-            memberNumber = entity.getMember().getMemberNumber();
+            memberName = entity.getMember().getFullName();
+            memberNumber = entity.getMember().getPolicyNumber();
         }
         
         return VisitResponseDto.builder()

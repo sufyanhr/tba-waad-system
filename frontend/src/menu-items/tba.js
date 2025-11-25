@@ -30,7 +30,7 @@ const tba = {
       url: '/tba/members',
       icon: icons.UserOutlined,
       breadcrumbs: false,
-      requiredPermissions: ['READ_MEMBER']
+      requiredPermissions: ['MANAGE_MEMBERS']
     },
     {
       id: 'employers',

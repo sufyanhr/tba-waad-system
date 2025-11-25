@@ -18,8 +18,8 @@ public class ClaimMapper {
         String memberName = null;
         String memberNumber = null;
         if (entity.getVisit() != null && entity.getVisit().getMember() != null) {
-            memberName = entity.getVisit().getMember().getFirstName() + " " + entity.getVisit().getMember().getLastName();
-            memberNumber = entity.getVisit().getMember().getMemberNumber();
+            memberName = entity.getVisit().getMember().getFullName();
+            memberNumber = entity.getVisit().getMember().getPolicyNumber();
         }
         
         return ClaimResponseDto.builder()

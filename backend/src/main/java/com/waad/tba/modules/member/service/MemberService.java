@@ -6,19 +6,13 @@ import com.waad.tba.modules.member.dto.MemberResponseDto;
 import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.mapper.MemberMapper;
 import com.waad.tba.modules.member.repository.MemberRepository;
-import com.waad.tba.modules.employer.entity.Employer;
 import com.waad.tba.modules.employer.repository.EmployerRepository;
-import com.waad.tba.modules.insurance.entity.InsuranceCompany;
-import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,16 +21,7 @@ public class MemberService {
 
     private final MemberRepository repository;
     private final EmployerRepository employerRepository;
-    private final InsuranceCompanyRepository insuranceCompanyRepository;
     private final MemberMapper mapper;
-
-    @Transactional(readOnly = true)
-    public List<MemberResponseDto> findAll() {
-        log.debug("Finding all members");
-        return repository.findAll().stream()
-                .map(mapper::toResponseDto)
-                .collect(Collectors.toList());
-    }
 
     @Transactional(readOnly = true)
     public MemberResponseDto findById(Long id) {
@@ -48,18 +33,27 @@ public class MemberService {
 
     @Transactional
     public MemberResponseDto create(MemberCreateDto dto) {
-        log.info("Creating new member: {} {}", dto.getFirstName(), dto.getLastName());
+        log.info("Creating new member: {}", dto.getFullName());
 
-        Employer employer = employerRepository.findById(dto.getEmployerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employer", "id", dto.getEmployerId()));
+        // Validate employer exists
+        if (!employerRepository.existsById(dto.getEmployerId())) {
+            throw new ResourceNotFoundException("Employer", "id", dto.getEmployerId());
+        }
         
-        InsuranceCompany insuranceCompany = insuranceCompanyRepository.findById(dto.getInsuranceCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("InsuranceCompany", "id", dto.getInsuranceCompanyId()));
+        // Validate unique civilId
+        if (repository.existsByCivilId(dto.getCivilId())) {
+            throw new IllegalArgumentException("Civil ID already exists: " + dto.getCivilId());
+        }
+        
+        // Validate unique policyNumber
+        if (repository.existsByPolicyNumber(dto.getPolicyNumber())) {
+            throw new IllegalArgumentException("Policy number already exists: " + dto.getPolicyNumber());
+        }
 
-        Member entity = mapper.toEntity(dto, employer, insuranceCompany);
+        Member entity = mapper.toEntity(dto);
         Member saved = repository.save(entity);
         
-        log.info("Member created successfully with id: {} and member number: {}", saved.getId(), saved.getMemberNumber());
+        log.info("Member created successfully with id: {}", saved.getId());
         return mapper.toResponseDto(saved);
     }
 
@@ -70,13 +64,22 @@ public class MemberService {
         Member entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", id));
 
-        Employer employer = employerRepository.findById(dto.getEmployerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employer", "id", dto.getEmployerId()));
+        // Validate employer exists
+        if (!employerRepository.existsById(dto.getEmployerId())) {
+            throw new ResourceNotFoundException("Employer", "id", dto.getEmployerId());
+        }
         
-        InsuranceCompany insuranceCompany = insuranceCompanyRepository.findById(dto.getInsuranceCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("InsuranceCompany", "id", dto.getInsuranceCompanyId()));
+        // Validate unique civilId (excluding current member)
+        if (repository.existsByCivilIdAndIdNot(dto.getCivilId(), id)) {
+            throw new IllegalArgumentException("Civil ID already exists: " + dto.getCivilId());
+        }
+        
+        // Validate unique policyNumber (excluding current member)
+        if (repository.existsByPolicyNumberAndIdNot(dto.getPolicyNumber(), id)) {
+            throw new IllegalArgumentException("Policy number already exists: " + dto.getPolicyNumber());
+        }
 
-        mapper.updateEntityFromDto(entity, dto, employer, insuranceCompany);
+        mapper.updateEntityFromDto(entity, dto);
         Member updated = repository.save(entity);
         
         log.info("Member updated successfully: {}", id);
@@ -96,20 +99,26 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberResponseDto> search(String query) {
-        log.debug("Searching members with query: {}", query);
-        return repository.search(query).stream()
-                .map(mapper::toResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public Page<MemberResponseDto> findAllPaginated(Pageable pageable, String search) {
-        log.debug("Finding members with pagination. search={}", search);
-        if (search == null || search.isBlank()) {
-            return repository.findAll(pageable).map(mapper::toResponseDto);
+    public Page<MemberResponseDto> findAllPaginated(Long companyId, String search, Pageable pageable) {
+        log.debug("Finding members with pagination. companyId={}, search={}", companyId, search);
+        
+        Page<Member> page;
+        
+        if (companyId != null) {
+            if (search != null && !search.isBlank()) {
+                page = repository.searchPagedByCompany(companyId, search, pageable);
+            } else {
+                page = repository.findByCompanyId(companyId, pageable);
+            }
+        } else {
+            if (search != null && !search.isBlank()) {
+                page = repository.searchPaged(search, pageable);
+            } else {
+                page = repository.findAll(pageable);
+            }
         }
-        return repository.searchPaged(search, pageable).map(mapper::toResponseDto);
+        
+        return page.map(mapper::toResponseDto);
     }
 
     @Transactional(readOnly = true)

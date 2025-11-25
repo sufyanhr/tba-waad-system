@@ -1,85 +1,77 @@
 package com.waad.tba.modules.member.mapper;
 
-import com.waad.tba.modules.employer.entity.Employer;
-import com.waad.tba.modules.employer.repository.EmployerRepository;
-import com.waad.tba.modules.insurance.entity.InsuranceCompany;
-import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
 import com.waad.tba.modules.member.dto.MemberResponseDto;
 import com.waad.tba.modules.member.entity.Member;
+import com.waad.tba.modules.employer.repository.EmployerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
+@RequiredArgsConstructor
 public class MemberMapper {
+
+    private final EmployerRepository employerRepository;
 
     public MemberResponseDto toResponseDto(Member entity) {
         if (entity == null) return null;
         
+        String employerName = null;
+        if (entity.getEmployerId() != null) {
+            employerName = employerRepository.findById(entity.getEmployerId())
+                    .map(emp -> emp.getName())
+                    .orElse(null);
+        }
+        
         return MemberResponseDto.builder()
                 .id(entity.getId())
-                .firstName(entity.getFirstName())
-                .lastName(entity.getLastName())
-                .nationalId(entity.getNationalId())
-                .memberNumber(entity.getMemberNumber())
+                .employerId(entity.getEmployerId())
+                .employerName(employerName)
+                .companyId(entity.getCompanyId())
+                .fullName(entity.getFullName())
+                .civilId(entity.getCivilId())
+                .policyNumber(entity.getPolicyNumber())
                 .dateOfBirth(entity.getDateOfBirth())
+                .gender(entity.getGender())
                 .phone(entity.getPhone())
                 .email(entity.getEmail())
-                .address(entity.getAddress())
-                .employerId(entity.getEmployer() != null ? entity.getEmployer().getId() : null)
-                .employerName(entity.getEmployer() != null ? entity.getEmployer().getName() : null)
-                .insuranceCompanyId(entity.getInsuranceCompany() != null ? entity.getInsuranceCompany().getId() : null)
-                .insuranceCompanyName(entity.getInsuranceCompany() != null ? entity.getInsuranceCompany().getName() : null)
-                .status(entity.getStatus())
                 .active(entity.getActive())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
-    public Member toEntity(MemberCreateDto dto, Employer employer, InsuranceCompany insuranceCompany) {
+    public Member toEntity(MemberCreateDto dto) {
         if (dto == null) return null;
         
-        String memberNumber = dto.getMemberNumber();
-        if (memberNumber == null || memberNumber.isBlank()) {
-            memberNumber = generateMemberNumber();
-        }
-        
         return Member.builder()
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .nationalId(dto.getNationalId())
-                .memberNumber(memberNumber)
+                .employerId(dto.getEmployerId())
+                .companyId(dto.getCompanyId())
+                .fullName(dto.getFullName())
+                .civilId(dto.getCivilId())
+                .policyNumber(dto.getPolicyNumber())
                 .dateOfBirth(dto.getDateOfBirth())
+                .gender(dto.getGender())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
-                .address(dto.getAddress())
-                .employer(employer)
-            .insuranceCompany(insuranceCompany)
-            .status(dto.getStatus() != null ? dto.getStatus() : Member.MemberStatus.ACTIVE)
-                .active(true)
+                .active(dto.getActive() != null ? dto.getActive() : true)
                 .build();
     }
 
-    public void updateEntityFromDto(Member entity, MemberCreateDto dto, Employer employer, InsuranceCompany insuranceCompany) {
+    public void updateEntityFromDto(Member entity, MemberCreateDto dto) {
         if (dto == null) return;
         
-        entity.setFirstName(dto.getFirstName());
-        entity.setLastName(dto.getLastName());
-        entity.setNationalId(dto.getNationalId());
+        entity.setEmployerId(dto.getEmployerId());
+        entity.setCompanyId(dto.getCompanyId());
+        entity.setFullName(dto.getFullName());
+        entity.setCivilId(dto.getCivilId());
+        entity.setPolicyNumber(dto.getPolicyNumber());
         entity.setDateOfBirth(dto.getDateOfBirth());
+        entity.setGender(dto.getGender());
         entity.setPhone(dto.getPhone());
         entity.setEmail(dto.getEmail());
-        entity.setAddress(dto.getAddress());
-        entity.setEmployer(employer);
-        entity.setInsuranceCompany(insuranceCompany);
-        if (dto.getStatus() != null) {
-            entity.setStatus(dto.getStatus());
+        if (dto.getActive() != null) {
+            entity.setActive(dto.getActive());
         }
-    }
-
-    private String generateMemberNumber() {
-        return "MEM-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 }

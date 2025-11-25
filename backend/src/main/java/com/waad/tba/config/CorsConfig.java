@@ -1,4 +1,4 @@
-package com.waad.tba.common.config;
+package com.waad.tba.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -9,12 +9,13 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+
         registry.addMapping("/api/**")
                 .allowedOriginPatterns(
-                    "http://localhost:3000",
-                    "http://127.0.0.1:3000",
-                    "https://*.github.dev",
-                    "https://*.githubpreview.dev"
+                        "http://localhost:3000",
+                        "http://127.0.0.1:3000",
+                        "https://*.github.dev",
+                        "https://*.githubpreview.dev"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

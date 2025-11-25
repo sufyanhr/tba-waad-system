@@ -1,9 +1,9 @@
 package com.waad.tba.modules.member.dto;
 
-import com.waad.tba.modules.member.entity.Member;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,32 +17,30 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class MemberCreateDto {
     
-    @NotBlank(message = "First name is required")
-    private String firstName;
+    @NotNull(message = "Employer ID is required")
+    private Long employerId;
     
-    @NotBlank(message = "Last name is required")
-    private String lastName;
+    @NotNull(message = "Company ID is required")
+    private Long companyId;
     
-    @NotBlank(message = "National ID is required")
-    private String nationalId;
+    @NotBlank(message = "Full name is required")
+    private String fullName;
     
-    private String memberNumber;
+    @NotBlank(message = "Civil ID is required")
+    private String civilId;
     
-    @NotNull(message = "Date of birth is required")
+    @NotBlank(message = "Policy number is required")
+    private String policyNumber;
+    
     private LocalDate dateOfBirth;
     
+    private String gender; // MALE, FEMALE
+    
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number format")
     private String phone;
     
     @Email(message = "Email must be valid")
     private String email;
     
-    private String address;
-    
-    @NotNull(message = "Employer ID is required")
-    private Long employerId;
-    
-    @NotNull(message = "Insurance company ID is required")
-    private Long insuranceCompanyId;
-    
-    private Member.MemberStatus status;
+    private Boolean active;
 }
