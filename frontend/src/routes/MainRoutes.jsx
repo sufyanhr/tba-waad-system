@@ -28,6 +28,11 @@ const TbaMembers = Loadable(lazy(() => import('pages/tba/members')));
 const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
 const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
 const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
+const TbaPolicies = Loadable(lazy(() => import('pages/tba/policies')));
+const TbaBenefitPackages = Loadable(lazy(() => import('pages/tba/benefit-packages')));
+const TbaPreAuthorizations = Loadable(lazy(() => import('pages/tba/pre-authorizations')));
+const TbaInvoices = Loadable(lazy(() => import('pages/tba/invoices')));
+const TbaProviderContracts = Loadable(lazy(() => import('pages/tba/provider-contracts')));
 
 // render - Members module
 const MembersList = Loadable(lazy(() => import('pages/tba/members/MembersList')));
@@ -40,6 +45,11 @@ const EmployersList = Loadable(lazy(() => import('pages/tba/employers/EmployersL
 const EmployerCreate = Loadable(lazy(() => import('pages/tba/employers/EmployerCreate')));
 const EmployerEdit = Loadable(lazy(() => import('pages/tba/employers/EmployerEdit')));
 const EmployerView = Loadable(lazy(() => import('pages/tba/employers/EmployerView')));
+
+// render - Administration pages
+const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));
+const AdminRoles = Loadable(lazy(() => import('pages/admin/roles')));
+const AdminCompanies = Loadable(lazy(() => import('pages/admin/companies')));
 
 // render - Tools pages
 const ToolsReports = Loadable(lazy(() => import('pages/tools/reports')));
@@ -271,6 +281,43 @@ const MainRoutes = {
             {
               path: 'visits',
               element: <TbaVisits />
+            },
+            {
+              path: 'policies',
+              element: <TbaPolicies />
+            },
+            {
+              path: 'benefit-packages',
+              element: <TbaBenefitPackages />
+            },
+            {
+              path: 'pre-authorizations',
+              element: <TbaPreAuthorizations />
+            },
+            {
+              path: 'invoices',
+              element: <TbaInvoices />
+            },
+            {
+              path: 'provider-contracts',
+              element: <TbaProviderContracts />
+            }
+          ]
+        },
+        {
+          path: 'admin',
+          children: [
+            {
+              path: 'users',
+              element: <AdminUsers />
+            },
+            {
+              path: 'roles',
+              element: <AdminRoles />
+            },
+            {
+              path: 'companies',
+              element: <AdminCompanies />
             }
           ]
         },
