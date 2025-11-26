@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // material-ui
@@ -8,39 +8,44 @@ import {
   Chip,
   IconButton,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
-  TablePagination,
   Tooltip,
-  Typography
+  Typography,
+  TablePagination
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import SearchIcon from '@mui/icons-material/Search';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  Search as SearchIcon
+} from '@mui/icons-material';
 
 // project imports
 import MainCard from 'components/MainCard';
-import { getMembers, deleteMember } from 'api/members';
+import RBACGuard from 'components/tba/RBACGuard';
+import TableSkeleton from 'components/tba/LoadingSkeleton';
+import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
+import membersService from 'services/members.service';
 import useAuth from 'hooks/useAuth';
 import { useSnackbar } from 'notistack';
 
+// third-party
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper
+} from '@tanstack/react-table';
+
 // ==============================|| MEMBERS LIST PAGE ||============================== //
+
+const columnHelper = createColumnHelper();
 
 export default function MembersList() {
   const navigate = useNavigate();
@@ -49,48 +54,122 @@ export default function MembersList() {
 
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Check if user is super admin
-  const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN');
+  // Define table columns
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('fullName', {
+        header: 'Member Name',
+        cell: (info) => (
+          <Typography variant="body2" fontWeight={500}>
+            {info.getValue()}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('civilId', {
+        header: 'Civil ID',
+        cell: (info) => info.getValue()
+      }),
+      columnHelper.accessor('policyNumber', {
+        header: 'Policy Number',
+        cell: (info) => (
+          <Typography variant="body2" color="primary">
+            {info.getValue()}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('employerName', {
+        header: 'Employer',
+        cell: (info) => info.getValue() || '-'
+      }),
+      columnHelper.accessor('phone', {
+        header: 'Phone',
+        cell: (info) => info.getValue() || '-'
+      }),
+      columnHelper.accessor('active', {
+        header: 'Status',
+        cell: (info) => (
+          <Chip
+            label={info.getValue() ? 'Active' : 'Inactive'}
+            color={info.getValue() ? 'success' : 'default'}
+            size="small"
+          />
+        )
+      }),
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        cell: (info) => (
+          <Stack direction="row" spacing={0.5} justifyContent="center">
+            <Tooltip title="View">
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => handleViewMember(info.row.original.id)}
+              >
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <RBACGuard permission="MEMBER_MANAGE">
+              <Tooltip title="Edit">
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditMember(info.row.original.id)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete">
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDeleteClick(info.row.original)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </RBACGuard>
+          </Stack>
+        )
+      })
+    ],
+    []
+  );
 
-  // Set initial company filter
-  useEffect(() => {
-    if (!isSuperAdmin && user?.companyId) {
-      setSelectedCompanyId(user.companyId);
-    }
-  }, [isSuperAdmin, user]);
-
-  // Load members
+  // Load members from API
   const loadMembers = async () => {
     try {
       setLoading(true);
-      const companyId = isSuperAdmin ? (selectedCompanyId || null) : user?.companyId;
-      const response = await getMembers({
+      setError(null);
+
+      const result = await membersService.list({
         page: page + 1, // Backend uses 1-based pagination
         size: rowsPerPage,
         search: searchTerm,
-        companyId: companyId
+        sortBy: 'createdAt',
+        sortDir: 'desc'
       });
-      
-      const data = response.data?.data;
-      if (data) {
-        setMembers(data.items || []);
-        setTotalCount(data.total || 0);
+
+      if (result.success) {
+        setMembers(result.data?.items || []);
+        setTotalCount(result.data?.total || 0);
       } else {
+        setError(result.error);
         setMembers([]);
         setTotalCount(0);
       }
-    } catch (error) {
-      console.error('Error loading members:', error);
-      enqueueSnackbar('Failed to load members', { variant: 'error' });
+    } catch (err) {
+      setError(err.message || 'Failed to load members');
       setMembers([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -98,9 +177,9 @@ export default function MembersList() {
 
   useEffect(() => {
     loadMembers();
-  }, [page, rowsPerPage, searchTerm, selectedCompanyId]);
+  }, [page, rowsPerPage, searchTerm]);
 
-  // Handlers
+  // Event handlers
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -115,13 +194,8 @@ export default function MembersList() {
     setPage(0);
   };
 
-  const handleCompanyChange = (event) => {
-    setSelectedCompanyId(event.target.value);
-    setPage(0);
-  };
-
   const handleViewMember = (id) => {
-    navigate(`/tba/members/view/${id}`);
+    navigate(`/tba/members/${id}`);
   };
 
   const handleEditMember = (id) => {
@@ -135,14 +209,18 @@ export default function MembersList() {
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteMember(memberToDelete.id);
-      enqueueSnackbar('Member deleted successfully', { variant: 'success' });
-      setDeleteDialogOpen(false);
-      setMemberToDelete(null);
-      loadMembers();
-    } catch (error) {
-      console.error('Error deleting member:', error);
-      enqueueSnackbar(error.response?.data?.message || 'Failed to delete member', { variant: 'error' });
+      const result = await membersService.delete(memberToDelete.id);
+      
+      if (result.success) {
+        enqueueSnackbar(result.message, { variant: 'success' });
+        setDeleteDialogOpen(false);
+        setMemberToDelete(null);
+        loadMembers();
+      } else {
+        enqueueSnackbar(result.error, { variant: 'error' });
+      }
+    } catch (err) {
+      enqueueSnackbar('Failed to delete member', { variant: 'error' });
     }
   };
 
@@ -155,18 +233,33 @@ export default function MembersList() {
     navigate('/tba/members/create');
   };
 
+  const handleRetry = () => {
+    loadMembers();
+  };
+
+  // Initialize React Table
+  const table = useReactTable({
+    data: members,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: Math.ceil(totalCount / rowsPerPage)
+  });
+
   return (
-    <MainCard
-      title="Members"
-      secondary={
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateMember}>
-          Add Member
-        </Button>
-      }
-    >
-      <Stack spacing={2.5}>
-        {/* Filters */}
-        <Stack direction="row" spacing={2} alignItems="center">
+    <RBACGuard permission="MEMBER_VIEW">
+      <MainCard
+        title="Members"
+        secondary={
+          <RBACGuard permission="MEMBER_MANAGE">
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateMember}>
+              Add Member
+            </Button>
+          </RBACGuard>
+        }
+      >
+        <Stack spacing={3}>
+          {/* Search Bar */}
           <TextField
             placeholder="Search by name, civil ID, or policy number..."
             value={searchTerm}
@@ -174,136 +267,111 @@ export default function MembersList() {
             InputProps={{
               startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
             }}
-            sx={{ flexGrow: 1 }}
+            fullWidth
           />
-          
-          {isSuperAdmin && (
-            <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel>Company</InputLabel>
-              <Select
-                value={selectedCompanyId}
-                onChange={handleCompanyChange}
-                label="Company"
-              >
-                <MenuItem value="">All Companies</MenuItem>
-                <MenuItem value="1">Company 1</MenuItem>
-                <MenuItem value="2">Company 2</MenuItem>
-              </Select>
-            </FormControl>
+
+          {/* Error State */}
+          {error && !loading && (
+            <ErrorFallback error={error} onRetry={handleRetry} />
+          )}
+
+          {/* Loading State */}
+          {loading && <TableSkeleton rows={rowsPerPage} columns={7} />}
+
+          {/* Empty State */}
+          {!loading && !error && members.length === 0 && (
+            <EmptyState
+              title="No members found"
+              description={
+                searchTerm
+                  ? 'Try adjusting your search criteria'
+                  : 'Get started by adding your first member'
+              }
+              action={handleCreateMember}
+              actionLabel="Add Member"
+            />
+          )}
+
+          {/* Data Table */}
+          {!loading && !error && members.length > 0 && (
+            <Box sx={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <th
+                          key={header.id}
+                          style={{
+                            textAlign: 'left',
+                            padding: '12px 16px',
+                            borderBottom: '1px solid #e0e0e0',
+                            fontWeight: 600,
+                            color: '#666'
+                          }}
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
+                </thead>
+                <tbody>
+                  {table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      style={{
+                        borderBottom: '1px solid #f0f0f0',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fafafa')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} style={{ padding: '12px 16px' }}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+          )}
+
+          {/* Pagination */}
+          {!loading && !error && totalCount > 0 && (
+            <TablePagination
+              component="div"
+              count={totalCount}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
           )}
         </Stack>
 
-        {/* Table */}
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Member Name</TableCell>
-                <TableCell>Civil ID</TableCell>
-                <TableCell>Policy Number</TableCell>
-                <TableCell>Employer</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : members.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    <Typography variant="body2" color="text.secondary">
-                      No members found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                members.map((member) => (
-                  <TableRow key={member.id} hover>
-                    <TableCell>{member.fullName}</TableCell>
-                    <TableCell>{member.civilId}</TableCell>
-                    <TableCell>{member.policyNumber}</TableCell>
-                    <TableCell>{member.employerName || '-'}</TableCell>
-                    <TableCell>{member.phone || '-'}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={member.active ? 'Active' : 'Inactive'}
-                        color={member.active ? 'success' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Stack direction="row" spacing={0.5} justifyContent="center">
-                        <Tooltip title="View">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleViewMember(member.id)}
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleEditMember(member.id)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleDeleteClick(member)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* Pagination */}
-        <TablePagination
-          component="div"
-          count={totalCount}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
-      </Stack>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete member "<strong>{memberToDelete?.fullName}</strong>"? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </MainCard>
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete member "<strong>{memberToDelete?.fullName}</strong>"? This action cannot
+              be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel}>Cancel</Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </MainCard>
+    </RBACGuard>
   );
 }
