@@ -9,16 +9,12 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-
+        // CORS for API endpoints only (not Swagger)
         registry.addMapping("/api/**")
-                .allowedOriginPatterns(
-                        "http://localhost:3000",
-                        "http://127.0.0.1:3000",
-                        "https://*.github.dev",
-                        "https://*.githubpreview.dev"
-                )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedOriginPatterns("http://localhost:3000")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
