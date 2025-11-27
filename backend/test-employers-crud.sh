@@ -1,135 +1,393 @@
 #!/bin/bash
 
-# Employers Module CRUD Testing Script
-# Tests all endpoints with proper authentication
+# ==============================
+# TBA Waad System - Employers Module Test Script
+# ==============================
+# Purpose: Comprehensive automated testing of Employers CRUD API
+# Date: $(date +%Y-%m-%d)
+# ==============================
 
-TOKEN="eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6MSwiZnVsbE5hbWUiOiJTdXBlciBBZG1pbmlzdHJhdG9yIiwiZW1haWwiOiJhZG1pbkB0YmEuc2EiLCJyb2xlcyI6WyJTVVBFUl9BRE1JTiJdLCJwZXJtaXNzaW9ucyI6WyJNQU5BR0VfUkVQT1JUUyIsInZpc2l0Lm1hbmFnZSIsInBlcm1pc3Npb24ubWFuYWdlIiwicmJhYy5tYW5hZ2UiLCJNQU5BR0VfUk9MRVMiLCJlbXBsb3llci5tYW5hZ2UiLCJpbnN1cmFuY2UubWFuYWdlIiwicmV2aWV3ZXIubWFuYWdlIiwidmlzaXQudmlldyIsInBlcm1pc3Npb24udmlldyIsImVtcGxveWVyLnZpZXciLCJjbGFpbS52aWV3IiwiY2xhaW0ubWFuYWdlIiwicmJhYy52aWV3IiwiTUFOQUdFX01FTUJFUlMiLCJNQU5BR0VfU1lTVEVNX1NFVFRJTkdTIiwiTUFOQUdFX0NMQUlNUyIsInJvbGUubWFuYWdlIiwicmV2aWV3ZXIudmlldyIsIk1BTkFHRV9VU0VSUyIsInVzZXIudmlldyIsIm1lbWJlci52aWV3IiwibWVtYmVyLm1hbmFnZSIsImNsYWltLnJlamVjdCIsIk1BTkFHRV9WSVNJVFMiLCJ1c2VyLm1hbmFnZSIsIk1BTkFHRV9QUk9WSURFUlMiLCJpbnN1cmFuY2UudmlldyIsImNsYWltLmFwcHJvdmUiLCJNQU5BR0VfRU1QTE9ZRVJTIiwiZGFzaGJvYXJkLnZpZXciLCJyb2xlLnZpZXciXSwiaWF0IjoxNzY0MDIyMTc2LCJleHAiOjE3NjQxMDg1NzZ9.GLcy_HfjNjA3xRgNPpCL9MXHzLrJ_4ZTan23KGIFZAOqzYYbBcts8mbDOq2_AA5h"
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-BASE_URL="http://localhost:8080/api/employers"
+# API Configuration
+BASE_URL="http://localhost:8080/api"
+AUTH_ENDPOINT="${BASE_URL}/auth/login"
+EMPLOYERS_ENDPOINT="${BASE_URL}/employers"
 
-echo "============================================"
-echo "  Employers Module CRUD Testing"
-echo "============================================"
-echo ""
+# Test credentials
+ADMIN_USERNAME="admin@tba.sa"
+ADMIN_PASSWORD="Admin@123"
 
-# Test 1: Create Employer
-echo "TEST 1: Create Employer (POST)"
-echo "---------------------------------------------"
-RESPONSE=$(curl -s -X POST "$BASE_URL" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{
-    "name":"Acme Corporation",
-    "code":"ACME001",
-    "companyId":1,
-    "address":"123 Main St, Riyadh",
-    "phone":"+966501234567",
-    "email":"info@acme.com",
-    "contactName":"John Doe",
-    "contactPhone":"+966509876543",
-    "contactEmail":"john@acme.com",
-    "active":true
-  }')
-echo "$RESPONSE" | jq .
-EMPLOYER_ID=$(echo "$RESPONSE" | jq -r '.data.id')
-echo "Created Employer ID: $EMPLOYER_ID"
-echo ""
+# Test counters
+TESTS_PASSED=0
+TESTS_FAILED=0
+TOTAL_TESTS=0
 
-# Test 2: Get by ID
-echo "TEST 2: Get Employer by ID (GET)"
-echo "---------------------------------------------"
-curl -s "$BASE_URL/$EMPLOYER_ID" -H "Authorization: Bearer $TOKEN" | jq .
-echo ""
+# JWT Token (will be set after login)
+JWT_TOKEN=""
 
-# Test 3: Get List (Paginated)
-echo "TEST 3: Get All Employers (Paginated)"
-echo "---------------------------------------------"
-curl -s "$BASE_URL?page=1&size=10" -H "Authorization: Bearer $TOKEN" | jq .
-echo ""
+# ==============================
+# Utility Functions
+# ==============================
 
-# Test 4: Update Employer
-echo "TEST 4: Update Employer (PUT)"
-echo "---------------------------------------------"
-curl -s -X PUT "$BASE_URL/$EMPLOYER_ID" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{
-    "name":"Acme Corporation UPDATED",
-    "code":"ACME001",
-    "companyId":1,
-    "address":"456 Updated Street, Riyadh",
-    "phone":"+966507777777",
-    "email":"updated@acme.com",
-    "contactName":"John Doe Updated",
-    "contactPhone":"+966508888888",
-    "contactEmail":"john.updated@acme.com",
-    "active":false
-  }' | jq .
-echo ""
+print_header() {
+    echo -e "\n${CYAN}════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}  $1${NC}"
+    echo -e "${CYAN}════════════════════════════════════════════════════════════════${NC}\n"
+}
 
-# Test 5: Verify Update
-echo "TEST 5: Verify Update (GET)"
-echo "---------------------------------------------"
-curl -s "$BASE_URL/$EMPLOYER_ID" -H "Authorization: Bearer $TOKEN" | jq '.data | {name, address, email, active}'
-echo ""
+print_test() {
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    echo -e "${BLUE}[TEST #${TOTAL_TESTS}]${NC} $1"
+}
 
-# Test 6: Create employer with different companyId
-echo "TEST 6: Create Employer with CompanyId=2"
-echo "---------------------------------------------"
-RESPONSE2=$(curl -s -X POST "$BASE_URL" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{
-    "name":"Beta Company",
-    "code":"BETA001",
-    "companyId":2,
-    "address":"789 King Road",
-    "phone":"+966501111111",
-    "email":"info@beta.com",
-    "contactName":"Jane Smith",
-    "contactPhone":"+966502222222",
-    "contactEmail":"jane@beta.com",
-    "active":true
-  }')
-echo "$RESPONSE2" | jq .
-EMPLOYER_ID_2=$(echo "$RESPONSE2" | jq -r '.data.id')
-echo ""
+print_success() {
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+    echo -e "${GREEN}✓ PASS:${NC} $1"
+}
 
-# Test 7: Test Company Filter
-echo "TEST 7: Filter by CompanyId=1"
-echo "---------------------------------------------"
-curl -s "$BASE_URL?companyId=1" -H "Authorization: Bearer $TOKEN" | jq '.data.items[] | {id, name, code, companyId}'
-echo ""
+print_fail() {
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    echo -e "${RED}✗ FAIL:${NC} $1"
+}
 
-echo "TEST 8: Filter by CompanyId=2"
-echo "---------------------------------------------"
-curl -s "$BASE_URL?companyId=2" -H "Authorization: Bearer $TOKEN" | jq '.data.items[] | {id, name, code, companyId}'
-echo ""
+print_info() {
+    echo -e "${YELLOW}ℹ INFO:${NC} $1"
+}
 
-# Test 9: Test Search
-echo "TEST 9: Search for 'Acme'"
-echo "---------------------------------------------"
-curl -s "$BASE_URL?search=Acme" -H "Authorization: Bearer $TOKEN" | jq '.data.items[] | {id, name, code}'
-echo ""
+print_summary() {
+    echo -e "\n${CYAN}════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}  TEST SUMMARY${NC}"
+    echo -e "${CYAN}════════════════════════════════════════════════════════════════${NC}"
+    echo -e "Total Tests: ${TOTAL_TESTS}"
+    echo -e "${GREEN}Passed: ${TESTS_PASSED}${NC}"
+    echo -e "${RED}Failed: ${TESTS_FAILED}${NC}"
+    
+    if [ $TESTS_FAILED -eq 0 ]; then
+        echo -e "\n${GREEN}✓ ALL TESTS PASSED!${NC} 🎉"
+    else
+        echo -e "\n${RED}✗ SOME TESTS FAILED${NC} ⚠️"
+    fi
+    echo -e "${CYAN}════════════════════════════════════════════════════════════════${NC}\n"
+}
 
-# Test 10: Delete Employer
-echo "TEST 10: Delete Employer (DELETE)"
-echo "---------------------------------------------"
-curl -s -X DELETE "$BASE_URL/$EMPLOYER_ID" -H "Authorization: Bearer $TOKEN" | jq .
-echo ""
+# ==============================
+# Test Functions
+# ==============================
 
-# Test 11: Verify Deletion
-echo "TEST 11: Verify Deletion (should return 404)"
-echo "---------------------------------------------"
-curl -s "$BASE_URL/$EMPLOYER_ID" -H "Authorization: Bearer $TOKEN" | jq .
-echo ""
+test_login() {
+    print_header "TEST 1: Authentication"
+    print_test "Admin login to obtain JWT token"
+    
+    RESPONSE=$(curl -s -X POST "${AUTH_ENDPOINT}" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"identifier\": \"${ADMIN_USERNAME}\",
+            \"password\": \"${ADMIN_PASSWORD}\"
+        }")
+    
+    JWT_TOKEN=$(echo "$RESPONSE" | jq -r '.data.token')
+    
+    if [ "$JWT_TOKEN" != "null" ] && [ -n "$JWT_TOKEN" ]; then
+        print_success "Login successful, JWT token obtained"
+        print_info "Token: ${JWT_TOKEN:0:50}..."
+    else
+        print_fail "Login failed or invalid token"
+        echo "$RESPONSE" | jq '.'
+        exit 1
+    fi
+}
 
-# Test 12: Test Count Endpoint
-echo "TEST 12: Count Total Employers"
-echo "---------------------------------------------"
-curl -s "$BASE_URL/count" -H "Authorization: Bearer $TOKEN" | jq .
-echo ""
+test_create_company() {
+    print_header "TEST 2: Create Insurance Company (Prerequisite)"
+    print_test "Creating insurance company for employer testing"
+    
+    RESPONSE=$(curl -s -X POST "${BASE_URL}/insurance-companies" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${JWT_TOKEN}" \
+        -d '{
+            "name": "Test Insurance Company",
+            "code": "TIC-001",
+            "licenseNumber": "LIC-TEST-001",
+            "active": true
+        }')
+    
+    COMPANY_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+    
+    if [ "$COMPANY_ID" != "null" ] && [ -n "$COMPANY_ID" ]; then
+        print_success "Insurance company created successfully (ID: $COMPANY_ID)"
+    else
+        print_info "Company might already exist, attempting to fetch existing company"
+        
+        RESPONSE=$(curl -s -X GET "${BASE_URL}/insurance-companies?page=0&size=1" \
+            -H "Authorization: Bearer ${JWT_TOKEN}")
+        
+        COMPANY_ID=$(echo "$RESPONSE" | jq -r '.data.items[0].id')
+        
+        if [ "$COMPANY_ID" != "null" ] && [ -n "$COMPANY_ID" ]; then
+            print_success "Using existing company (ID: $COMPANY_ID)"
+        else
+            print_fail "Failed to create or fetch insurance company"
+            echo "$RESPONSE" | jq '.'
+            exit 1
+        fi
+    fi
+}
 
-echo "============================================"
-echo "  Testing Complete!"
-echo "============================================"
+test_create_employer() {
+    print_header "TEST 3: Create Employer"
+    print_test "Creating Libyan Cement Company employer record"
+    
+    RESPONSE=$(curl -s -X POST "${EMPLOYERS_ENDPOINT}" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${JWT_TOKEN}" \
+        -d "{
+            \"name\": \"شركة الإسمنت الليبية\",
+            \"nameEn\": \"Libyan Cement Company\",
+            \"code\": \"LIBCEMENT\",
+            \"companyId\": ${COMPANY_ID},
+            \"contactName\": \"أحمد محمود\",
+            \"phone\": \"+218912345678\",
+            \"email\": \"info@libcement.ly\",
+            \"active\": true
+        }")
+    
+    EMPLOYER_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+    
+    if [ "$EMPLOYER_ID" != "null" ] && [ -n "$EMPLOYER_ID" ]; then
+        print_success "Employer created successfully (ID: $EMPLOYER_ID)"
+        echo "$RESPONSE" | jq '.'
+    else
+        print_info "Employer might already exist, attempting to fetch existing employer"
+        
+        RESPONSE=$(curl -s -X GET "${EMPLOYERS_ENDPOINT}?search=LIBCEMENT&page=0&size=1" \
+            -H "Authorization: Bearer ${JWT_TOKEN}")
+        
+        EMPLOYER_ID=$(echo "$RESPONSE" | jq -r '.data.items[0].id')
+        
+        if [ "$EMPLOYER_ID" != "null" ] && [ -n "$EMPLOYER_ID" ]; then
+            print_success "Using existing Libyan Cement Company (ID: $EMPLOYER_ID)"
+        else
+            print_fail "Failed to create or fetch employer"
+            exit 1
+        fi
+    fi
+}
+
+test_get_employer_by_id() {
+    print_header "TEST 4: Get Employer by ID"
+    print_test "Fetching employer details by ID: $EMPLOYER_ID"
+    
+    RESPONSE=$(curl -s -X GET "${EMPLOYERS_ENDPOINT}/${EMPLOYER_ID}" \
+        -H "Authorization: Bearer ${JWT_TOKEN}")
+    
+    NAME=$(echo "$RESPONSE" | jq -r '.data.name')
+    CODE=$(echo "$RESPONSE" | jq -r '.data.code')
+    
+    if [ "$NAME" == "شركة الإسمنت الليبية" ] && [ "$CODE" == "LIBCEMENT" ]; then
+        print_success "Employer retrieved successfully"
+        echo "$RESPONSE" | jq '.'
+    else
+        print_fail "Failed to retrieve employer correctly"
+        echo "$RESPONSE" | jq '.'
+    fi
+}
+
+test_list_employers() {
+    print_header "TEST 5: List Employers (Paginated)"
+    print_test "Fetching paginated list of employers (page 0, size 10)"
+    
+    RESPONSE=$(curl -s -X GET "${EMPLOYERS_ENDPOINT}?page=0&size=10" \
+        -H "Authorization: Bearer ${JWT_TOKEN}")
+    
+    TOTAL_ELEMENTS=$(echo "$RESPONSE" | jq -r '.data.total')
+    CONTENT_LENGTH=$(echo "$RESPONSE" | jq '.data.items | length')
+    
+    if [ "$TOTAL_ELEMENTS" != "null" ] && [ "$TOTAL_ELEMENTS" -ge 1 ]; then
+        print_success "Employers list retrieved successfully (Total: $TOTAL_ELEMENTS, Returned: $CONTENT_LENGTH)"
+        echo "$RESPONSE" | jq '.data.items[0]'
+    else
+        print_fail "Failed to retrieve employers list"
+        echo "$RESPONSE" | jq '.'
+    fi
+}
+
+test_search_employers() {
+    print_header "TEST 6: Search Employers"
+    print_test "Searching employers by name: 'Libyan Cement'"
+    
+    RESPONSE=$(curl -s -X GET "${EMPLOYERS_ENDPOINT}?search=LIBCEMENT&page=0&size=10" \
+        -H "Authorization: Bearer ${JWT_TOKEN}")
+    
+    TOTAL_ELEMENTS=$(echo "$RESPONSE" | jq -r '.data.total')
+    FIRST_NAME=$(echo "$RESPONSE" | jq -r '.data.items[0].name')
+    
+    if [ "$TOTAL_ELEMENTS" -ge 1 ] && [[ "$FIRST_NAME" == *"إسمنت"* ]]; then
+        print_success "Search returned ${TOTAL_ELEMENTS} result(s)"
+        echo "$RESPONSE" | jq '.data.items[0]'
+    else
+        print_fail "Search failed to return expected results"
+        echo "$RESPONSE" | jq '.'
+    fi
+}
+
+test_filter_by_status() {
+    print_header "TEST 7: Filter Employers by Status"
+    print_test "Filtering active employers only"
+    
+    RESPONSE=$(curl -s -X GET "${EMPLOYERS_ENDPOINT}?status=true&page=0&size=10" \
+        -H "Authorization: Bearer ${JWT_TOKEN}")
+    
+    TOTAL_ELEMENTS=$(echo "$RESPONSE" | jq -r '.data.total')
+    FIRST_ACTIVE=$(echo "$RESPONSE" | jq -r '.data.items[0].active')
+    
+    if [ "$TOTAL_ELEMENTS" -ge 1 ] && [ "$FIRST_ACTIVE" == "true" ]; then
+        print_success "Status filter working correctly (Active employers: $TOTAL_ELEMENTS)"
+        echo "$RESPONSE" | jq '.data.items[0]'
+    else
+        print_fail "Status filter not working as expected"
+        echo "$RESPONSE" | jq '.'
+    fi
+}
+
+test_update_employer() {
+    print_header "TEST 8: Update Employer"
+    print_test "Updating employer details (ID: $EMPLOYER_ID)"
+    
+    RESPONSE=$(curl -s -X PUT "${EMPLOYERS_ENDPOINT}/${EMPLOYER_ID}" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${JWT_TOKEN}" \
+        -d "{
+            \"name\": \"شركة الإسمنت الليبية\",
+            \"nameEn\": \"Libyan Cement Company\",
+            \"code\": \"LIBCEMENT\",
+            \"companyId\": ${COMPANY_ID},
+            \"contactName\": \"فاطمة علي\",
+            \"phone\": \"+218917654321\",
+            \"email\": \"fatima.ali@libcement.ly\",
+            \"active\": true
+        }")
+    
+    UPDATED_NAME=$(echo "$RESPONSE" | jq -r '.data.name')
+    UPDATED_CONTACT=$(echo "$RESPONSE" | jq -r '.data.contactName')
+    
+    if [ "$UPDATED_NAME" == "شركة الإسمنت الليبية" ] && [ "$UPDATED_CONTACT" == "فاطمة علي" ]; then
+        print_success "Employer updated successfully"
+        echo "$RESPONSE" | jq '.'
+    else
+        print_fail "Failed to update employer"
+        echo "$RESPONSE" | jq '.'
+    fi
+}
+
+test_unauthorized_access() {
+    print_header "TEST 9: Unauthorized Access (Security Test)"
+    print_test "Attempting to access employers without JWT token"
+    
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${EMPLOYERS_ENDPOINT}")
+    
+    if [ "$HTTP_CODE" == "401" ] || [ "$HTTP_CODE" == "403" ]; then
+        print_success "Unauthorized access correctly blocked (HTTP $HTTP_CODE)"
+    else
+        print_fail "Security issue: Unauthorized access not blocked (HTTP $HTTP_CODE)"
+    fi
+}
+
+test_not_found() {
+    print_header "TEST 10: Not Found (404 Test)"
+    print_test "Attempting to fetch non-existent employer (ID: 999999)"
+    
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${EMPLOYERS_ENDPOINT}/999999" \
+        -H "Authorization: Bearer ${JWT_TOKEN}")
+    
+    if [ "$HTTP_CODE" == "404" ]; then
+        print_success "404 Not Found handled correctly"
+    else
+        print_fail "Expected 404, got HTTP $HTTP_CODE"
+    fi
+}
+
+test_delete_employer() {
+    print_header "TEST 11: Delete Employer"
+    print_test "Deleting employer (ID: $EMPLOYER_ID)"
+    
+    RESPONSE=$(curl -s -X DELETE "${EMPLOYERS_ENDPOINT}/${EMPLOYER_ID}" \
+        -H "Authorization: Bearer ${JWT_TOKEN}")
+    
+    MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
+    
+    if [[ "$MESSAGE" == *"success"* ]] || [[ "$MESSAGE" == *"deleted"* ]]; then
+        print_success "Employer deleted successfully"
+        
+        # Verify deletion
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${EMPLOYERS_ENDPOINT}/${EMPLOYER_ID}" \
+            -H "Authorization: Bearer ${JWT_TOKEN}")
+        
+        if [ "$HTTP_CODE" == "404" ]; then
+            print_success "Deletion verified (HTTP 404 on subsequent GET)"
+        else
+            print_fail "Employer still exists after deletion (HTTP $HTTP_CODE)"
+        fi
+    else
+        print_fail "Failed to delete employer"
+        echo "$RESPONSE" | jq '.'
+    fi
+}
+
+# ==============================
+# Main Execution
+# ==============================
+
+main() {
+    echo -e "${CYAN}"
+    echo "╔════════════════════════════════════════════════════════════════╗"
+    echo "║                                                                ║"
+    echo "║        TBA WAAD SYSTEM - EMPLOYERS MODULE TEST SUITE           ║"
+    echo "║                                                                ║"
+    echo "╚════════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}\n"
+    
+    print_info "API Base URL: ${BASE_URL}"
+    print_info "Testing as user: ${ADMIN_USERNAME}"
+    print_info "Start Time: $(date)"
+    
+    # Check if jq is installed
+    if ! command -v jq &> /dev/null; then
+        echo -e "${RED}Error: jq is not installed. Please install jq to parse JSON responses.${NC}"
+        exit 1
+    fi
+    
+    # Run all tests
+    test_login
+    test_create_company
+    test_create_employer
+    test_get_employer_by_id
+    test_list_employers
+    test_search_employers
+    test_filter_by_status
+    test_update_employer
+    test_unauthorized_access
+    test_not_found
+    test_delete_employer
+    
+    # Print summary
+    print_summary
+    
+    print_info "End Time: $(date)"
+    
+    # Exit with appropriate code
+    if [ $TESTS_FAILED -eq 0 ]; then
+        exit 0
+    else
+        exit 1
+    fi
+}
+
+# Run main function
+main "$@"

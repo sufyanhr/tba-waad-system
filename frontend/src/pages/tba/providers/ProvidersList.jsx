@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // material-ui
@@ -35,8 +35,7 @@ import MainCard from 'components/MainCard';
 import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
-import employersService from 'services/employers.service';
-import useAuth from 'hooks/useAuth';
+import providersService from 'services/providers.service';
 import { useSnackbar } from 'notistack';
 
 // third-party
@@ -47,57 +46,85 @@ import {
   createColumnHelper
 } from '@tanstack/react-table';
 
-// ==============================|| EMPLOYERS LIST PAGE ||============================== //
+// ==============================|| PROVIDERS LIST PAGE ||============================== //
 
 const columnHelper = createColumnHelper();
 
-export default function EmployersList() {
+// Provider Type Options
+const PROVIDER_TYPES = [
+  { value: '', label: 'All Types' },
+  { value: 'HOSPITAL', label: 'Hospital' },
+  { value: 'CLINIC', label: 'Clinic' },
+  { value: 'PHARMACY', label: 'Pharmacy' },
+  { value: 'LABORATORY', label: 'Laboratory' }
+];
+
+export default function ProvidersList() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
   // State
-  const [employers, setEmployers] = useState([]);
+  const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedEmployer, setSelectedEmployer] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
 
   // Column definitions
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        header: 'Employer Name',
+        header: 'Provider Name',
         cell: (info) => (
           <Typography variant="body2" fontWeight={500}>
             {info.getValue()}
           </Typography>
         )
       }),
-      columnHelper.accessor('code', {
-        header: 'Code',
+      columnHelper.accessor('providerType', {
+        header: 'Type',
+        cell: (info) => {
+          const type = info.getValue();
+          const colorMap = {
+            HOSPITAL: 'error',
+            CLINIC: 'primary',
+            PHARMACY: 'success',
+            LABORATORY: 'warning'
+          };
+          return (
+            <Chip
+              label={type || 'N/A'}
+              color={colorMap[type] || 'default'}
+              size="small"
+            />
+          );
+        }
+      }),
+      columnHelper.accessor('licenseNumber', {
+        header: 'License Number',
         cell: (info) => (
           <Typography variant="body2" color="text.secondary">
-            {info.getValue()}
+            {info.getValue() || '-'}
           </Typography>
         )
-      }),
-      columnHelper.accessor('contactName', {
-        header: 'Contact Person',
-        cell: (info) => info.getValue() || '-'
       }),
       columnHelper.accessor('phone', {
         header: 'Phone',
         cell: (info) => info.getValue() || '-'
       }),
-      columnHelper.accessor('email', {
-        header: 'Email',
-        cell: (info) => info.getValue() || '-'
+      columnHelper.accessor('address', {
+        header: 'Address',
+        cell: (info) => (
+          <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+            {info.getValue() || '-'}
+          </Typography>
+        )
       }),
       columnHelper.accessor('active', {
         header: 'Status',
@@ -122,7 +149,7 @@ export default function EmployersList() {
                 <EyeOutlined />
               </IconButton>
             </Tooltip>
-            <RBACGuard requiredPermission="EMPLOYER_UPDATE">
+            <RBACGuard requiredPermission="PROVIDER_UPDATE">
               <Tooltip title="Edit">
                 <IconButton
                   size="small"
@@ -133,7 +160,7 @@ export default function EmployersList() {
                 </IconButton>
               </Tooltip>
             </RBACGuard>
-            <RBACGuard requiredPermission="EMPLOYER_DELETE">
+            <RBACGuard requiredPermission="PROVIDER_DELETE">
               <Tooltip title="Delete">
                 <IconButton
                   size="small"
@@ -148,46 +175,47 @@ export default function EmployersList() {
         )
       })
     ],
-    [navigate]
+    []
   );
 
-  // Load employers
-  const loadEmployers = async () => {
+  // Load providers
+  const loadProviders = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await employersService.list({
+      const result = await providersService.list({
         page,
         size: rowsPerPage,
         search: searchTerm,
+        type: typeFilter || undefined,
         status: statusFilter || undefined
       });
 
       if (result.success) {
         const responseData = result.data;
-        setEmployers(responseData.content || []);
-        setTotalElements(responseData.totalElements || 0);
+        setProviders(responseData.items || []);
+        setTotalElements(responseData.total || 0);
       } else {
         setError(result.error);
         enqueueSnackbar(result.error, { variant: 'error' });
       }
     } catch (err) {
-      const errorMessage = err.message || 'Failed to load employers';
+      const errorMessage = err.message || 'Failed to load providers';
       setError(errorMessage);
       enqueueSnackbar(errorMessage, { variant: 'error' });
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage, searchTerm, typeFilter, statusFilter, enqueueSnackbar]);
 
   useEffect(() => {
-    loadEmployers();
-  }, [page, rowsPerPage, searchTerm, statusFilter]);
+    loadProviders();
+  }, [loadProviders]);
 
   // Handlers
   const handleRetry = () => {
-    loadEmployers();
+    loadProviders();
   };
 
   const handleChangePage = (event, newPage) => {
@@ -204,67 +232,72 @@ export default function EmployersList() {
     setPage(0);
   };
 
+  const handleTypeChange = (event) => {
+    setTypeFilter(event.target.value);
+    setPage(0);
+  };
+
   const handleStatusChange = (event) => {
     setStatusFilter(event.target.value);
     setPage(0);
   };
 
   const handleCreate = () => {
-    navigate('/tpa/employers/create');
+    navigate('/tpa/providers/create');
   };
 
   const handleView = (id) => {
-    navigate(`/tpa/employers/view/${id}`);
+    navigate(`/tpa/providers/view/${id}`);
   };
 
   const handleEdit = (id) => {
-    navigate(`/tpa/employers/edit/${id}`);
+    navigate(`/tpa/providers/edit/${id}`);
   };
 
-  const openDeleteDialog = (employer) => {
-    setSelectedEmployer(employer);
+  const openDeleteDialog = (provider) => {
+    setSelectedProvider(provider);
     setDeleteDialogOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!selectedEmployer) return;
+    if (!selectedProvider) return;
 
     try {
-      const result = await employersService.delete(selectedEmployer.id);
+      const result = await providersService.delete(selectedProvider.id);
       
       if (result.success) {
-        enqueueSnackbar(result.message || 'Employer deleted successfully', { variant: 'success' });
+        enqueueSnackbar(result.message || 'Provider deleted successfully', { variant: 'success' });
         setDeleteDialogOpen(false);
-        setSelectedEmployer(null);
-        loadEmployers();
+        setSelectedProvider(null);
+        loadProviders();
       } else {
         enqueueSnackbar(result.error, { variant: 'error' });
       }
     } catch (err) {
-      enqueueSnackbar(err.message || 'Failed to delete employer', { variant: 'error' });
+      enqueueSnackbar(err.message || 'Failed to delete provider', { variant: 'error' });
     }
   };
 
   // React Table initialization
   const table = useReactTable({
-    data: employers,
+    data: providers,
     columns,
     getCoreRowModel: getCoreRowModel()
   });
 
   return (
-    <RBACGuard requiredPermission="EMPLOYER_READ">
+    <RBACGuard requiredPermission="PROVIDER_READ">
       <MainCard
-        title="Employers"
+        title="Healthcare Providers"
         content={false}
         secondary={
-          <RBACGuard requiredPermission="EMPLOYER_CREATE">
+          <RBACGuard requiredPermission="PROVIDER_CREATE">
             <Button
               variant="contained"
               startIcon={<PlusOutlined />}
               onClick={handleCreate}
             >
-              Add Employer
+              Add Provider
             </Button>
           </RBACGuard>
         }
@@ -274,7 +307,7 @@ export default function EmployersList() {
           <Stack direction="row" spacing={2}>
             <TextField
               fullWidth
-              placeholder="Search employers by name, code, or contact..."
+              placeholder="Search providers by name, license, or phone..."
               value={searchTerm}
               onChange={handleSearch}
               InputProps={{
@@ -282,6 +315,20 @@ export default function EmployersList() {
               }}
             />
             <FormControl sx={{ minWidth: 180 }}>
+              <InputLabel>Provider Type</InputLabel>
+              <Select
+                value={typeFilter}
+                onChange={handleTypeChange}
+                label="Provider Type"
+              >
+                {PROVIDER_TYPES.map((type) => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: 150 }}>
               <InputLabel>Status</InputLabel>
               <Select
                 value={statusFilter}
@@ -305,21 +352,21 @@ export default function EmployersList() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && employers.length === 0 && (
+        {!loading && !error && providers.length === 0 && (
           <EmptyState
-            title="No employers found"
+            title="No providers found"
             description={
-              searchTerm || statusFilter
+              searchTerm || typeFilter || statusFilter
                 ? 'Try adjusting your search or filter criteria'
-                : 'Get started by adding your first employer'
+                : 'Get started by adding your first healthcare provider'
             }
             action={handleCreate}
-            actionLabel="Add Employer"
+            actionLabel="Add Provider"
           />
         )}
 
         {/* Data Table */}
-        {!loading && !error && employers.length > 0 && (
+        {!loading && !error && providers.length > 0 && (
           <>
             <Box sx={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -398,8 +445,7 @@ export default function EmployersList() {
           <DialogTitle>Confirm Delete</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete employer "{selectedEmployer?.name}"?
-              This action cannot be undone.
+              Are you sure you want to delete provider "{selectedProvider?.name}"? This action cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
