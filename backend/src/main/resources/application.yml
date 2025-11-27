@@ -1,26 +1,12 @@
 spring:
   application:
     name: tba-waad-system-backend
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: 
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  mail:
+    mail:
     host: smtp.hostinger.com
     port: 587
     username: support@alwahacare.com
     password: 6L8~nz@Go
+    protocol: smtp
     properties:
       mail:
         smtp:
@@ -28,9 +14,22 @@ spring:
           starttls:
             enable: true
             required: true
-          ssl:
-            trust: smtp.hostinger.com
-  
+        debug: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tba_waad_system
+    username: postgres
+    password: 12345
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 server:
   port: 8080
   error:

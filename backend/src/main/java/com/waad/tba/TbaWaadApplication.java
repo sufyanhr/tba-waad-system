@@ -11,5 +11,3 @@ public class TbaWaadApplication {
         SpringApplication.run(TbaWaadApplication.class, args);
     }
 }
-
-git commit -m "🔥 Fix: Hibernate floating scale issue + cleanup JPA config + backend stabilization"

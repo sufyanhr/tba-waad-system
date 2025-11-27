@@ -198,7 +198,7 @@ public class AuthService {
                 user.getFullName(), otp
         );
 
-        emailService.send(email, subject, body);
+        emailService.sendOtpTemplate(email, user.getFullName(), otp);
         log.info("Password reset OTP sent successfully to: {}", email);
     }
 
