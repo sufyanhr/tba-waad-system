@@ -42,7 +42,7 @@ public class Visit {
     
     private String treatment;
     
-    @Column(precision = 10, scale = 2)
+    @Column()
     private BigDecimal totalAmount;
     
     @Column(length = 1000)

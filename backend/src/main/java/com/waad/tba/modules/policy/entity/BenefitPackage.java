@@ -44,17 +44,17 @@ public class BenefitPackage {
     private String description;
 
     // Outpatient (OP) Coverage
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal opCoverageLimit;
 
-    @Column(precision = 5, scale = 2)
+    @Column()
     private BigDecimal opCoPaymentPercentage;
 
     // Inpatient (IP) Coverage
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal ipCoverageLimit;
 
-    @Column(precision = 5, scale = 2)
+    @Column()
     private BigDecimal ipCoPaymentPercentage;
 
     // Maternity Coverage
@@ -62,7 +62,7 @@ public class BenefitPackage {
     @Column(nullable = false)
     private Boolean maternityCovered = false;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal maternityCoverageLimit;
 
     // Dental Coverage
@@ -70,7 +70,7 @@ public class BenefitPackage {
     @Column(nullable = false)
     private Boolean dentalCovered = false;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal dentalCoverageLimit;
 
     // Optical Coverage
@@ -78,7 +78,7 @@ public class BenefitPackage {
     @Column(nullable = false)
     private Boolean opticalCovered = false;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal opticalCoverageLimit;
 
     // Pharmacy Coverage
@@ -86,14 +86,14 @@ public class BenefitPackage {
     @Column(nullable = false)
     private Boolean pharmacyCovered = true;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal pharmacyCoverageLimit;
 
     // Annual Limits
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal annualLimitPerMember;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal lifetimeLimitPerMember;
 
     // Emergency Coverage

@@ -70,10 +70,10 @@ public class PreAuthorization {
     private ServiceType serviceType;
 
     // Cost Information
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal estimatedCost;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal approvedAmount;
 
     // Doctor Information

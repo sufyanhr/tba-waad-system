@@ -106,7 +106,7 @@ public class Provider {
     private ContractStatus contractStatus;
 
     // Discount and Pricing
-    @Column(precision = 5, scale = 2)
+    @Column()
     private BigDecimal discountPercentage;
 
     @Column(length = 2000)

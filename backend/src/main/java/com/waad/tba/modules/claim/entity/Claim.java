@@ -65,23 +65,23 @@ public class Claim {
     private LocalDate submissionDate;
 
     // Financial Information
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(nullable = false)
     @Builder.Default
     private BigDecimal totalClaimed = BigDecimal.ZERO;
     
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal totalApproved = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal totalRejected = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal memberCoPayment = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal netPayable = BigDecimal.ZERO;
 

@@ -53,27 +53,27 @@ public class ClaimLine {
     private Integer quantity = 1;
 
     @NotNull(message = "Unit price is required")
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(nullable = false)
     @Builder.Default
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
     // Approved Amounts
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal approvedQuantity = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal approvedUnitPrice = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal approvedAmount = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     @Builder.Default
     private BigDecimal rejectedAmount = BigDecimal.ZERO;
 

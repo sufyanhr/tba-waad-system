@@ -82,20 +82,20 @@ public class Policy {
     private Integer preExistingWaitingPeriodDays = 365;
 
     // Coverage Limits
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal totalPolicyLimit;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal perMemberLimit;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal perFamilyLimit;
 
     // Premium Information
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal totalPremium;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal premiumPerMember;
 
     // Policy Details

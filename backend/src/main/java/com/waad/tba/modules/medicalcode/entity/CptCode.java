@@ -51,13 +51,13 @@ public class CptCode {
     private ProcedureType procedureType;
 
     // Standard Pricing (can be overridden by provider contracts)
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal standardPrice;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal maxAllowedPrice;
 
-    @Column(precision = 15, scale = 2)
+    @Column()
     private BigDecimal minAllowedPrice;
 
     // Coverage Information
@@ -65,7 +65,7 @@ public class CptCode {
     @Column(nullable = false)
     private Boolean covered = true;
 
-    @Column(precision = 5, scale = 2)
+    @Column()
     private BigDecimal coPaymentPercentage;
 
     // Pre-authorization requirement

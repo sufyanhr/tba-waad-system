@@ -33,9 +33,9 @@ import { useSnackbar } from 'notistack';
 // Project imports
 import MainCard from 'components/MainCard';
 import { RBACGuard } from 'contexts/RBACContext';
-import TableSkeleton from 'components/TableSkeleton';
+import TableSkeleton from 'components/tba/TableSkeleton';
 import ErrorFallback from 'components/ErrorFallback';
-import EmptyState from 'components/EmptyState';
+import EmptyState from 'components/tba/EmptyState';
 import medicalPackagesService from 'services/medical-packages.service';
 import medicalServicesService from 'services/medical-services.service';
 

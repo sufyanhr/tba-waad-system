@@ -56,7 +56,7 @@ public class MedicalPackage {
      * Total coverage limit for this package (optional)
      * Sum of all included services coverage limits
      */
-    @Column(precision = 15, scale = 2)
+    @Column()
     private Double totalCoverageLimit;
 
     @Builder.Default

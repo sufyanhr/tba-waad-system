@@ -2,17 +2,19 @@ spring:
   application:
     name: tba-waad-system-backend
   datasource:
-    datasource:
-      url: jdbc:postgresql://localhost:5432/tba_waad
-      username: postgres
-      password: 12345
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
   mail:
     host: smtp.hostinger.com

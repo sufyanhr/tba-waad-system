@@ -1,13 +1,22 @@
 package com.waad.tba.modules.medicalpackage;
 
-import com.waad.tba.common.dto.ApiResponse;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.waad.tba.common.dto.ApiResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/medical-packages")
@@ -26,19 +35,11 @@ public class MedicalPackageController {
         try {
             List<MedicalPackage> packages = service.findAll();
             return ResponseEntity.ok(
-                ApiResponse.<List<MedicalPackage>>builder()
-                    .success(true)
-                    .message("Medical packages retrieved successfully")
-                    .data(packages)
-                    .build()
+                ApiResponse.success("Medical packages retrieved successfully", packages)
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.<List<MedicalPackage>>builder()
-                    .success(false)
-                    .message("Failed to retrieve medical packages")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Failed to retrieve medical packages: " + e.getMessage())
             );
         }
     }
@@ -53,19 +54,11 @@ public class MedicalPackageController {
         try {
             MedicalPackage medicalPackage = service.findById(id);
             return ResponseEntity.ok(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(true)
-                    .message("Medical package retrieved successfully")
-                    .data(medicalPackage)
-                    .build()
+                ApiResponse.success("Medical package retrieved successfully", medicalPackage)
             );
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(false)
-                    .message("Medical package not found")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Medical package not found: " + e.getMessage())
             );
         }
     }
@@ -80,19 +73,11 @@ public class MedicalPackageController {
         try {
             MedicalPackage medicalPackage = service.findByCode(code);
             return ResponseEntity.ok(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(true)
-                    .message("Medical package retrieved successfully")
-                    .data(medicalPackage)
-                    .build()
+                ApiResponse.success("Medical package retrieved successfully", medicalPackage)
             );
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(false)
-                    .message("Medical package not found")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Medical package not found: " + e.getMessage())
             );
         }
     }
@@ -107,19 +92,11 @@ public class MedicalPackageController {
         try {
             List<MedicalPackage> packages = service.findActive();
             return ResponseEntity.ok(
-                ApiResponse.<List<MedicalPackage>>builder()
-                    .success(true)
-                    .message("Active medical packages retrieved successfully")
-                    .data(packages)
-                    .build()
+                ApiResponse.success("Active medical packages retrieved successfully", packages)
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.<List<MedicalPackage>>builder()
-                    .success(false)
-                    .message("Failed to retrieve active medical packages")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Failed to retrieve active medical packages: " + e.getMessage())
             );
         }
     }
@@ -134,19 +111,11 @@ public class MedicalPackageController {
         try {
             MedicalPackage created = service.create(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(true)
-                    .message("Medical package created successfully")
-                    .data(created)
-                    .build()
+                ApiResponse.success("Medical package created successfully", created)
             );
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(false)
-                    .message("Failed to create medical package")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Failed to create medical package: " + e.getMessage())
             );
         }
     }
@@ -161,19 +130,11 @@ public class MedicalPackageController {
         try {
             MedicalPackage updated = service.update(id, dto);
             return ResponseEntity.ok(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(true)
-                    .message("Medical package updated successfully")
-                    .data(updated)
-                    .build()
+                ApiResponse.success("Medical package updated successfully", updated)
             );
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.<MedicalPackage>builder()
-                    .success(false)
-                    .message("Failed to update medical package")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Failed to update medical package: " + e.getMessage())
             );
         }
     }
@@ -188,18 +149,11 @@ public class MedicalPackageController {
         try {
             service.delete(id);
             return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
-                    .success(true)
-                    .message("Medical package deleted successfully")
-                    .build()
+                ApiResponse.success("Medical package deleted successfully", null)
             );
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.<Void>builder()
-                    .success(false)
-                    .message("Failed to delete medical package")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Failed to delete medical package: " + e.getMessage())
             );
         }
     }
@@ -214,19 +168,11 @@ public class MedicalPackageController {
         try {
             Long count = service.count();
             return ResponseEntity.ok(
-                ApiResponse.<Long>builder()
-                    .success(true)
-                    .message("Package count retrieved successfully")
-                    .data(count)
-                    .build()
+                ApiResponse.success("Package count retrieved successfully", count)
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.<Long>builder()
-                    .success(false)
-                    .message("Failed to retrieve package count")
-                    .error(e.getMessage())
-                    .build()
+                ApiResponse.error("Failed to retrieve package count: " + e.getMessage())
             );
         }
     }
