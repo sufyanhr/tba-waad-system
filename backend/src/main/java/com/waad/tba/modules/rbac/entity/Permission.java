@@ -29,6 +29,9 @@ public class Permission {
 
     private String description;
 
+    @Column(name = "module", length = 50)
+    private String module;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;

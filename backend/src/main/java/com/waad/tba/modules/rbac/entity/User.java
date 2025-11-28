@@ -40,8 +40,13 @@ public class User {
 
     private String phone;
 
+    @Column(name = "is_active")
     @Builder.Default
     private Boolean active = true;
+
+    @Column(name = "email_verified")
+    @Builder.Default
+    private Boolean emailVerified = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
