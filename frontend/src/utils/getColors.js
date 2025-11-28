@@ -3,16 +3,16 @@
 export default function getColors(theme, color) {
   switch (color) {
     case 'secondary':
-      return theme.vars.palette.secondary;
+      return theme.palette.secondary;
     case 'error':
-      return theme.vars.palette.error;
+      return theme.palette.error;
     case 'warning':
-      return theme.vars.palette.warning;
+      return theme.palette.warning;
     case 'info':
-      return theme.vars.palette.info;
+      return theme.palette.info;
     case 'success':
-      return theme.vars.palette.success;
+      return theme.palette.success;
     default:
-      return theme.vars.palette.primary;
+      return theme.palette.primary;
   }
 }
