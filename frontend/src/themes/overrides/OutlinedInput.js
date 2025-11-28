@@ -19,13 +19,14 @@ function getColor({ variant, theme }) {
 // ==============================|| OVERRIDES - OUTLINED INPUT ||============================== //
 
 export default function OutlinedInput(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiOutlinedInput: {
       styleOverrides: {
         input: { padding: '10.5px 14px 10.5px 12px' },
         notchedOutline: {
-          borderColor: theme.vars.palette.grey[300],
-          ...theme.applyStyles('dark', { borderColor: theme.vars.palette.grey[200] })
+          borderColor: varsPalette.grey?.[300] ?? theme.palette.grey?.[300],
+          ...theme.applyStyles('dark', { borderColor: varsPalette.grey?.[200] ?? theme.palette.grey?.[200] })
         },
         root: { ...getColor({ variant: 'primary', theme }), '&.Mui-error': { ...getColor({ variant: 'error', theme }) } },
         inputSizeSmall: { padding: '7.5px 8px 7.5px 12px' },

@@ -48,7 +48,7 @@ COMMIT
 
 ### Step 4: Restart Backend
 ```bash
-mvn spring-boot:run
+y
 ```
 
 Backend will start on: **http://localhost:8080**

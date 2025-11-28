@@ -1,6 +1,8 @@
 // ==============================|| OVERRIDES - ALERT TITLE ||============================== //
 
 export default function Accordion(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
+  const secondaryVars = varsPalette.secondary || theme.palette.secondary || theme.palette.primary || {};
   return {
     MuiAccordion: {
       defaultProps: {
@@ -11,7 +13,7 @@ export default function Accordion(theme) {
       styleOverrides: {
         root: {
           border: '1px solid',
-          borderColor: theme.vars.palette.secondary.light,
+          borderColor: secondaryVars.light ?? secondaryVars.main,
           '&:not(:last-child)': {
             borderBottom: 0
           },
@@ -19,7 +21,7 @@ export default function Accordion(theme) {
             display: 'none'
           },
           '&.Mui-disabled': {
-            backgroundColor: theme.vars.palette.secondary.lighter
+            backgroundColor: secondaryVars.lighter ?? secondaryVars.main
           }
         }
       }

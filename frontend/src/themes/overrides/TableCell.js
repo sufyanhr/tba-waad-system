@@ -1,11 +1,12 @@
 // ==============================|| OVERRIDES - TABLE CELL ||============================== //
 
 export default function TableCell(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   const commonCell = {
     fontSize: '0.75rem',
     textTransform: 'uppercase',
-    '&:not(:last-of-type)': {
-      backgroundImage: `linear-gradient(${theme.vars.palette.divider}, ${theme.vars.palette.divider})`,
+      '&:not(:last-of-type)': {
+        backgroundImage: `linear-gradient(${varsPalette.divider ?? theme.palette.divider}, ${varsPalette.divider ?? theme.palette.divider})`,
       backgroundRepeat: 'no-repeat',
       /* 1px wide, shorter than full height */
       backgroundSize: '1px calc(100% - 30px)',
@@ -18,10 +19,10 @@ export default function TableCell(theme) {
     MuiTableCell: {
       styleOverrides: {
         root: ({ ownerState }) => {
-          const baseStyle = {
+            const baseStyle = {
             fontSize: '0.875rem',
             padding: 12,
-            borderColor: theme.vars.palette.divider
+            borderColor: varsPalette.divider ?? theme.palette.divider
           };
 
           const align = ownerState.align;

@@ -1,15 +1,16 @@
 // ==============================|| OVERRIDES - TABLE CELL ||============================== //
 
 export default function TableFooter(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiTableFooter: {
       styleOverrides: {
         root: {
-          backgroundColor: theme.vars.palette.grey[50],
+          backgroundColor: varsPalette.grey?.[50] ?? theme.palette.grey?.[50],
           borderTop: '2px solid',
-          borderTopColor: theme.vars.palette.divider,
+          borderTopColor: varsPalette.divider ?? theme.palette.divider,
           borderBottom: '1px solid',
-          borderBottomColor: theme.vars.palette.divider
+          borderBottomColor: varsPalette.divider ?? theme.palette.divider
         }
       }
     }

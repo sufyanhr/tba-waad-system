@@ -35,12 +35,13 @@ function switchStyle(theme, size) {
 // ==============================|| OVERRIDES - TAB ||============================== //
 
 export default function Switch(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiSwitch: {
       styleOverrides: {
         track: {
           opacity: 1,
-          backgroundColor: theme.vars.palette.secondary[400],
+          backgroundColor: varsPalette.secondary?.[400] ?? theme.palette.secondary?.[400],
           boxSizing: 'border-box'
         },
         thumb: {
@@ -56,11 +57,11 @@ export default function Switch(theme) {
               opacity: 1
             },
             '&.Mui-disabled': {
-              color: theme.vars.palette.background.paper
+              color: varsPalette.background?.paper ?? theme.palette.background?.paper
             }
           },
           '&.Mui-disabled': {
-            color: theme.vars.palette.background.paper,
+            color: varsPalette.background?.paper ?? theme.palette.background?.paper,
             '+.MuiSwitch-track': {
               opacity: 0.3
             }
@@ -71,7 +72,7 @@ export default function Switch(theme) {
           // }
         },
         root: {
-          color: theme.vars.palette.text.primary,
+          color: varsPalette.text?.primary ?? theme.palette.text?.primary,
           padding: 0,
           margin: 8,
           display: 'flex',

@@ -4,7 +4,9 @@ import RightOutlined from '@ant-design/icons/RightOutlined';
 // ==============================|| OVERRIDES - ALERT TITLE ||============================== //
 
 export default function AccordionSummary(theme) {
-  const { vars, spacing } = theme;
+  const { spacing } = theme;
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
+  const paletteSecondary = varsPalette.secondary || theme.palette.secondary || theme.palette.primary || {};
 
   return {
     MuiAccordionSummary: {
@@ -13,7 +15,7 @@ export default function AccordionSummary(theme) {
       },
       styleOverrides: {
         root: {
-          backgroundColor: vars.palette.secondary.lighter,
+          backgroundColor: paletteSecondary.lighter ?? (varsPalette.primary?.lighter ?? theme.palette.primary?.lighter),
           flexDirection: 'row-reverse',
           minHeight: 46
         },

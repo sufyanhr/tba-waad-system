@@ -11,6 +11,8 @@ function getColorStyle({ color, theme }) {
 }
 
 export default function Slider(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
+  const secondaryVars = (varsPalette && varsPalette.secondary) || theme.palette.secondary || theme.palette.primary || {};
   return {
     MuiSlider: {
       styleOverrides: {
@@ -21,8 +23,8 @@ export default function Slider(theme) {
           width: 14,
           height: 14,
           border: '2px solid',
-          borderColor: theme.vars.palette.primary.main,
-          backgroundColor: theme.vars.palette.background.paper,
+          borderColor: varsPalette.primary?.main ?? theme.palette.primary?.main,
+          backgroundColor: varsPalette.background?.paper ?? theme.palette.background?.paper,
           '&.MuiSlider-thumbColorPrimary': getColorStyle({ color: 'primary', theme }),
           '&.MuiSlider-thumbColorSecondary': getColorStyle({ color: 'secondary', theme }),
           '&.MuiSlider-thumbColorSuccess': getColorStyle({ color: 'success', theme }),
@@ -35,8 +37,8 @@ export default function Slider(theme) {
           height: 4,
           borderRadius: '50%',
           border: '1px solid',
-          borderColor: theme.vars.palette.secondary.light,
-          backgroundColor: theme.vars.palette.background.paper,
+          borderColor: secondaryVars.light ?? secondaryVars.main,
+          backgroundColor: varsPalette.background?.paper ?? theme.palette.background?.paper,
           '&.MuiSlider-markActive': {
             opacity: 1,
             borderColor: 'inherit',
@@ -44,7 +46,7 @@ export default function Slider(theme) {
           }
         },
         rail: {
-          color: theme.vars.palette.secondary.light
+          color: secondaryVars.light ?? secondaryVars.main
         },
         root: {
           '&.Mui-disabled': {
@@ -52,17 +54,17 @@ export default function Slider(theme) {
               opacity: 0.25
             },
             '.MuiSlider-track': {
-              color: theme.vars.palette.secondary.lighter
+              color: secondaryVars.lighter ?? secondaryVars.main
             },
             '.MuiSlider-thumb': {
               border: '2px solid',
-              borderColor: theme.vars.palette.secondary.lighter
+              borderColor: secondaryVars.lighter ?? secondaryVars.main
             }
           }
         },
         valueLabel: {
-          backgroundColor: theme.vars.palette.grey[600],
-          color: theme.vars.palette.grey[0]
+          backgroundColor: varsPalette.grey?.[600] ?? theme.palette.grey?.[600],
+          color: varsPalette.grey?.[0] ?? theme.palette.grey?.[0]
         }
       }
     }

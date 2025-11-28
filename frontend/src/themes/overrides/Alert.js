@@ -18,33 +18,36 @@ function getColorStyle({ color, theme }) {
 // ==============================|| OVERRIDES - ALERT ||============================== //
 
 export default function Alert(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   const primaryDashed = getColorStyle({ color: 'primary', theme });
+  const primaryVars = (varsPalette && varsPalette.primary) || theme.palette.primary || {};
 
   return {
     MuiAlert: {
       styleOverrides: {
         root: {
-          color: theme.vars.palette.text.primary,
+          color: varsPalette.text?.primary ?? theme.palette.text?.primary,
           fontSize: '0.875rem',
           variants: [
             {
               props: { variant: 'standard' },
-              style: ({ ownerState }) => {
-                const paletteColor = theme.palette[ownerState.color];
+                style: ({ ownerState }) => {
+                  const ownerColor = ownerState.color || 'primary';
+                  const paletteColor = theme.palette[ownerColor] || theme.palette.primary;
                 return {
-                  position: 'relative',
-                  backgroundColor: paletteColor.lighter,
-                  '& .MuiAlert-icon': {
-                    color: paletteColor.main
-                  },
+                    position: 'relative',
+                    backgroundColor: paletteColor?.lighter ?? primaryVars.lighter ?? primaryVars.main,
+                    '& .MuiAlert-icon': {
+                      color: paletteColor?.main ?? primaryVars.main
+                    },
                   ...theme.applyStyles('dark', {
-                    backgroundColor: withAlpha(theme.vars.palette.background.default, 0.99),
+                    backgroundColor: withAlpha(varsPalette.background?.default ?? theme.palette.background?.default, 0.99),
                     '&:before': {
                       width: '100%',
                       height: '100%',
                       position: 'absolute',
                       content: '""',
-                      backgroundColor: paletteColor.main,
+                      backgroundColor: paletteColor?.main ?? primaryVars.main,
                       top: 0,
                       left: 0,
                       opacity: 0.05
@@ -55,14 +58,15 @@ export default function Alert(theme) {
             },
             {
               props: { variant: 'filled' },
-              style: ({ ownerState }) => {
-                const paletteColor = theme.palette[ownerState.color];
+                style: ({ ownerState }) => {
+                  const ownerColor = ownerState.color || 'primary';
+                  const paletteColor = theme.palette[ownerColor] || theme.palette.primary;
                 return {
-                  color: theme.vars.palette.grey[0],
-                  backgroundColor: paletteColor.main,
+                  color: varsPalette.grey?.[0] ?? theme.palette.grey?.[0],
+                    backgroundColor: paletteColor?.main ?? primaryVars.main,
                   ...theme.applyStyles('dark', {
-                    backgroundColor: paletteColor.dark,
-                    ...(ownerState.color === 'secondary' && { backgroundColor: paletteColor.main })
+                      backgroundColor: paletteColor?.dark ?? primaryVars.dark,
+                      ...(ownerState.color === 'secondary' && { backgroundColor: paletteColor?.main ?? primaryVars.main })
                   })
                 };
               }

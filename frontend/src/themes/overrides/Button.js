@@ -81,11 +81,12 @@ function getColorStyle({ variant, color, theme }) {
 export default function Button(theme) {
   const primaryDashed = getColorStyle({ variant: 'dashed', color: 'primary', theme });
   const primaryShadow = getColorStyle({ variant: 'shadow', color: 'primary', theme });
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
 
   const disabledStyle = {
-    backgroundColor: theme.vars.palette.grey[200],
+    backgroundColor: varsPalette.grey?.[200] ?? theme.palette.grey?.[200],
     '&:hover': {
-      backgroundColor: theme.vars.palette.grey[200]
+      backgroundColor: varsPalette.grey?.[200] ?? theme.palette.grey?.[200]
     }
   };
   const iconStyle = {
@@ -133,8 +134,8 @@ export default function Button(theme) {
           '&.Mui-disabled': {
             ...disabledStyle,
             '&:hover': {
-              backgroundColor: theme.vars.palette.grey[200],
-              color: `${theme.vars.palette.grey[300]} !important`,
+              backgroundColor: varsPalette.grey?.[200] ?? theme.palette.grey?.[200],
+              color: `${varsPalette.grey?.[300] ?? theme.palette.grey?.[300]} !important`,
               borderColor: 'inherit'
             }
           }
@@ -161,9 +162,9 @@ export default function Button(theme) {
           '&.MuiButton-dashedInfo': getColorStyle({ variant: 'dashed', color: 'info', theme }),
           '&.MuiButton-dashedWarning': getColorStyle({ variant: 'dashed', color: 'warning', theme }),
           '&.Mui-disabled': {
-            color: `${theme.vars.palette.grey[300]} !important`,
-            borderColor: `${theme.vars.palette.grey[400]} !important`,
-            backgroundColor: `${theme.vars.palette.grey[200]} !important`
+            color: `${varsPalette.grey?.[300] ?? theme.palette.grey?.[300]} !important`,
+            borderColor: `${varsPalette.grey?.[400] ?? theme.palette.grey?.[400]} !important`,
+            backgroundColor: `${varsPalette.grey?.[200] ?? theme.palette.grey?.[200]} !important`
           }
         },
         shadow: {
@@ -175,9 +176,9 @@ export default function Button(theme) {
           '&.MuiButton-shadowInfo': getColorStyle({ variant: 'shadow', color: 'info', theme }),
           '&.MuiButton-shadowWarning': getColorStyle({ variant: 'shadow', color: 'warning', theme }),
           '&.Mui-disabled': {
-            color: `${theme.vars.palette.grey[300]} !important`,
-            borderColor: `${theme.vars.palette.grey[400]} !important`,
-            backgroundColor: `${theme.vars.palette.grey[200]} !important`
+            color: `${varsPalette.grey?.[300] ?? theme.palette.grey?.[300]} !important`,
+            borderColor: `${varsPalette.grey?.[400] ?? theme.palette.grey?.[400]} !important`,
+            backgroundColor: `${varsPalette.grey?.[200] ?? theme.palette.grey?.[200]} !important`
           }
         },
         containedPrimary: getColorStyle({ variant: 'contained', color: 'primary', theme }),

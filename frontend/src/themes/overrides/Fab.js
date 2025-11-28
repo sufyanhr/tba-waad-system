@@ -38,13 +38,14 @@ function getColorStyle({ color, theme }) {
 // ==============================|| OVERRIDES - BUTTON ||============================== //
 
 export default function Button(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiFab: {
       styleOverrides: {
         root: {
           fontWeight: 400,
           '&.Mui-disabled': {
-            backgroundColor: theme.vars.palette.grey[200]
+            backgroundColor: varsPalette.grey?.[200] ?? theme.palette.grey?.[200]
           },
           '&.MuiFab-primary': getColorStyle({ color: 'primary', theme }),
           '&.MuiFab-secondary': getColorStyle({ color: 'secondary', theme }),

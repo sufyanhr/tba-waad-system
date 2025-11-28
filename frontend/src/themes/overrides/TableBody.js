@@ -1,9 +1,10 @@
 // ==============================|| OVERRIDES - TABLE ROW ||============================== //
 
 export default function TableBody(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   const hoverStyle = {
     '&:hover': {
-      backgroundColor: theme.vars.palette.action.hover
+      backgroundColor: (varsPalette.action && varsPalette.action.hover) ?? (theme.palette && theme.palette.action && theme.palette.action.hover)
     }
   };
 
@@ -11,7 +12,7 @@ export default function TableBody(theme) {
     MuiTableBody: {
       styleOverrides: {
         root: {
-          backgroundColor: theme.vars.palette.background.paper,
+          backgroundColor: varsPalette.background?.paper ?? theme.palette.background?.paper,
           '& .MuiTableRow-root': {
             ...hoverStyle
           }

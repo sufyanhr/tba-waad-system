@@ -19,6 +19,7 @@ function getColor({ variant, theme }) {
 // ==============================|| OVERRIDES - PICKERS TEXT FIELD ||============================== //
 
 export default function PickersTextField(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiPickersTextField: {
       defaultProps: {
@@ -31,8 +32,8 @@ export default function PickersTextField(theme) {
             padding: '10.5px 14px 10.5px 0px'
           },
           '& .MuiPickersOutlinedInput-notchedOutline': {
-            borderColor: theme.vars.palette.grey[300],
-            ...theme.applyStyles('dark', { borderColor: theme.vars.palette.grey[200] })
+            borderColor: varsPalette.grey?.[300] ?? theme.palette.grey?.[300],
+            ...theme.applyStyles('dark', { borderColor: varsPalette.grey?.[200] ?? theme.palette.grey?.[200] })
           },
           variants: [
             {

@@ -1,6 +1,7 @@
 // ==============================|| OVERRIDES - CHART TOOLTIP ||============================== //
 
 export default function ChartTooltip(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiChartsTooltip: {
       styleOverrides: {
@@ -11,8 +12,8 @@ export default function ChartTooltip(theme) {
         table: {
           borderSpacing: '0 8px',
           '& caption': {
-            color: theme.vars.palette.text.primary,
-            backgroundColor: theme.vars.palette.background.default
+            color: varsPalette.text?.primary ?? theme.palette.text?.primary,
+            backgroundColor: varsPalette.background?.default ?? theme.palette.background?.default
           }
         },
         cell: { lineHeight: 1 }

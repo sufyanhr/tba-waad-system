@@ -1,26 +1,27 @@
 // ==============================|| OVERRIDES - CHART AXIS ||============================== //
 
 export default function ChartsAxis(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiChartsAxis: {
       styleOverrides: {
         root: {
           '& .MuiChartsAxis-line': {
-            stroke: theme.vars.palette.grey[300],
+            stroke: varsPalette.grey?.[300] ?? theme.palette.grey?.[300],
             strokeWidth: 1
           },
           '& .MuiChartsAxis-tick': {
-            stroke: theme.vars.palette.grey[300]
+            stroke: varsPalette.grey?.[300] ?? theme.palette.grey?.[300]
           },
           '&.MuiChartsAxis-directionX .MuiChartsAxis-tick': {
-            stroke: theme.vars.palette.grey[300]
+            stroke: varsPalette.grey?.[300] ?? theme.palette.grey?.[300]
           },
           '&.MuiChartsAxis-directionY .MuiChartsAxis-tick': {
-            stroke: theme.vars.palette.grey[300]
+            stroke: varsPalette.grey?.[300] ?? theme.palette.grey?.[300]
           },
           '& .MuiChartsAxis-tickLabel': {
             fontSize: 12,
-            fill: theme.vars.palette.text.secondary
+            fill: varsPalette.text?.secondary ?? theme.palette.text?.secondary
           }
         }
       }

@@ -10,7 +10,7 @@ function getColorStyle({ variant, color, theme }) {
       outline: `2px solid ${dark}`,
       outlineOffset: 2,
       ...(variant === 'text' && {
-        backgroundColor: theme.vars.palette.background.paper
+            backgroundColor: varsPalette.background?.paper ?? theme.palette.background?.paper
       })
     }
   };
@@ -51,12 +51,13 @@ function getColorStyle({ variant, color, theme }) {
 // ==============================|| OVERRIDES - PAGINATION ITEM ||============================== //
 
 export default function PaginationItem(theme) {
+  const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
   return {
     MuiPaginationItem: {
       styleOverrides: {
         root: {
           '&:focus-visible': {
-            outline: `2px solid ${theme.vars.palette.secondary.dark}`,
+            outline: `2px solid ${varsPalette.secondary?.dark ?? theme.palette.secondary?.dark}`,
             outlineOffset: 2
           }
         },
@@ -85,7 +86,7 @@ export default function PaginationItem(theme) {
         },
         combined: {
           border: '1px solid',
-          borderColor: theme.vars.palette.divider,
+          borderColor: varsPalette.divider ?? theme.palette.divider,
           '&.MuiPaginationItem-ellipsis': {
             border: 'none'
           },
@@ -99,7 +100,7 @@ export default function PaginationItem(theme) {
           }
         },
         outlined: {
-          borderColor: theme.vars.palette.divider,
+          borderColor: varsPalette.divider ?? theme.palette.divider,
           '&.Mui-selected': {
             backgroundColor: 'transparent',
             '&.MuiPaginationItem-outlined.MuiPaginationItem-colorPrimary': getColorStyle({ variant: 'outlined', color: 'primary', theme }),
