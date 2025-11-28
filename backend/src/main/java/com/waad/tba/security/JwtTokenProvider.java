@@ -47,14 +47,14 @@ public class JwtTokenProvider {
                 .collect(Collectors.toList());
 
         return Jwts.builder()
-                .setSubject(user.getUsername())
+                .subject(user.getUsername())
                 .claim("userId", user.getId())
                 .claim("fullName", user.getFullName())
                 .claim("email", user.getEmail())
                 .claim("roles", roles)
                 .claim("permissions", permissions)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
+                .issuedAt(now)
+                .expiration(expiryDate)
                 .signWith(key)
                 .compact();
     }

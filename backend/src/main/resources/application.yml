@@ -20,15 +20,20 @@ spring:
     username: postgres
     password: 12345
     driver-class-name: org.postgresql.Driver
+    hikari:
+      initialization-fail-timeout: -1
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
 server:
   port: 8080
