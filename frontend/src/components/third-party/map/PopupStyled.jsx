@@ -9,15 +9,23 @@ import { styled } from '@mui/material/styles';
 const PopupStyled = styled(Popup)(({ theme }) => {
   const isRTL = theme.direction === 'rtl';
 
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+  const commonVars = varsPalette.common || theme.palette?.common || {};
+  const dividerColor = varsPalette.divider ?? theme.palette?.divider ?? '#e0e0e0';
+  const paperColor = backgroundVars.paper ?? theme.palette?.background?.paper ?? '#ffffff';
+  const defaultBg = backgroundVars.default ?? theme.palette?.background?.default ?? '#121212';
+  const whiteColor = commonVars.white ?? theme.palette?.common?.white ?? '#ffffff';
+
   return {
     '& .mapboxgl-popup-content': {
       maxWidth: 180,
       padding: 12,
       boxShadow: theme.vars.customShadows.z1,
       borderRadius: 4,
-      background: theme.vars.palette.background.paper,
+      background: paperColor,
       ...theme.applyStyles('dark', {
-        background: theme.vars.palette.background.default
+        background: defaultBg
       })
     },
     '& .mapboxgl-popup-close-button': {
@@ -25,7 +33,7 @@ const PopupStyled = styled(Popup)(({ theme }) => {
       height: 24,
       fontSize: 16,
       opacity: 0.48,
-      color: theme.vars.palette.common.white,
+      color: whiteColor,
       right: isRTL && '0',
       left: isRTL && 'auto',
       '&:hover': {
@@ -37,19 +45,19 @@ const PopupStyled = styled(Popup)(({ theme }) => {
     },
     '&.mapboxgl-popup-anchor-top .mapboxgl-popup-tip': {
       marginBottom: -1,
-      borderBottomColor: theme.vars.palette.divider
+      borderBottomColor: dividerColor
     },
     '&.mapboxgl-popup-anchor-right .mapboxgl-popup-tip': {
       marginLeft: -1,
-      borderLeftColor: theme.vars.palette.divider
+      borderLeftColor: dividerColor
     },
     '&.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip': {
       marginTop: -1,
-      borderTopColor: theme.vars.palette.divider
+      borderTopColor: dividerColor
     },
     '&.mapboxgl-popup-anchor-left .mapboxgl-popup-tip': {
       marginRight: -1,
-      borderRightColor: theme.vars.palette.divider
+      borderRightColor: dividerColor
     }
   };
 });

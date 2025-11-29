@@ -177,10 +177,15 @@ export default function CustomerTable({ data, columns, modalToggler }) {
                   </TableRow>
                   {row.getIsExpanded() && (
                     <TableRow
-                      sx={(theme) => ({
-                        bgcolor: withAlpha(theme.vars.palette.primary.lighter, 0.1),
-                        '&:hover': { bgcolor: `${withAlpha(theme.vars.palette.primary.lighter, 0.1)} !important` }
-                      })}
+                      sx={(theme) => {
+                        const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                        const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+                        const lighterColor = primaryVars.lighter ?? theme.palette?.primary?.lighter ?? '#e3f2fd';
+                        return {
+                          bgcolor: withAlpha(lighterColor, 0.1),
+                          '&:hover': { bgcolor: `${withAlpha(lighterColor, 0.1)} !important` }
+                        };
+                      }}
                     >
                       <TableCell colSpan={row.getVisibleCells().length}>
                         <ExpandingUserDetail data={row.original} />

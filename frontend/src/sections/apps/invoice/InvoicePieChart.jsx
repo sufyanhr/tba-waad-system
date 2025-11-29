@@ -22,6 +22,13 @@ import MoreOutlined from '@ant-design/icons/MoreOutlined';
 export default function InvoicePieChart() {
   const theme = useTheme();
 
+  // Safe palette access with fallbacks
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const warningVars = varsPalette.warning || theme.palette?.warning || {};
+  const successVars = varsPalette.success || theme.palette?.success || {};
+  const errorVars = varsPalette.error || theme.palette?.error || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
 
@@ -34,10 +41,10 @@ export default function InvoicePieChart() {
   };
 
   const data = [
-    { value: 30, label: 'Pending', color: theme.vars.palette.warning.main },
-    { value: 28, label: 'Paid', color: theme.vars.palette.success.main },
-    { value: 22, label: 'Overdue', color: theme.vars.palette.error.main },
-    { value: 20, label: 'Draft', color: theme.vars.palette.primary.main }
+    { value: 30, label: 'Pending', color: warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800' },
+    { value: 28, label: 'Paid', color: successVars.main ?? theme.palette?.success?.main ?? '#4caf50' },
+    { value: 22, label: 'Overdue', color: errorVars.main ?? theme.palette?.error?.main ?? '#f44336' },
+    { value: 20, label: 'Draft', color: primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2' }
   ];
 
   //sx style
@@ -125,7 +132,7 @@ export default function InvoicePieChart() {
           <Grid container>
             <Grid></Grid>
             <Grid sx={DotSize} size="grow">
-              <Dot sx={{ bgcolor: theme.vars.palette.primary.main }} size={12} />
+              <Dot sx={{ bgcolor: primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2' }} size={12} />
               <Typography variant="subtitle1" color="text.secondary">
                 Draft
               </Typography>

@@ -60,45 +60,53 @@ export default function AddEventFrom({ event, range, onCancel, modalCallback }) 
   const theme = useTheme();
   const isCreating = !event;
 
+  // Safe palette access with fallbacks
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+  const errorVars = varsPalette.error || theme.palette?.error || {};
+  const successVars = varsPalette.success || theme.palette?.success || {};
+  const warningVars = varsPalette.warning || theme.palette?.warning || {};
+
   const backgroundColor = [
     {
-      value: theme.vars.palette.primary.main,
+      value: primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2',
       color: 'primary.main'
     },
     {
-      value: theme.vars.palette.error.main,
+      value: errorVars.main ?? theme.palette?.error?.main ?? '#f44336',
       color: 'error.main'
     },
     {
-      value: theme.vars.palette.success.main,
+      value: successVars.main ?? theme.palette?.success?.main ?? '#4caf50',
       color: 'success.main'
     },
     {
-      value: theme.vars.palette.secondary.main,
+      value: secondaryVars.main ?? theme.palette?.secondary?.main ?? '#1976d2',
       color: 'secondary.main'
     },
     {
-      value: theme.vars.palette.warning.main,
+      value: warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800',
       color: 'warning.main'
     },
     {
-      value: theme.vars.palette.primary.lighter,
+      value: primaryVars.lighter ?? theme.palette?.primary?.lighter ?? '#e3f2fd',
       color: 'primary.lighter'
     },
     {
-      value: theme.vars.palette.error.lighter,
+      value: errorVars.lighter ?? theme.palette?.error?.lighter ?? '#ffebee',
       color: 'error.lighter'
     },
     {
-      value: theme.vars.palette.success.lighter,
+      value: successVars.lighter ?? theme.palette?.success?.lighter ?? '#e8f5e9',
       color: 'success.lighter'
     },
     {
-      value: theme.vars.palette.secondary.lighter,
+      value: secondaryVars.lighter ?? theme.palette?.secondary?.lighter ?? '#e3f2fd',
       color: 'secondary.lighter'
     },
     {
-      value: theme.vars.palette.warning.lighter,
+      value: warningVars.lighter ?? theme.palette?.warning?.lighter ?? '#fff3e0',
       color: 'warning.lighter'
     }
   ];
@@ -109,43 +117,43 @@ export default function AddEventFrom({ event, range, onCancel, modalCallback }) 
       color: 'white'
     },
     {
-      value: theme.vars.palette.error.lighter,
+      value: errorVars.lighter ?? theme.palette?.error?.lighter ?? '#ffebee',
       color: 'error.lighter'
     },
     {
-      value: theme.vars.palette.success.lighter,
+      value: successVars.lighter ?? theme.palette?.success?.lighter ?? '#e8f5e9',
       color: 'success.lighter'
     },
     {
-      value: theme.vars.palette.secondary.lighter,
+      value: secondaryVars.lighter ?? theme.palette?.secondary?.lighter ?? '#e3f2fd',
       color: 'secondary.lighter'
     },
     {
-      value: theme.vars.palette.warning.lighter,
+      value: warningVars.lighter ?? theme.palette?.warning?.lighter ?? '#fff3e0',
       color: 'warning.lighter'
     },
     {
-      value: theme.vars.palette.primary.lighter,
+      value: primaryVars.lighter ?? theme.palette?.primary?.lighter ?? '#e3f2fd',
       color: 'primary.lighter'
     },
     {
-      value: theme.vars.palette.primary.main,
+      value: primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2',
       color: 'primary.main'
     },
     {
-      value: theme.vars.palette.error.main,
+      value: errorVars.main ?? theme.palette?.error?.main ?? '#f44336',
       color: 'error.main'
     },
     {
-      value: theme.vars.palette.success.main,
+      value: successVars.main ?? theme.palette?.success?.main ?? '#4caf50',
       color: 'success.main'
     },
     {
-      value: theme.vars.palette.secondary.main,
+      value: secondaryVars.main ?? theme.palette?.secondary?.main ?? '#1976d2',
       color: 'secondary.main'
     },
     {
-      value: theme.vars.palette.warning.main,
+      value: warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800',
       color: 'warning.main'
     }
   ];

@@ -62,34 +62,46 @@ export default function Columns({ column, index }) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          sx={(theme) => ({
-            minWidth: 250,
-            border: '1px solid',
-            borderColor: theme.vars.palette.divider,
-            borderRadius: 1,
-            userSelect: 'none',
-            margin: `0 ${16}px 0 0`,
-            height: '100%',
-            ...provided.draggableProps.style
-          })}
+          sx={(theme) => {
+            const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+            const dividerColor = varsPalette.divider ?? theme.palette?.divider ?? '#e0e0e0';
+            return {
+              minWidth: 250,
+              border: '1px solid',
+              borderColor: dividerColor,
+              borderRadius: 1,
+              userSelect: 'none',
+              margin: `0 ${16}px 0 0`,
+              height: '100%',
+              ...provided.draggableProps.style
+            };
+          }}
         >
           <Droppable droppableId={column.id} type="item">
             {(providedDrop, snapshotDrop) => (
               <Box
                 ref={providedDrop.innerRef}
                 {...providedDrop.droppableProps}
-                sx={(theme) => ({
-                  background: snapshotDrop.isDraggingOver
-                    ? colorScheme === ThemeMode.DARK
-                      ? theme.vars.palette.text.disabled
-                      : withAlpha(theme.vars.palette.secondary.light, 0.65)
-                    : colorScheme === ThemeMode.DARK
-                      ? withAlpha(theme.vars.palette.secondary.light, 0.2)
-                      : theme.vars.palette.secondary.lighter,
-                  padding: '8px 16px 14px',
-                  width: 'auto',
-                  borderRadius: 1
-                })}
+                sx={(theme) => {
+                  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                  const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+                  const textVars = varsPalette.text || theme.palette?.text || {};
+                  const lightColor = secondaryVars.light ?? theme.palette?.secondary?.light ?? '#90caf9';
+                  const lighterColor = secondaryVars.lighter ?? theme.palette?.secondary?.lighter ?? '#e3f2fd';
+                  const disabledColor = textVars.disabled ?? theme.palette?.text?.disabled ?? '#9e9e9e';
+                  return {
+                    background: snapshotDrop.isDraggingOver
+                      ? colorScheme === ThemeMode.DARK
+                        ? disabledColor
+                        : withAlpha(lightColor, 0.65)
+                      : colorScheme === ThemeMode.DARK
+                        ? withAlpha(lightColor, 0.2)
+                        : lighterColor,
+                    padding: '8px 16px 14px',
+                    width: 'auto',
+                    borderRadius: 1
+                  };
+                }}
               >
                 <Grid container spacing={3} sx={{ alignItems: 'center' }}>
                   <Grid size="grow">

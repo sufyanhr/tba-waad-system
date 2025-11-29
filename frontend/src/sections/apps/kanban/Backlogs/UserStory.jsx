@@ -109,23 +109,29 @@ export default function UserStory({ story, index }) {
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               ref={provided.innerRef}
-              sx={(theme) => ({
-                background: open
-                  ? colorScheme === ThemeMode.DARK
-                    ? theme.vars.palette.background.default
-                    : theme.vars.palette.secondary.lighter
-                  : snapshot.isDragging
+              sx={(theme) => {
+                const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+                const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+                const backgroundVars = varsPalette.background || theme.palette?.background || {};
+                return {
+                  background: open
                     ? colorScheme === ThemeMode.DARK
-                      ? theme.vars.palette.background.default
-                      : theme.vars.palette.primary.lighter
-                    : 'transparent',
-                userSelect: 'none',
-                ...(!open && {
-                  '& .MuiTableCell-root': {
-                    border: 'none'
-                  }
-                })
-              })}
+                      ? backgroundVars.default ?? theme.palette?.background?.default ?? '#121212'
+                      : secondaryVars.lighter ?? theme.palette?.secondary?.lighter ?? '#e3f2fd'
+                    : snapshot.isDragging
+                      ? colorScheme === ThemeMode.DARK
+                        ? backgroundVars.default ?? theme.palette?.background?.default ?? '#121212'
+                        : primaryVars.lighter ?? theme.palette?.primary?.lighter ?? '#e3f2fd'
+                      : 'transparent',
+                  userSelect: 'none',
+                  ...(!open && {
+                    '& .MuiTableCell-root': {
+                      border: 'none'
+                    }
+                  })
+                };
+              }}
             >
               <TableCell sx={{ pl: 3, minWidth: 120, width: 120, height: 46 }}>
                 <Stack direction="row" sx={{ gap: 0.5, alignItems: 'center' }}>

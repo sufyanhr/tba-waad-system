@@ -29,13 +29,17 @@ import MoreOutlined from '@ant-design/icons/MoreOutlined';
 
 // item drag wrapper
 const getDragWrapper = (isDragging, draggableStyle, theme, radius) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+  const dividerColor = varsPalette.divider ?? theme.palette?.divider ?? '#e0e0e0';
+  const paperColor = backgroundVars.paper ?? theme.palette?.background?.paper ?? '#ffffff';
   return {
     userSelect: 'none',
     margin: '0 0 8px 0',
     padding: 2,
     border: '1px solid',
-    borderColor: theme.vars.palette.divider,
-    background: withAlpha(theme.vars.palette.background.paper, isDragging ? 0.8 : 1),
+    borderColor: dividerColor,
+    background: withAlpha(paperColor, isDragging ? 0.8 : 1),
     borderRadius: radius,
     ...draggableStyle
   };

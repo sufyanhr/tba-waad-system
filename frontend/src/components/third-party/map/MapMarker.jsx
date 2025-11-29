@@ -22,7 +22,11 @@ export default function MapMarker({ ...other }) {
           height: size,
           stroke: 'none',
           cursor: 'pointer',
-          fill: (theme) => theme.vars.palette.primary.main,
+          fill: (theme) => {
+            const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+            const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+            return primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2';
+          },
           transform: `translate(${-size / 2}px,${-size}px)`
         }}
       >

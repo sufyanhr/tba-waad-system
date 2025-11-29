@@ -46,6 +46,13 @@ export default function TabPersonal() {
   const [selectedImage, setSelectedImage] = useState(undefined);
   const [avatar, setAvatar] = useState(defaultImages);
 
+  // Safe palette access with fallbacks
+  const getSafePalette = (theme) => {
+    const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+    const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+    return { secondaryVars };
+  };
+
   useEffect(() => {
     if (selectedImage) {
       setAvatar(URL.createObjectURL(selectedImage));
@@ -77,19 +84,24 @@ export default function TabPersonal() {
                 >
                   <Avatar alt="Avatar 1" src={avatar} sx={{ width: 76, height: 76 }} />
                   <Box
-                    sx={(theme) => ({
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      bgcolor: withAlpha(theme.vars.palette.secondary.dark, 0.75),
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'secondary.lighter'
-                    })}
+                    sx={(theme) => {
+                      const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                      const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+                      const darkColor = secondaryVars.dark ?? theme.palette?.secondary?.dark ?? '#1565c0';
+                      return {
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        bgcolor: withAlpha(darkColor, 0.75),
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'secondary.lighter'
+                      };
+                    }}
                   >
                     <Stack sx={{ gap: 0.25, alignItems: 'center' }}>
                       <CameraOutlined style={{ fontSize: '1.5rem' }} />

@@ -28,20 +28,25 @@ export default function CustomizedAccordion() {
   };
 
   const customAccordionCodeString = `<Box
-  sx={{
-    '& .MuiAccordion-root': {
-      borderColor: theme.vars.palette.divider,
-      '& .MuiAccordionSummary-root': {
-        bgcolor: 'transparent',
-        flexDirection: 'row'
-      },
-      '& .MuiAccordionDetails-root': {
-        borderColor: theme.vars.palette.divider
-      },
-      '& .Mui-expanded': {
-        color: theme.vars.palette.primary.main
+  sx={(theme) => {
+    const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+    const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+    const dividerColor = varsPalette.divider ?? theme.palette?.divider ?? '#e0e0e0';
+    return {
+      '& .MuiAccordion-root': {
+        borderColor: dividerColor,
+        '& .MuiAccordionSummary-root': {
+          bgcolor: 'transparent',
+          flexDirection: 'row'
+        },
+        '& .MuiAccordionDetails-root': {
+          borderColor: dividerColor
+        },
+        '& .Mui-expanded': {
+          color: primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2'
+        }
       }
-    }
+    };
   }}
 >
   <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>

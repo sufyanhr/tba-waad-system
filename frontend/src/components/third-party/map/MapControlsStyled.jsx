@@ -18,7 +18,11 @@ export default function MapControlsStyled() {
           border: 'none',
           lineHeight: '14px',
           borderRadius: 4,
-          color: theme.vars.palette.common.white,
+          color: (() => {
+            const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+            const commonVars = varsPalette.common || theme.palette?.common || {};
+            return commonVars.white ?? theme.palette?.common?.white ?? '#ffffff';
+          })(),
           fontWeight: theme.typography.fontWeightBold,
           backgroundImage: `linear-gradient(to right, #8a2387, #e94057, #f27121)`
         }

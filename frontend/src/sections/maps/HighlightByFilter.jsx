@@ -81,8 +81,18 @@ function HighlightByFilter({ ...other }) {
           latitude={hoverInfo.latitude}
           sx={{
             '.mapboxgl-popup-tip': {
-              borderColor: `${theme.vars.palette.background.paper} !important`,
-              ...theme.applyStyles('dark', { borderColor: theme.vars.palette.background.default })
+              borderColor: `${(() => {
+                const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                const backgroundVars = varsPalette.background || theme.palette?.background || {};
+                return backgroundVars.paper ?? theme.palette?.background?.paper ?? '#ffffff';
+              })()} !important`,
+              ...theme.applyStyles('dark', { 
+                borderColor: (() => {
+                  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+                  return backgroundVars.default ?? theme.palette?.background?.default ?? '#121212';
+                })()
+              })
             }
           }}
           closeButton={false}

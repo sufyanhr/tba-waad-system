@@ -14,14 +14,21 @@ import PlaceholderContent from './PlaceholderContent';
 import FilesPreview from './FilesPreview';
 import { DropzoneType } from 'config';
 
-const DropzoneWrapper = styled('div')(({ theme }) => ({
-  outline: 'none',
-  padding: theme.spacing(5, 1),
-  borderRadius: theme.shape.borderRadius,
-  background: theme.vars.palette.background.paper,
-  border: `1px dashed ${theme.vars.palette.secondary.main}`,
-  '&:hover': { opacity: 0.72, cursor: 'pointer' }
-}));
+const DropzoneWrapper = styled('div')(({ theme }) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+  const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+  const paperColor = backgroundVars.paper ?? theme.palette?.background?.paper ?? '#ffffff';
+  const secondaryMain = secondaryVars.main ?? theme.palette?.secondary?.main ?? '#1976d2';
+  return {
+    outline: 'none',
+    padding: theme.spacing(5, 1),
+    borderRadius: theme.shape.borderRadius,
+    background: paperColor,
+    border: `1px dashed ${secondaryMain}`,
+    '&:hover': { opacity: 0.72, cursor: 'pointer' }
+  };
+});
 
 // ==============================|| UPLOAD - MULTIPLE FILE ||============================== //
 

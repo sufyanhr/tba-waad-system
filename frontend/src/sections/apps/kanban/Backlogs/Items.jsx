@@ -96,7 +96,15 @@ export default function Items({ itemId, index }) {
               }
             }),
             background: snapshot.isDragging
-              ? withAlpha(colorScheme === ThemeMode.DARK ? theme.vars.palette.background.paper : theme.vars.palette.primary.lighter, 0.9)
+              ? (() => {
+                  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+                  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+                  const bgColor = colorScheme === ThemeMode.DARK 
+                    ? (backgroundVars.paper ?? theme.palette?.background?.paper ?? '#1e1e1e')
+                    : (primaryVars.lighter ?? theme.palette?.primary?.lighter ?? '#e3f2fd');
+                  return withAlpha(bgColor, 0.9);
+                })()
               : 'transparent',
             userSelect: 'none'
           })}

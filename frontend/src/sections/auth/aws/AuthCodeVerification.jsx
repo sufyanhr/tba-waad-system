@@ -146,7 +146,15 @@ const AuthCodeVerification = () => {
               </Grid>
               {touched && errors && errors.submit && (
                 <Grid size={12}>
-                  <Alert color="error" variant="border" icon={<BugFilled twoToneColor={theme.vars.palette.error.main} />}>
+                  <Alert 
+                    color="error" 
+                    variant="border" 
+                    icon={<BugFilled twoToneColor={(() => {
+                      const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                      const errorVars = varsPalette.error || theme.palette?.error || {};
+                      return errorVars.main ?? theme.palette?.error?.main ?? '#f44336';
+                    })()} />}
+                  >
                     {errors?.submit}
                   </Alert>
                 </Grid>

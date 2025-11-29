@@ -12,7 +12,18 @@ export default function RejectionFiles({ fileRejections }) {
   return (
     <Paper
       variant="outlined"
-      sx={{ py: 1, px: 2, mt: 3, borderColor: 'error.light', bgcolor: (theme) => withAlpha(theme.vars.palette.error.main, 0.08) }}
+      sx={{ 
+        py: 1, 
+        px: 2, 
+        mt: 3, 
+        borderColor: 'error.light', 
+        bgcolor: (theme) => {
+          const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+          const errorVars = varsPalette.error || theme.palette?.error || {};
+          const errorMain = errorVars.main ?? theme.palette?.error?.main ?? '#f44336';
+          return withAlpha(errorMain, 0.08);
+        }
+      }}
     >
       {fileRejections.map(({ file, errors }) => {
         const { path, size } = getDropzoneData(file);

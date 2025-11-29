@@ -54,7 +54,12 @@ function ControlPanel({ settings, onChange }) {
                   fontSize: 14,
                   borderRadius: 1,
                   textAlign: 'center',
-                  bgcolor: (theme) => withAlpha(theme.vars.palette.grey[500], 0.12)
+                  bgcolor: (theme) => {
+                    const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                    const greyVars = varsPalette.grey || theme.palette?.grey || {};
+                    const grey500 = greyVars[500] ?? theme.palette?.grey?.[500] ?? '#9e9e9e';
+                    return withAlpha(grey500, 0.12);
+                  }
                 }
               }}
             />

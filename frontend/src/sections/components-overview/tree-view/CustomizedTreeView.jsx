@@ -52,18 +52,23 @@ function TransitionComponent({ ...others }) {
   );
 }
 
-const StyledTreeItem = styled((props) => <TreeItem {...props} slots={{ groupTransition: TransitionComponent }} />)(({ theme }) => ({
-  [`& .${treeItemClasses.iconContainer}`]: {
-    '& .close': {
-      opacity: 0.3
+const StyledTreeItem = styled((props) => <TreeItem {...props} slots={{ groupTransition: TransitionComponent }} />)(({ theme }) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  const textPrimary = textVars.primary ?? theme.palette?.text?.primary ?? '#212121';
+  return {
+    [`& .${treeItemClasses.iconContainer}`]: {
+      '& .close': {
+        opacity: 0.3
+      }
+    },
+    [`& .${treeItemClasses.groupTransition}`]: {
+      marginLeft: 15,
+      paddingLeft: 18,
+      borderLeft: `1px dashed ${withAlpha(textPrimary, 0.4)}`
     }
-  },
-  [`& .${treeItemClasses.groupTransition}`]: {
-    marginLeft: 15,
-    paddingLeft: 18,
-    borderLeft: `1px dashed ${withAlpha(theme.vars.palette.text.primary, 0.4)}`
-  }
-}));
+  };
+});
 
 StyledTreeItem.displayName = 'StyledTreeItem';
 

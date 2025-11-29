@@ -50,10 +50,15 @@ function Colors({ checked, colorsData }) {
     <Grid>
       <Tooltip title={colorsData.length && colorsData[0] && colorsData[0].label ? colorsData[0].label : ''}>
         <ButtonBase
-          sx={(theme) => ({
-            borderRadius: '50%',
-            '&:focus-visible': { outline: `2px solid ${theme.vars.palette.secondary.dark}`, outlineOffset: 2 }
-          })}
+          sx={(theme) => {
+            const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+            const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+            const darkColor = secondaryVars.dark ?? theme.palette?.secondary?.dark ?? '#1565c0';
+            return {
+              borderRadius: '50%',
+              '&:focus-visible': { outline: `2px solid ${darkColor}`, outlineOffset: 2 }
+            };
+          }}
         >
           <Avatar
             color="inherit"

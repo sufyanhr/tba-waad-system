@@ -90,16 +90,24 @@ export default function InvoiceChartCard() {
   const theme = useTheme();
   const [activeChart, setActiveChart] = useState(0);
 
+  // Safe palette access with fallbacks
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const warningVars = varsPalette.warning || theme.palette?.warning || {};
+  const errorVars = varsPalette.error || theme.palette?.error || {};
+  const successVars = varsPalette.success || theme.palette?.success || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+
   const widgetData = [
-    { title: 'Total', count: '£5678.09', percentage: 20.3, isLoss: true, invoice: '3', color: theme.vars.palette.warning },
-    { title: 'Paid', count: '£5678.09', percentage: -8.73, isLoss: true, invoice: '5', color: theme.vars.palette.error },
-    { title: 'Pending', count: '£5678.09', percentage: 1.73, isLoss: false, invoice: '20', color: theme.vars.palette.success },
-    { title: 'Overdue', count: '£5678.09', percentage: -4.7, isLoss: true, invoice: '5', color: theme.vars.palette.primary }
+    { title: 'Total', count: '£5678.09', percentage: 20.3, isLoss: true, invoice: '3', color: warningVars },
+    { title: 'Paid', count: '£5678.09', percentage: -8.73, isLoss: true, invoice: '5', color: errorVars },
+    { title: 'Pending', count: '£5678.09', percentage: 1.73, isLoss: false, invoice: '20', color: successVars },
+    { title: 'Overdue', count: '£5678.09', percentage: -4.7, isLoss: true, invoice: '5', color: primaryVars }
   ];
 
   const series = [
-    { type: 'bar', id: 'teamA', dataKey: 'data1', color: theme.vars.palette.warning.main, label: 'Team A' },
-    { type: 'line', curve: 'linear', id: 'teamB', dataKey: 'data2', color: theme.vars.palette.warning.main, label: 'Team B' }
+    { type: 'bar', id: 'teamA', dataKey: 'data1', color: warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800', label: 'Team A' },
+    { type: 'line', curve: 'linear', id: 'teamB', dataKey: 'data2', color: warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800', label: 'Team B' }
   ];
 
   const handleDatasetChange = (index) => {
@@ -146,8 +154,8 @@ export default function InvoiceChartCard() {
         <svg width="0" height="0">
           <defs>
             <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={theme.vars.palette.background.default} stopOpacity={0.1} />
-              <stop offset="100%" stopColor={theme.vars.palette.warning.main} stopOpacity={0.1} />
+              <stop offset="0%" stopColor={backgroundVars.default ?? theme.palette?.background?.default ?? '#ffffff'} stopOpacity={0.1} />
+              <stop offset="100%" stopColor={warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800'} stopOpacity={0.1} />
             </linearGradient>
           </defs>
         </svg>

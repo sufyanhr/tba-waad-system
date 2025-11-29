@@ -46,6 +46,13 @@ import { Gender } from 'config';
 import { openSnackbar } from 'api/snackbar';
 import { insertCustomer, updateCustomer } from 'api/customer';
 import { withAlpha } from 'utils/colorUtils';
+
+// Safe palette helper
+const getSafeSecondaryDark = (theme) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+  return secondaryVars.dark ?? theme.palette?.secondary?.dark ?? '#1565c0';
+};
 import { getImageUrl, ImagePath } from 'utils/getImageUrl';
 
 // assets
@@ -246,19 +253,24 @@ export default function FormCustomerAdd({ customer, closeModal }) {
                     >
                       <Avatar alt="Avatar 1" src={avatar} sx={{ width: 72, height: 72, border: '1px dashed' }} />
                       <Box
-                        sx={(theme) => ({
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          bgcolor: withAlpha(theme.vars.palette.secondary.dark, 0.75),
-                          width: '100%',
-                          height: '100%',
-                          opacity: 0,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'secondary.lighter'
-                        })}
+                        sx={(theme) => {
+                          const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                          const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+                          const darkColor = secondaryVars.dark ?? theme.palette?.secondary?.dark ?? '#1565c0';
+                          return {
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            bgcolor: withAlpha(darkColor, 0.75),
+                            width: '100%',
+                            height: '100%',
+                            opacity: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'secondary.lighter'
+                          };
+                        }}
                       >
                         <Stack sx={{ gap: 0.25, alignItems: 'center' }}>
                           <CameraOutlined style={{ fontSize: '1.5rem' }} />

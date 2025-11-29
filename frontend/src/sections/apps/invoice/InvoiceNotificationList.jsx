@@ -67,7 +67,10 @@ const notifications = [
 
 export default function InvoiceNotificationList() {
   const theme = useTheme();
-  const iconSX = { fontSize: '1rem', color: theme.vars.palette.text.secondary };
+  // Safe palette access with fallbacks
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  const iconSX = { fontSize: '1rem', color: textVars.secondary ?? theme.palette?.text?.secondary ?? '#616161' };
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
 

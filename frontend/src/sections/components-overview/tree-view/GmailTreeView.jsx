@@ -22,32 +22,39 @@ import TagsFilled from '@ant-design/icons/TagsFilled';
 import CaretDownFilled from '@ant-design/icons/CaretDownFilled';
 import CaretRightFilled from '@ant-design/icons/CaretRightFilled';
 
-const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => ({
-  color: theme.vars.palette.text.secondary,
-  [`& .${treeItemClasses.content}`]: {
-    color: theme.vars.palette.text.secondary,
-    borderTopRightRadius: theme.spacing(2),
-    borderBottomRightRadius: theme.spacing(2),
-    paddingRight: theme.spacing(1),
-    fontWeight: theme.typography.fontWeightMedium,
-    '&.Mui-expanded': {
-      fontWeight: theme.typography.fontWeightRegular
-    },
-    '&:hover': {
-      background: theme.vars.palette.action.hover
-    },
-    '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
-      background: `var(--tree-view-bg-color, ${theme.vars.palette.action.selected})`,
-      color: 'var(--tree-view-color)'
-    },
-    [`& .${treeItemClasses.label}`]: {
-      fontWeight: 'inherit',
-      color: 'inherit'
-    }
-  },
-  [`& .${treeItemClasses.groupTransition}`]: {
-    marginLeft: 0,
+const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  const actionVars = varsPalette.action || theme.palette?.action || {};
+  const textSecondary = textVars.secondary ?? theme.palette?.text?.secondary ?? '#616161';
+  const actionHover = actionVars.hover ?? theme.palette?.action?.hover ?? 'rgba(0, 0, 0, 0.04)';
+  const actionSelected = actionVars.selected ?? theme.palette?.action?.selected ?? 'rgba(0, 0, 0, 0.08)';
+  return {
+    color: textSecondary,
     [`& .${treeItemClasses.content}`]: {
+      color: textSecondary,
+      borderTopRightRadius: theme.spacing(2),
+      borderBottomRightRadius: theme.spacing(2),
+      paddingRight: theme.spacing(1),
+      fontWeight: theme.typography.fontWeightMedium,
+      '&.Mui-expanded': {
+        fontWeight: theme.typography.fontWeightRegular
+      },
+      '&:hover': {
+        background: actionHover
+      },
+      '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
+        background: `var(--tree-view-bg-color, ${actionSelected})`,
+        color: 'var(--tree-view-color)'
+      },
+      [`& .${treeItemClasses.label}`]: {
+        fontWeight: 'inherit',
+        color: 'inherit'
+      }
+    },
+    [`& .${treeItemClasses.groupTransition}`]: {
+      marginLeft: 0,
+      [`& .${treeItemClasses.content}`]: {
       paddingLeft: theme.spacing(2)
     }
   }

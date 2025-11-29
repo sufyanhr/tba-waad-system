@@ -24,9 +24,14 @@ import { withAlpha } from 'utils/colorUtils';
 // assets
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 
-const getDropWrapper = (isDraggingOver, theme) => ({
-  background: isDraggingOver ? withAlpha(theme.vars.palette.secondary.lighter, 0.65) : 'transparent'
-});
+const getDropWrapper = (isDraggingOver, theme) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+  const lighterColor = secondaryVars.lighter ?? theme.palette?.secondary?.lighter ?? '#e3f2fd';
+  return {
+    background: isDraggingOver ? withAlpha(lighterColor, 0.65) : 'transparent'
+  };
+};
 
 // ==============================|| KANBAN - BACKLOGS ||============================== //
 

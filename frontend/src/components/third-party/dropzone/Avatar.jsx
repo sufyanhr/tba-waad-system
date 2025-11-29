@@ -35,18 +35,23 @@ const DropzoneWrapper = styled('div')({
   }
 });
 
-const PlaceholderWrapper = styled('div')(({ theme }) => ({
-  display: 'flex',
-  position: 'absolute',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: theme.vars.palette.text.secondary,
-  transition: theme.transitions.create('opacity', {
-    easing: theme.transitions.easing.easeInOut,
-    duration: theme.transitions.duration.shorter
-  }),
-  '&:hover': { opacity: 0.85 }
-}));
+const PlaceholderWrapper = styled('div')(({ theme }) => {
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  const textSecondary = textVars.secondary ?? theme.palette?.text?.secondary ?? '#616161';
+  return {
+    display: 'flex',
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: textSecondary,
+    transition: theme.transitions.create('opacity', {
+      easing: theme.transitions.easing.easeInOut,
+      duration: theme.transitions.duration.shorter
+    }),
+    '&:hover': { opacity: 0.85 }
+  };
+});
 
 // ==============================|| UPLOAD - AVATAR ||============================== //
 
