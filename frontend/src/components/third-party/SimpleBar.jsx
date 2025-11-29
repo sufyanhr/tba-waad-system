@@ -20,29 +20,36 @@ const RootStyle = styled(BrowserView)({
 });
 
 // scroll bar wrapper
-const SimpleBarStyle = styled(SimpleBar)(({ theme }) => ({
-  maxHeight: '100%',
-  '& .simplebar-scrollbar': {
-    '&:before': {
-      background: withAlpha(theme.vars.palette.grey[500], 0.48),
-      ...theme.applyStyles('dark', { background: withAlpha(theme.vars.palette.grey[200], 0.48) })
+const SimpleBarStyle = styled(SimpleBar)(({ theme }) => {
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const greyVars = varsPalette.grey || theme.palette?.grey || {};
+  const grey500 = greyVars[500] || '#9e9e9e';
+  const grey200 = greyVars[200] || '#eeeeee';
+  
+  return {
+    maxHeight: '100%',
+    '& .simplebar-scrollbar': {
+      '&:before': {
+        background: withAlpha(grey500, 0.48),
+        ...theme.applyStyles('dark', { background: withAlpha(grey200, 0.48) })
+      },
+      '&.simplebar-visible:before': {
+        opacity: 1
+      }
     },
-    '&.simplebar-visible:before': {
-      opacity: 1
+    '& .simplebar-track': {
+      '&.simplebar-vertical': {
+        width: 10
+      }
+    },
+    '& .simplebar-track.simplebar-horizontal .simplebar-scrollbar': {
+      height: 6
+    },
+    '& .simplebar-mask': {
+      zIndex: 'inherit'
     }
-  },
-  '& .simplebar-track': {
-    '&.simplebar-vertical': {
-      width: 10
-    }
-  },
-  '& .simplebar-track.simplebar-horizontal .simplebar-scrollbar': {
-    height: 6
-  },
-  '& .simplebar-mask': {
-    zIndex: 'inherit'
-  }
-}));
+  };
+});
 
 // ==============================|| SIMPLE SCROLL BAR ||============================== //
 

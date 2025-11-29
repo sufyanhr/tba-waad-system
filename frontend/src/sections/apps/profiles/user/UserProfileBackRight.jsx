@@ -10,7 +10,8 @@ export default function UserProfileBackRight() {
   const theme = useTheme();
   
   // Safe palette access with fallbacks
-  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {}  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
   const lightColor = primaryVars.light ?? theme.palette?.primary?.light ?? '#90caf9';
 
   return (

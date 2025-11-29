@@ -55,10 +55,11 @@ const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => {
     [`& .${treeItemClasses.groupTransition}`]: {
       marginLeft: 0,
       [`& .${treeItemClasses.content}`]: {
-      paddingLeft: theme.spacing(2)
+        paddingLeft: theme.spacing(2)
+      }
     }
-  }
-}));
+  };
+});
 
 function StyledTreeItem({ bgColor, color, labelIcon, labelInfo, labelText, ...other }) {
   return (
