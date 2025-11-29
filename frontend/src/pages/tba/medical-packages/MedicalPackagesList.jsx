@@ -32,7 +32,7 @@ import { useSnackbar } from 'notistack';
 
 // Project imports
 import MainCard from 'components/MainCard';
-import { RBACGuard } from 'contexts/RBACContext';
+import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/TableSkeleton';
 import ErrorFallback from 'components/ErrorFallback';
 import EmptyState from 'components/tba/EmptyState';

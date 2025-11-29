@@ -10,7 +10,6 @@ import Box from '@mui/material/Box';
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
 import menuItem from 'menu-items';
-import { MenuFromAPI } from 'menu-items/dashboard';
 
 import useConfig from 'hooks/useConfig';
 import useAuth from 'hooks/useAuth';
@@ -42,20 +41,9 @@ export default function Navigation() {
   const [selectedLevel, setSelectedLevel] = useState(0);
   const [menuItems, setMenuItems] = useState({ items: [] });
 
-  const dashboardMenu = MenuFromAPI();
-
   useLayoutEffect(() => {
-    let rawMenuItems = { items: [] };
-    
-    if (menuLoading && !isFound(menuItem, 'group-dashboard-loading')) {
-      menuItem.items.splice(0, 0, dashboardMenu);
-      rawMenuItems = { items: [...menuItem.items] };
-    } else if (!menuLoading && dashboardMenu?.id !== undefined && !isFound(menuItem, 'group-dashboard')) {
-      menuItem.items.splice(0, 1, dashboardMenu);
-      rawMenuItems = { items: [...menuItem.items] };
-    } else {
-      rawMenuItems = { items: [...menuItem.items] };
-    }
+    // Simply use static menu items and filter by permissions
+    const rawMenuItems = { items: [...menuItem.items] };
     
     // Filter menu items based on user permissions
     const filteredItems = filterMenuByPermissions(rawMenuItems.items, user);
