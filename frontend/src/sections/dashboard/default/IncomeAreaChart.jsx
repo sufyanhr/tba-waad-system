@@ -62,6 +62,15 @@ export default function IncomeAreaChart({ view }) {
     setVisibility((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+  
+  const primaryMain = primaryVars.main || '#1976d2';
+  const primary700 = primaryVars[700] || primaryVars.dark || '#1565c0';
+  const backgroundDefault = backgroundVars.default || '#fff';
+
   const visibleSeries = [
     {
       data: data1,
@@ -69,7 +78,7 @@ export default function IncomeAreaChart({ view }) {
       showMark: false,
       area: true,
       id: 'page-views',
-      color: theme.vars.palette.primary.main || '',
+      color: primaryMain || '',
       visible: visibility['Page views']
     },
     {
@@ -78,7 +87,7 @@ export default function IncomeAreaChart({ view }) {
       showMark: false,
       area: true,
       id: 'sessions',
-      color: theme.vars.palette.primary[700] || '',
+      color: primary700 || '',
       visible: visibility['Sessions']
     }
   ];
@@ -115,12 +124,12 @@ export default function IncomeAreaChart({ view }) {
       >
         <defs>
           <linearGradient id="myGradient1" gradientTransform="rotate(90)">
-            <stop offset="10%" stopColor={withAlpha(theme.vars.palette.primary.main, 0.4)} />
-            <stop offset="90%" stopColor={withAlpha(theme.vars.palette.background.default, 0.4)} />
+            <stop offset="10%" stopColor={withAlpha(primaryMain, 0.4)} />
+            <stop offset="90%" stopColor={withAlpha(backgroundDefault, 0.4)} />
           </linearGradient>
           <linearGradient id="myGradient2" gradientTransform="rotate(90)">
-            <stop offset="10%" stopColor={withAlpha(theme.vars.palette.primary[700], 0.4)} />
-            <stop offset="90%" stopColor={withAlpha(theme.vars.palette.background.default, 0.4)} />
+            <stop offset="10%" stopColor={withAlpha(primary700, 0.4)} />
+            <stop offset="90%" stopColor={withAlpha(backgroundDefault, 0.4)} />
           </linearGradient>
         </defs>
       </LineChart>

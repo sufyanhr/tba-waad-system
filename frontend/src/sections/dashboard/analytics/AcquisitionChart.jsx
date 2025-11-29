@@ -37,24 +37,33 @@ export default function AcquisitionChart() {
     '2025-04-12'
   ];
 
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const greyVars = varsPalette.grey || theme.palette?.grey || {};
+  
+  const grey900 = greyVars[900] || '#212121';
+  const primaryMain = primaryVars.main || '#1976d2';
+  const primary200 = primaryVars[200] || '#90caf9';
+
   const initialSeries = [
     {
       id: 'Direct',
       label: 'Direct',
       data: [21, 17, 15, 13, 15, 13, 16, 13, 8, 14, 11, 9, 7, 5, 3, 3, 7],
-      color: theme.vars.palette.grey[900]
+      color: grey900
     },
     {
       id: 'Referral',
       label: 'Referral',
       data: [28, 30, 20, 26, 18, 27, 22, 28, 20, 21, 15, 14, 12, 10, 8, 18, 16],
-      color: theme.vars.palette.primary.main
+      color: primaryMain
     },
     {
       id: 'Social',
       label: 'Social',
       data: [50, 51, 60, 54, 53, 48, 55, 40, 44, 42, 44, 44, 42, 40, 42, 32, 16],
-      color: theme.vars.palette.primary[200]
+      color: primary200
     }
   ];
 
