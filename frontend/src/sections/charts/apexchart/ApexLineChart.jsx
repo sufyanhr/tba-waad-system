@@ -31,9 +31,14 @@ export default function ApexLineChart() {
     state: { fontFamily }
   } = useConfig();
 
-  const line = theme.vars.palette.divider;
-  const textPrimary = theme.vars.palette.text.primary;
-  const primary700 = theme.vars.palette.primary[700];
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  
+  const line = varsPalette.divider || theme.palette?.divider || '#e0e0e0';
+  const textPrimary = textVars.primary || '#000';
+  const primary700 = primaryVars[700] || primaryVars.dark || '#1565c0';
 
   const [series] = useState([
     {

@@ -75,15 +75,21 @@ export default function ApexRedialBarChart() {
     state: { fontFamily }
   } = useConfig();
 
-  const line = theme.vars.palette.divider;
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const successVars = varsPalette.success || theme.palette?.success || {};
+  const errorVars = varsPalette.error || theme.palette?.error || {};
+  
+  const line = varsPalette.divider || theme.palette?.divider || '#e0e0e0';
 
   const [series] = useState([76, 67, 61, 90]);
   const [options, setOptions] = useState(redialBarChartOptions);
 
-  const primary700 = theme.vars.palette.primary[700];
-  const primaryMain = theme.vars.palette.primary.main;
-  const successMain = theme.vars.palette.success.main;
-  const errorMain = theme.vars.palette.error.main;
+  const primary700 = primaryVars[700] || primaryVars.dark || '#1565c0';
+  const primaryMain = primaryVars.main || '#1976d2';
+  const successMain = successVars.main || '#2e7d32';
+  const errorMain = errorVars.main || '#d32f2f';
 
   useEffect(() => {
     setOptions({

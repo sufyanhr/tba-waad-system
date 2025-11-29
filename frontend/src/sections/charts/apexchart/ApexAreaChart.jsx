@@ -47,10 +47,15 @@ export default function ApexAreaChart() {
     state: { fontFamily }
   } = useConfig();
 
-  const textPrimary = theme.vars.palette.text.primary;
-  const line = theme.vars.palette.divider;
-  const primary700 = theme.vars.palette.primary[700];
-  const primaryMain = theme.vars.palette.primary.main;
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  
+  const textPrimary = textVars.primary || '#000';
+  const line = varsPalette.divider || theme.palette?.divider || '#e0e0e0';
+  const primary700 = primaryVars[700] || primaryVars.dark || '#1565c0';
+  const primaryMain = primaryVars.main || '#1976d2';
 
   const [series] = useState([
     { name: 'Series 1', data: [31, 40, 28, 51, 42, 109, 100] },

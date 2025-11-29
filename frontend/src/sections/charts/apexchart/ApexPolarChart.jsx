@@ -43,18 +43,27 @@ export default function ApexPolarChart() {
     state: { fontFamily }
   } = useConfig();
 
-  const line = theme.vars.palette.divider;
-  const textPrimary = theme.vars.palette.text.primary;
-  const backColor = theme.vars.palette.background.paper;
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const successVars = varsPalette.success || theme.palette?.success || {};
+  const errorVars = varsPalette.error || theme.palette?.error || {};
+  const warningVars = varsPalette.warning || theme.palette?.warning || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
+  
+  const line = varsPalette.divider || theme.palette?.divider || '#e0e0e0';
+  const textPrimary = textVars.primary || '#000';
+  const backColor = backgroundVars.paper || '#fff';
 
   const [series] = useState([13.5, 18, 11, 5, 10]);
   const [options, setOptions] = useState(polarChartOptions);
 
-  const primary400 = theme.vars.palette.primary[400];
-  const primaryMain = theme.vars.palette.primary.main;
-  const successMain = theme.vars.palette.success.main;
-  const errorMain = theme.vars.palette.error.main;
-  const warningMain = theme.vars.palette.warning.main;
+  const primary400 = primaryVars[400] || primaryVars.light || '#42a5f5';
+  const primaryMain = primaryVars.main || '#1976d2';
+  const successMain = successVars.main || '#2e7d32';
+  const errorMain = errorVars.main || '#d32f2f';
+  const warningMain = warningVars.main || '#ed6c02';
 
   useEffect(() => {
     setOptions({
