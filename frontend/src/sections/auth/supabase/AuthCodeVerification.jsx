@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 // third-party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import OtpInput from 'react-otp-input';
+import OutlinedInput from '@mui/material/OutlinedInput';
 
 // project imports
 import AnimateButton from 'components/@extended/AnimateButton';
@@ -51,37 +51,14 @@ export default function AuthCodeVerification() {
                   }
                 })}
               >
-                <OtpInput
+                <OutlinedInput
+                  fullWidth
+                  id="otp-input"
+                  name="otp"
                   value={values.otp}
-                  onChange={(otp) => setFieldValue('otp', otp)}
-                  inputType="tel"
-                  shouldAutoFocus
-                  renderInput={(props, index) => (
-                    <input
-                      {...props}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Tab') {
-                          e.preventDefault();
-                        } else if (e.key === 'Backspace' && !props.value) {
-                          const previousInput = document.getElementById(`otp-input-${index - 1}`);
-                          if (previousInput) {
-                            previousInput.focus();
-                          }
-                        } else if (e.key !== 'Backspace') {
-                          const nextInput = document.getElementById(`otp-input-${index + 1}`);
-                          if (nextInput && props.value) {
-                            setTimeout(() => {
-                              nextInput.focus();
-                            }, 0);
-                          }
-                        }
-                        props.onKeyDown?.(e);
-                      }}
-                    />
-                  )}
-                  numInputs={4}
-                  containerStyle={{ justifyContent: 'space-between', margin: -8 }}
-                  inputStyle={{ width: '100%', margin: '8px', padding: '10px', outline: 'none', borderRadius: 4 }}
+                  onChange={(e) => setFieldValue('otp', e.target.value)}
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 4 }}
+                  placeholder="Enter 4-digit code"
                 />
                 {touched.otp && errors.otp && (
                   <FormHelperText error id="standard-weight-helper-text-otp">

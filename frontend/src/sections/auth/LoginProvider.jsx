@@ -13,10 +13,7 @@ import { APP_AUTH, AuthProvider } from 'config';
 
 // assets
 import Jwt from 'assets/images/icons/jwt.svg';
-import Firebase from 'assets/images/icons/firebase.svg';
-import Auth0 from 'assets/images/icons/auth0.svg';
-import Aws from 'assets/images/icons/aws.svg';
-import Supabase from 'assets/images/icons/supabase.svg';
+// removed external auth icons
 
 // ==============================|| SOCIAL BUTTON ||============================== //
 
@@ -25,20 +22,10 @@ export default function LoginProvider({ currentLoginWith }) {
   const navigate = useNavigate();
 
   const loginHandlers = {
-    Jwt: () => navigate(APP_AUTH === AuthProvider.JWT ? '/login' : '/jwt/login?auth=jwt'),
-    Firebase: () => navigate(APP_AUTH === AuthProvider.FIREBASE ? '/login' : '/firebase/login?auth=firebase'),
-    Auth0: () => navigate(APP_AUTH === AuthProvider.AUTH0 ? '/login' : '/auth0/login?auth=auth0'),
-    Aws: () => navigate(APP_AUTH === AuthProvider.AWS ? '/login' : '/aws/login?auth=aws'),
-    Supabase: () => navigate(APP_AUTH === AuthProvider.SUPABASE ? '/login' : '/supabase/login?auth=supabase')
+    Jwt: () => navigate(APP_AUTH === AuthProvider.JWT ? '/login' : '/jwt/login?auth=jwt')
   };
 
-  const buttonData = [
-    { name: 'jwt', icon: Jwt, handler: loginHandlers.Jwt },
-    { name: 'firebase', icon: Firebase, handler: loginHandlers.Firebase },
-    { name: 'auth0', icon: Auth0, handler: loginHandlers.Auth0 },
-    { name: 'aws', icon: Aws, handler: loginHandlers.Aws },
-    { name: 'supabase', icon: Supabase, handler: loginHandlers.Supabase }
-  ];
+  const buttonData = [{ name: 'jwt', icon: Jwt, handler: loginHandlers.Jwt }];
 
   const currentLoginExists = buttonData.some((button) => button.name === currentLoginWith);
 

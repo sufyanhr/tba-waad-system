@@ -5,24 +5,15 @@ import Typography from '@mui/material/Typography';
 
 // project imports
 import AuthWrapper from 'sections/auth/AuthWrapper';
-import AuthResetPassword from 'sections/auth/supabase/AuthResetPassword';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // ================================|| SUPABASE - RESET PASSWORD ||================================ //
 
 export default function ResetPassword() {
-  return (
-    <AuthWrapper>
-      <Grid container spacing={3}>
-        <Grid size={12}>
-          <Stack sx={{ gap: 1, mb: { xs: -0.5, sm: 0.5 } }}>
-            <Typography variant="h3">Reset Password</Typography>
-            <Typography color="secondary">Please choose your new password</Typography>
-          </Stack>
-        </Grid>
-        <Grid size={12}>
-          <AuthResetPassword />
-        </Grid>
-      </Grid>
-    </AuthWrapper>
-  );
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/auth/login', { replace: true });
+  }, [navigate]);
+  return null;
 }

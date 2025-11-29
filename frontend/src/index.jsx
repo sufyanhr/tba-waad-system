@@ -5,14 +5,12 @@ import 'assets/style.css';
 
 // scroll bar
 import 'simplebar-react/dist/simplebar.min.css';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 
 // apex-chart
 import 'assets/third-party/apex-chart.css';
 
 // map
-import 'mapbox-gl/dist/mapbox-gl.css';
+// mapbox-gl CSS removed as mapbox is not used in TBA frontend
 
 // google-fonts
 // Preload critical fonts (for example, Roboto) to reduce FOUC.

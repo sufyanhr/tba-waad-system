@@ -30,22 +30,8 @@ export default function AuthWrapper({ children }) {
   const [searchParams] = useSearchParams();
   const authParam = searchParams.get('auth') || '';
 
-  let documentationLink = 'https://codedthemes.gitbook.io/mantis/authentication';
-
-  switch (authParam) {
-    case 'auth0':
-      documentationLink = 'https://codedthemes.gitbook.io/mantis/authentication/switch-to-auth0';
-      break;
-    case 'firebase':
-      documentationLink = 'https://codedthemes.gitbook.io/mantis/authentication/switch-to-firebase';
-      break;
-    case 'aws':
-      documentationLink = 'https://codedthemes.gitbook.io/mantis/authentication/switch-to-aws-cognito';
-      break;
-    case 'supabase':
-      documentationLink = 'https://codedthemes.gitbook.io/mantis/authentication/switch-to-supabase';
-      break;
-  }
+  // Only JWT authentication is supported now. Keep the general docs link.
+  const documentationLink = 'https://codedthemes.gitbook.io/mantis/authentication';
 
   return (
     <Box sx={{ minHeight: '100vh' }}>

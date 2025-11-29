@@ -7,7 +7,6 @@ import Box from '@mui/material/Box';
 
 // project imports
 import Search from './Search';
-import Chat from './Chat';
 import Profile from './Profile';
 import Localization from './Localization';
 import Notification from './Notification';
@@ -50,7 +49,6 @@ export default function HeaderContent() {
         {!downLG && megaMenu}
         {localization}
         <Notification />
-        <Chat />
         {!downLG && <FullScreen />}
         <Customization />
         {!downLG && <Profile />}

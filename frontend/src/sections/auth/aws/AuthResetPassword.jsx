@@ -16,7 +16,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // third-party
-import OtpInput from 'react-otp-input';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 
@@ -134,52 +133,16 @@ const AuthResetPassword = () => {
                     </Alert>
                   )}
                   <InputLabel htmlFor="verification-code">Enter Verification Code</InputLabel>
-                  <Box
-                    sx={(theme) => ({
-                      '& input': {
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        ...(touched.otp && errors.otp && { borderColor: 'error.main' }),
-                        '&:focus-visible': {
-                          outline: 'none !important',
-                          borderColor: 'primary.main',
-                          boxShadow: theme.vars.customShadows.primary,
-                          ...(touched.otp && errors.otp && { borderColor: 'error.main', boxShadow: theme.vars.customShadows.error })
-                        }
-                      }
-                    })}
-                  >
-                    <OtpInput
+                  <Box>
+                    <OutlinedInput
+                      id="verification-code"
+                      fullWidth
+                      error={Boolean(touched.otp && errors.otp)}
                       value={values.otp}
-                      onChange={(otp) => setFieldValue('otp', otp)}
-                      inputType="tel"
-                      shouldAutoFocus
-                      renderInput={(props, index) => (
-                        <input
-                          {...props}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Tab') {
-                              e.preventDefault();
-                            } else if (e.key === 'Backspace' && !props.value) {
-                              const previousInput = document.getElementById(`otp-input-${index - 1}`);
-                              if (previousInput) {
-                                previousInput.focus();
-                              }
-                            } else if (e.key !== 'Backspace') {
-                              const nextInput = document.getElementById(`otp-input-${index + 1}`);
-                              if (nextInput && props.value) {
-                                setTimeout(() => {
-                                  nextInput.focus();
-                                }, 0);
-                              }
-                            }
-                            props.onKeyDown?.(e);
-                          }}
-                        />
-                      )}
-                      numInputs={6}
-                      containerStyle={{ justifyContent: 'space-between', margin: -8 }}
-                      inputStyle={{ width: '100%', margin: '8px', padding: '10px', outline: 'none', borderRadius: 4 }}
+                      name="otp"
+                      onChange={(e) => setFieldValue('otp', e.target.value)}
+                      onBlur={handleBlur}
+                      placeholder="Enter verification code"
                     />
                   </Box>
                 </Stack>

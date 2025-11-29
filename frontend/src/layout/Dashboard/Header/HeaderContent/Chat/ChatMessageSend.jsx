@@ -2,13 +2,11 @@ import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
 
 // material-ui
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Popper from '@mui/material/Popper';
+// ClickAwayListener and Popper removed as emoji-picker is not used
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
 // third-party
-import EmojiPicker, { SkinTones } from 'emoji-picker-react';
 
 // project imports
 import MainCard from 'components/MainCard';
@@ -30,11 +28,7 @@ import SoundOutlined from '@ant-design/icons/SoundOutlined';
 export default function ChatMessageSend({ user }) {
   const { users } = useGetUsers();
 
-  const [anchorElEmoji, setAnchorElEmoji] = useState(); /** No single type can cater for all elements */
-
-  const handleOnEmojiButtonClick = (event) => {
-    setAnchorElEmoji(anchorElEmoji ? null : event?.currentTarget);
-  };
+  const handleOnEmojiButtonClick = () => setMessage((msg) => msg + '😊');
 
   // handle new message form
   const [message, setMessage] = useState('');
@@ -72,17 +66,7 @@ export default function ChatMessageSend({ user }) {
     handleOnSend();
   };
 
-  // handle emoji
-  const onEmojiClick = (emojiObject) => {
-    setMessage(message + emojiObject.emoji);
-  };
-
-  const emojiOpen = Boolean(anchorElEmoji);
-  const emojiId = emojiOpen ? 'simple-popper' : undefined;
-
-  const handleCloseEmoji = () => {
-    setAnchorElEmoji(null);
-  };
+  // handle emoji - simplified without external library
 
   return (
     <Stack sx={{ px: 2, pt: 3, borderTop: '1px solid', borderTopColor: 'divider' }}>
@@ -101,30 +85,9 @@ export default function ChatMessageSend({ user }) {
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
         <Stack direction="row" sx={{ py: 2, ml: -1 }}>
           <>
-            <IconButton
-              ref={anchorElEmoji}
-              aria-describedby={emojiId}
-              onClick={handleOnEmojiButtonClick}
-              sx={{ opacity: 0.5 }}
-              size="medium"
-              color="secondary"
-            >
+            <IconButton onClick={handleOnEmojiButtonClick} sx={{ opacity: 0.5 }} size="medium" color="secondary">
               <SmileOutlined />
             </IconButton>
-            <Popper
-              id={emojiId}
-              open={emojiOpen}
-              anchorEl={anchorElEmoji}
-              disablePortal
-              sx={{ zIndex: 1200 }}
-              popperOptions={{ modifiers: [{ name: 'offset', options: { offset: [-20, 125] } }] }}
-            >
-              <ClickAwayListener onClickAway={handleCloseEmoji}>
-                <MainCard elevation={8} content={false}>
-                  <EmojiPicker onEmojiClick={onEmojiClick} defaultSkinTone={SkinTones.DARK} lazyLoadEmojis={true} />
-                </MainCard>
-              </ClickAwayListener>
-            </Popper>
           </>
           <IconButton sx={{ opacity: 0.5 }} size="medium" color="secondary">
             <PaperClipOutlined />

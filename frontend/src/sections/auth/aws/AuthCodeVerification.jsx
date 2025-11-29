@@ -12,7 +12,7 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 
 // third-party
-import OtpInput from 'react-otp-input';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 
@@ -104,37 +104,14 @@ const AuthCodeVerification = () => {
                       }
                     })}
                   >
-                    <OtpInput
+                    <OutlinedInput
+                      fullWidth
+                      id="otp-input"
+                      name="otp"
                       value={values.otp}
-                      onChange={(otp) => setFieldValue('otp', otp)}
-                      numInputs={6}
-                      inputType="tel"
-                      containerStyle={{ justifyContent: 'space-between', margin: -8 }}
-                      shouldAutoFocus
-                      renderInput={(props, index) => (
-                        <input
-                          {...props}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Tab') {
-                              e.preventDefault();
-                            } else if (e.key === 'Backspace' && !props.value) {
-                              const previousInput = document.getElementById(`otp-input-${index - 1}`);
-                              if (previousInput) {
-                                previousInput.focus();
-                              }
-                            } else if (e.key !== 'Backspace') {
-                              const nextInput = document.getElementById(`otp-input-${index + 1}`);
-                              if (nextInput && props.value) {
-                                setTimeout(() => {
-                                  nextInput.focus();
-                                }, 0);
-                              }
-                            }
-                            props.onKeyDown?.(e);
-                          }}
-                        />
-                      )}
-                      inputStyle={{ width: '100%', margin: '8px', padding: '10px', outline: 'none', borderRadius: 4 }}
+                      onChange={(e) => setFieldValue('otp', e.target.value)}
+                      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 6 }}
+                      placeholder="Enter 6-digit code"
                     />
                   </Box>
                 </Stack>

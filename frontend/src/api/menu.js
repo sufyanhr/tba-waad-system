@@ -1,5 +1,4 @@
-import useSWR, { mutate } from 'swr';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 
 // Project-imports
 import { fetcher } from 'utils/axios';
@@ -24,80 +23,72 @@ const staticMenuItem = {
 };
 
 export function useGetMenu() {
-  const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.dashboard, fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const [menu, setMenu] = useState(null);
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState(null);
 
-  const memoizedValue = useMemo(() => {
-    let updatedMenu = data?.dashboard;
-
-    if (updatedMenu && Array.isArray(updatedMenu.children) && updatedMenu.children.length > 0) {
-      updatedMenu = {
-        ...updatedMenu,
-        children: updatedMenu.children.map((group) => {
-          if (Array.isArray(group.children)) {
-            return {
-              ...group,
-              children: [...group.children, staticMenuItem]
-            };
-          }
-          return group;
-        })
-      };
-    }
-
-    return {
-      menu: updatedMenu,
-      menuLoading: isLoading,
-      menuError: error,
-      menuValidating: isValidating,
-      menuEmpty: !isLoading && !data?.length
+  useEffect(() => {
+    let mounted = true;
+    setMenuLoading(true);
+    fetcher(endpoints.key + endpoints.dashboard)
+      .then((res) => {
+        if (!mounted) return;
+        let updatedMenu = res?.dashboard || res;
+        if (updatedMenu && Array.isArray(updatedMenu.children) && updatedMenu.children.length > 0) {
+          updatedMenu = {
+            ...updatedMenu,
+            children: updatedMenu.children.map((group) => {
+              if (Array.isArray(group.children)) {
+                return {
+                  ...group,
+                  children: [...group.children, staticMenuItem]
+                };
+              }
+              return group;
+            })
+          };
+        }
+        setMenu(updatedMenu);
+        setMenuLoading(false);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        setMenuError(err);
+        setMenuLoading(false);
+      });
+    return () => {
+      mounted = false;
     };
-  }, [data, error, isLoading, isValidating]);
+  }, []);
 
+  const memoizedValue = useMemo(() => ({ menu, menuLoading, menuError, menuValidating: false, menuEmpty: !menu && !menuLoading }), [menu, menuLoading, menuError]);
   return memoizedValue;
 }
 
+let menuMasterState = initialState;
+
 export function useGetMenuMaster() {
-  const { data, isLoading } = useSWR(endpoints.key + endpoints.master, () => initialState, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const [menuMaster, setMenuMaster] = useState(menuMasterState);
+  useEffect(() => {
+    function handle(e) {
+      setMenuMaster(e.detail || initialState);
+    }
+    window.addEventListener('menuMasterUpdate', handle);
+    // initialize with current state
+    setMenuMaster(menuMasterState);
+    return () => window.removeEventListener('menuMasterUpdate', handle);
+  }, []);
 
-  const memoizedValue = useMemo(
-    () => ({
-      menuMaster: data,
-      menuMasterLoading: isLoading
-    }),
-    [data, isLoading]
-  );
-
+  const memoizedValue = useMemo(() => ({ menuMaster, menuMasterLoading: false }), [menuMaster]);
   return memoizedValue;
 }
 
 export function handlerComponentDrawer(isComponentDrawerOpened) {
-  // to update local state based on key
-
-  mutate(
-    endpoints.key + endpoints.master,
-    (currentMenuMaster) => {
-      return { ...currentMenuMaster, isComponentDrawerOpened };
-    },
-    false
-  );
+  menuMasterState = { ...menuMasterState, isComponentDrawerOpened };
+  window.dispatchEvent(new CustomEvent('menuMasterUpdate', { detail: menuMasterState }));
 }
 
 export function handlerDrawerOpen(isDashboardDrawerOpened) {
-  // to update local state based on key
-
-  mutate(
-    endpoints.key + endpoints.master,
-    (currentMenuMaster) => {
-      return { ...currentMenuMaster, isDashboardDrawerOpened };
-    },
-    false
-  );
+  menuMasterState = { ...menuMasterState, isDashboardDrawerOpened };
+  window.dispatchEvent(new CustomEvent('menuMasterUpdate', { detail: menuMasterState }));
 }

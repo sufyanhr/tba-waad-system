@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import useSWR, { mutate } from 'swr';
+import { useMemo, useEffect, useState } from 'react';
 
 const endpoints = {
   key: 'snackbar'
@@ -28,14 +27,19 @@ const initialState = {
 };
 
 export function useGetSnackbar() {
-  const { data } = useSWR(endpoints.key, () => initialState, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const [snackbar, setSnackbar] = useState(initialState);
 
-  const memoizedValue = useMemo(() => ({ snackbar: data }), [data]);
+  useEffect(() => {
+    function handle(e) {
+      setSnackbar(e.detail || initialState);
+    }
+    window.addEventListener('snackbarUpdate', handle);
+    // initialize
+    setSnackbar(initialState);
+    return () => window.removeEventListener('snackbarUpdate', handle);
+  }, []);
 
+  const memoizedValue = useMemo(() => ({ snackbar }), [snackbar]);
   return memoizedValue;
 }
 
@@ -44,69 +48,40 @@ export function openSnackbar(snackbar) {
 
   const { action, open, message, anchorOrigin, variant, alert, transition, close, actionButton } = snackbar;
 
-  mutate(
-    endpoints.key,
-    (currentSnackbar) => {
-      return {
-        ...currentSnackbar,
-        action: action || initialState.action,
-        open: open || initialState.open,
-        message: message || initialState.message,
-        anchorOrigin: anchorOrigin || initialState.anchorOrigin,
-        variant: variant || initialState.variant,
-        alert: {
-          color: alert?.color || initialState.alert.color,
-          variant: alert?.variant || initialState.alert.variant
-        },
-        transition: transition || initialState.transition,
-        close: close || initialState.close,
-        actionButton: actionButton || initialState.actionButton
-      };
+  const payload = {
+    ...initialState,
+    action: action || initialState.action,
+    open: open || initialState.open,
+    message: message || initialState.message,
+    anchorOrigin: anchorOrigin || initialState.anchorOrigin,
+    variant: variant || initialState.variant,
+    alert: {
+      color: alert?.color || initialState.alert.color,
+      variant: alert?.variant || initialState.alert.variant
     },
-    false
-  );
+    transition: transition || initialState.transition,
+    close: close || initialState.close,
+    actionButton: actionButton || initialState.actionButton
+  };
+  window.dispatchEvent(new CustomEvent('snackbarUpdate', { detail: payload }));
 }
 
 export function closeSnackbar() {
-  // to update local state based on key
-  mutate(
-    endpoints.key,
-    (currentSnackbar) => {
-      return { ...currentSnackbar, open: false };
-    },
-    false
-  );
+  const payload = { ...initialState, open: false };
+  window.dispatchEvent(new CustomEvent('snackbarUpdate', { detail: payload }));
 }
 
 export function handlerIncrease(maxStack) {
-  // to update local state based on key
-  mutate(
-    endpoints.key,
-    (currentSnackbar) => {
-      return { ...currentSnackbar, maxStack };
-    },
-    false
-  );
+  const payload = { ...initialState, maxStack };
+  window.dispatchEvent(new CustomEvent('snackbarUpdate', { detail: payload }));
 }
 
 export function handlerDense(dense) {
-  // to update local state based on key
-  mutate(
-    endpoints.key,
-    (currentSnackbar) => {
-      return { ...currentSnackbar, dense };
-    },
-    false
-  );
+  const payload = { ...initialState, dense };
+  window.dispatchEvent(new CustomEvent('snackbarUpdate', { detail: payload }));
 }
 
 export function handlerIconVariants(iconVariant) {
-  // to update local state based on key
-  mutate(
-    endpoints.key,
-    (currentSnackbar) => {
-      return { ...currentSnackbar, iconVariant, hideIconVariant: iconVariant === 'hide' };
-    },
-    false
-  );
+  const payload = { ...initialState, iconVariant, hideIconVariant: iconVariant === 'hide' };
+  window.dispatchEvent(new CustomEvent('snackbarUpdate', { detail: payload }));
 }
