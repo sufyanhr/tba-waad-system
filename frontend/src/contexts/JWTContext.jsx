@@ -1,18 +1,16 @@
-import { createContext, useEffect, useReducer } from 'react';
+import { createContext, useEffect, useReducer, useCallback } from 'react';
 import PropTypes from 'prop-types';
-
-// third-party
 import { jwtDecode } from 'jwt-decode';
 
-// reducer - state management
+// reducer
 import { LOGIN, LOGOUT } from 'contexts/auth-reducer/actions';
 import authReducer from 'contexts/auth-reducer/auth';
 
 // project imports
 import Loader from 'components/Loader';
-import axios from 'utils/axios';
+import axios from 'utils/axios'; // axiosServices الصحيح
 
-// ==============================|| JWT CONTEXT & PROVIDER - TBA BACKEND ||============================== //
+// ==============================|| INITIAL STATE ||============================== //
 
 const initialState = {
   isLoggedIn: false,
@@ -20,27 +18,31 @@ const initialState = {
   user: null
 };
 
-const verifyToken = (serviceToken) => {
-  if (!serviceToken) {
-    return false;
-  }
+// ==============================|| TOKEN HELPERS ||============================== //
+
+const verifyToken = (token) => {
+  if (!token) return false;
   try {
-    const decoded = jwtDecode(serviceToken);
+    const decoded = jwtDecode(token);
     return decoded.exp > Date.now() / 1000;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
 
-const setSession = (serviceToken) => {
-  if (serviceToken) {
-    localStorage.setItem('serviceToken', serviceToken);
-    axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
+const setSession = (token) => {
+  if (token) {
+    localStorage.setItem('serviceToken', token);
+    if (!axios.defaults.headers) axios.defaults.headers = {};
+    if (!axios.defaults.headers.common) axios.defaults.headers.common = {};
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
   } else {
     localStorage.removeItem('serviceToken');
-    delete axios.defaults.headers.common.Authorization;
+    if (axios.defaults.headers?.common?.Authorization) delete axios.defaults.headers.common.Authorization;
   }
 };
+
+// ==============================|| CONTEXT ||============================== //
 
 const JWTContext = createContext(null);
 
@@ -50,120 +52,73 @@ export const JWTProvider = ({ children }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const serviceToken = window.localStorage.getItem('serviceToken');
-        if (serviceToken && verifyToken(serviceToken)) {
-          setSession(serviceToken);
-          
-          // Call backend /api/auth/me to get current user
-          const response = await axios.get('/api/auth/me');
-          const userData = response.data.data; // Backend wraps in ApiResponse
-          
+        const token = localStorage.getItem('serviceToken');
+
+        if (token && verifyToken(token)) {
+          setSession(token);
+
+          const response = await axios.get('/auth/me'); // ✔ بدون /api
+          const userData = response.data.data;
+
           dispatch({
             type: LOGIN,
             payload: {
-              isLoggedIn: true,
-              user: {
-                id: userData.id,
-                username: userData.username,
-                fullName: userData.fullName,
-                email: userData.email,
-                roles: userData.roles || [],
-                permissions: userData.permissions || []
-              }
+              user: userData
             }
           });
         } else {
-          dispatch({
-            type: LOGOUT
-          });
+          dispatch({ type: LOGOUT });
         }
-      } catch (err) {
-        console.error('Auth initialization error:', err);
-        dispatch({
-          type: LOGOUT
-        });
+      } catch (e) {
+        dispatch({ type: LOGOUT });
       }
     };
 
     init();
   }, []);
 
-  const login = async (identifier, password) => {
-    // Backend expects: { identifier: "username or email", password: "password" }
-    const response = await axios.post('/api/auth/login', { identifier, password });
-    const { token, user: userData } = response.data.data; // Backend wraps in ApiResponse
-    
-    setSession(token);
-    
-    dispatch({
-      type: LOGIN,
-      payload: {
-        isLoggedIn: true,
-        user: {
-          id: userData.id,
-          username: userData.username,
-          fullName: userData.fullName,
-          email: userData.email,
-          roles: userData.roles || [],
-          permissions: userData.permissions || []
-        }
-      }
-    });
-  };
+  // ==============================|| LOGIN ||============================== //
 
-  const register = async (username, email, password, fullName) => {
-    const response = await axios.post('/api/auth/register', {
-      username,
-      email,
-      password,
-      fullName
+  const login = async (identifier, password) => {
+    const response = await axios.post('/auth/login', {
+      identifier,
+      password
     });
-    
+
     const { token, user: userData } = response.data.data;
+
     setSession(token);
-    
+
     dispatch({
       type: LOGIN,
-      payload: {
-        isLoggedIn: true,
-        user: {
-          id: userData.id,
-          username: userData.username,
-          fullName: userData.fullName,
-          email: userData.email,
-          roles: userData.roles || [],
-          permissions: userData.permissions || []
-        }
-      }
+      payload: { user: userData }
     });
   };
 
   const logout = () => {
     setSession(null);
     dispatch({ type: LOGOUT });
+    // redirect to login to ensure UI resets
+    try {
+      window.location.href = '/login';
+    } catch (e) {
+      // ignore
+    }
   };
 
-  const resetPassword = async (email) => {
-    await axios.post('/api/auth/forgot-password', { email });
-  };
-
-  const updateProfile = () => {
-    // TODO: Implement profile update if needed
-  };
-
-  if (state.isInitialized !== undefined && !state.isInitialized) {
+  if (!state.isInitialized) {
     return <Loader />;
   }
 
   return (
-    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile }}>
+    <JWTContext.Provider value={{ ...state, login, logout }}>
       {children}
     </JWTContext.Provider>
   );
 };
 
-JWTProvider.propTypes = { 
-  children: PropTypes.node 
+JWTProvider.propTypes = {
+  children: PropTypes.node
 };
 
 export default JWTContext;
