@@ -31,4 +31,17 @@ axiosServices.interceptors.response.use(
   }
 );
 
+// ==============================|| LEGACY FETCHERS (for backward compatibility) ||============================== //
+export const fetcher = async (args) => {
+  const [url, config] = Array.isArray(args) ? args : [args];
+  const res = await axiosServices.get(url, { ...config });
+  return res.data;
+};
+
+export const fetcherPost = async (args) => {
+  const [url, config] = Array.isArray(args) ? args : [args];
+  const res = await axiosServices.post(url, { ...config });
+  return res.data;
+};
+
 export default axiosServices;
