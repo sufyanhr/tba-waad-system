@@ -113,19 +113,24 @@ export default function ProfileTabs({ focusInput }) {
             >
               <Avatar alt="Avatar 1" src={avatar} sx={{ width: 124, height: 124, border: '1px dashed' }} />
               <Box
-                sx={(theme) => ({
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  bgcolor: withAlpha(theme.vars.palette.secondary.dark, 0.75),
-                  width: '100%',
-                  height: '100%',
-                  opacity: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'secondary.lighter'
-                })}
+                sx={(theme) => {
+                  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                  const secondaryVars = varsPalette.secondary || theme.palette?.secondary || {};
+                  const darkColor = secondaryVars.dark ?? theme.palette?.secondary?.dark ?? '#1976d2';
+                  return {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    bgcolor: withAlpha(darkColor, 0.75),
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'secondary.lighter'
+                  };
+                }}
               >
                 <Stack sx={{ gap: 0.5, alignItems: 'center' }}>
                   <CameraOutlined style={{ fontSize: '2rem' }} />

@@ -34,9 +34,17 @@ export default function ProfileRadialChart() {
   const [series] = useState([30]);
   const [options, setOptions] = useState(redialBarChartOptions);
 
-  const textPrimary = theme.vars.palette.text.primary;
-  const primaryMain = theme.vars.palette.primary.main;
-  const trackColor = colorScheme === ThemeMode.DARK ? theme.vars.palette.grey[200] : theme.vars.palette.grey[0];
+  // Safe palette access with fallbacks
+  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+  const textVars = varsPalette.text || theme.palette?.text || {};
+  const primaryVars = varsPalette.primary || theme.palette?.primary || {};
+  const greyVars = varsPalette.grey || theme.palette?.grey || {};
+  
+  const textPrimary = textVars.primary ?? theme.palette?.text?.primary ?? '#000';
+  const primaryMain = primaryVars.main ?? theme.palette?.primary?.main ?? '#1976d2';
+  const trackColor = colorScheme === ThemeMode.DARK 
+    ? (greyVars[200] ?? theme.palette?.grey?.[200] ?? '#e0e0e0')
+    : (greyVars[0] ?? theme.palette?.grey?.[0] ?? '#fafafa');
 
   useEffect(() => {
     setOptions({

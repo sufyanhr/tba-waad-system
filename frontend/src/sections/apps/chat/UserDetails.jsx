@@ -84,17 +84,23 @@ export default function UserDetails({ user, onClose }) {
                 label={user?.online_status?.replaceAll('_', ' ')}
                 slotProps={{ label: { sx: { px: 1 } } }}
                 sx={(theme) => {
+                  // Safe palette access with fallbacks
+                  const varsPalette = (theme?.vars && theme.vars.palette) || theme.palette || {};
+                  const successVars = varsPalette.success || theme.palette?.success || {};
+                  const greyVars = varsPalette.grey || theme.palette?.grey || {};
+                  const warningVars = varsPalette.warning || theme.palette?.warning || {};
+                  
                   let statusBGColor;
                   let statusColor;
                   if (user.online_status === 'available') {
-                    statusBGColor = theme.vars.palette.success.lighter;
-                    statusColor = theme.vars.palette.success.main;
+                    statusBGColor = successVars.lighter ?? theme.palette?.success?.lighter ?? '#e0f2f1';
+                    statusColor = successVars.main ?? theme.palette?.success?.main ?? '#4caf50';
                   } else if (user.online_status === 'do_not_disturb') {
-                    statusBGColor = theme.vars.palette.grey.A100;
-                    statusColor = theme.vars.palette.grey.A200;
+                    statusBGColor = greyVars.A100 ?? theme.palette?.grey?.A100 ?? '#f5f5f5';
+                    statusColor = greyVars.A200 ?? theme.palette?.grey?.A200 ?? '#eeeeee';
                   } else {
-                    statusBGColor = theme.vars.palette.warning.lighter;
-                    statusColor = theme.vars.palette.warning.main;
+                    statusBGColor = warningVars.lighter ?? theme.palette?.warning?.lighter ?? '#fff3e0';
+                    statusColor = warningVars.main ?? theme.palette?.warning?.main ?? '#ff9800';
                   }
                   return { height: 24, bgcolor: statusBGColor, textTransform: 'capitalize', color: statusColor };
                 }}
