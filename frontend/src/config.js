@@ -75,6 +75,29 @@ export let AuthProvider;
 export const APP_AUTH = AuthProvider.JWT;
 export const DEFAULT_THEME_MODE = ThemeMode.SYSTEM;
 
+// ==============================|| PROJECT SETTINGS - TBA SYSTEM ||============================== //
+
+export const projectSettings = {
+  // Control visibility of non-TBA menu items (Mantis template components)
+  showEcommerce: false,
+  showChat: false,
+  showKanban: false,
+  showWidgets: false,
+  showCustomer: false,
+  showAnalytics: false,
+  showCharts: false,
+  showCalendar: false,
+  showInvoice: false,
+  showProfiles: false,
+  
+  // Keep useful tools visible
+  showTools: true,
+  showAdministration: true,
+  
+  // TBA modules are always visible
+  showTBAManagement: true
+};
+
 // ==============================|| THEME CONFIG ||============================== //
 
 const config = {

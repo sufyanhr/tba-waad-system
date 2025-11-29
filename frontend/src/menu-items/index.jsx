@@ -1,4 +1,5 @@
 // project imports
+import { projectSettings } from 'config';
 import tbaManagement from './tba-management';
 import tools from './tools';
 import administration from './administration';
@@ -6,7 +7,11 @@ import administration from './administration';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [tbaManagement, tools, administration]
+  items: [
+    ...(projectSettings.showTBAManagement ? [tbaManagement] : []),
+    ...(projectSettings.showTools ? [tools] : []),
+    ...(projectSettings.showAdministration ? [administration] : [])
+  ]
 };
 
 export default menuItems;
