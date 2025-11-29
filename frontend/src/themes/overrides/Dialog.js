@@ -5,12 +5,15 @@ import { withAlpha } from 'utils/colorUtils';
 
 export default function Dialog(theme) {
   const varsPalette = (theme.vars && theme.vars.palette) || theme.palette || {};
+  const commonVars = varsPalette.common || theme.palette?.common || {};
+  const blackColor = commonVars.black || '#000';
+  
   return {
     MuiDialog: {
       styleOverrides: {
         root: {
           '& .MuiBackdrop-root': {
-            backgroundColor: withAlpha(varsPalette.common?.black ?? (theme.palette && theme.palette.common && theme.palette.common.black) || '#000', 0.7)
+            backgroundColor: withAlpha(blackColor, 0.7)
           }
         },
         paper: {

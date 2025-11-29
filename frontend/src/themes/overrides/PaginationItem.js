@@ -4,13 +4,17 @@ import getColors from 'utils/getColors';
 function getColorStyle({ variant, color, theme }) {
   const colors = getColors(theme, color);
   const { lighter, light, dark, main, contrastText } = colors;
+  
+  // Safe palette access
+  const varsPalette = (theme?.vars?.palette) || theme.palette || {};
+  const backgroundVars = varsPalette.background || theme.palette?.background || {};
 
   const focusStyle = {
     '&:focus-visible': {
       outline: `2px solid ${dark}`,
       outlineOffset: 2,
       ...(variant === 'text' && {
-            backgroundColor: varsPalette.background?.paper ?? theme.palette.background?.paper
+        backgroundColor: backgroundVars.paper || '#fff'
       })
     }
   };
