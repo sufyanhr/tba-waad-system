@@ -5,7 +5,9 @@ import { REGISTER, LOGIN, LOGOUT } from './actions';
 const initialState = {
   isLoggedIn: false,
   isInitialized: false,
-  user: null
+  user: null,
+  roles: [],
+  permissions: []
 };
 
 // ==============================|| AUTH REDUCER ||============================== //
@@ -13,19 +15,23 @@ const initialState = {
 const auth = (state = initialState, action) => {
   switch (action.type) {
     case REGISTER: {
-      const { user } = action.payload;
+      const { user, roles = [], permissions = [] } = action.payload;
       return {
         ...state,
-        user
+        user,
+        roles,
+        permissions
       };
     }
     case LOGIN: {
-      const { user } = action.payload;
+      const { user, roles = [], permissions = [] } = action.payload;
       return {
         ...state,
         isLoggedIn: true,
         isInitialized: true,
-        user
+        user,
+        roles,
+        permissions
       };
     }
     case LOGOUT: {
@@ -33,7 +39,9 @@ const auth = (state = initialState, action) => {
         ...state,
         isInitialized: true,
         isLoggedIn: false,
-        user: null
+        user: null,
+        roles: [],
+        permissions: []
       };
     }
     default: {

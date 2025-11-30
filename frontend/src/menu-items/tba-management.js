@@ -35,6 +35,7 @@ const tbaManagement = {
   id: 'tba-management',
   title: 'TBA Management',
   type: 'group',
+  requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE', 'INSURANCE_ADMIN'], // TBA staff only
   children: [
     {
       id: 'members',
@@ -42,7 +43,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/members',
       icon: icons.UserOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'employers',
@@ -50,7 +52,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/employers',
       icon: icons.TeamOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'providers',
@@ -58,7 +61,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/providers',
       icon: icons.SafetyOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'policies',
@@ -66,7 +70,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/policies',
       icon: icons.FileProtectOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'benefit-packages',
@@ -74,7 +79,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/benefit-packages',
       icon: icons.GiftOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'pre-authorizations',
@@ -82,7 +88,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/pre-authorizations',
       icon: icons.SafetyCertificateOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'INSURANCE_ADMIN']
     },
     {
       id: 'claims',
@@ -90,7 +97,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/claims',
       icon: icons.AuditOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'INSURANCE_ADMIN']
     },
     {
       id: 'invoices',
@@ -98,7 +106,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/invoices',
       icon: icons.FileTextOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_FINANCE', 'INSURANCE_ADMIN']
     },
     {
       id: 'visits',
@@ -106,7 +115,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/visits',
       icon: icons.EyeOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'INSURANCE_ADMIN']
     },
     {
       id: 'provider-contracts',
@@ -114,7 +124,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/provider-contracts',
       icon: icons.FileSearchOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'medical-services',
@@ -122,7 +133,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/medical-services',
       icon: icons.MedicineBoxOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     },
     {
       id: 'medical-categories',
@@ -130,7 +142,8 @@ const tbaManagement = {
       type: 'item',
       url: '/tba/medical-categories',
       icon: icons.AppstoreOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'INSURANCE_ADMIN']
     }
   ]
 };

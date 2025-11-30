@@ -17,6 +17,7 @@ const administration = {
   id: 'administration',
   title: 'Administration',
   type: 'group',
+  requiredRoles: ['ADMIN'], // Only ADMIN can see this entire section
   children: [
     {
       id: 'users',
@@ -24,7 +25,8 @@ const administration = {
       type: 'item',
       url: '/admin/users',
       icon: icons.UserOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN']
     },
     {
       id: 'roles-permissions',
@@ -32,7 +34,8 @@ const administration = {
       type: 'item',
       url: '/admin/roles',
       icon: icons.SafetyCertificateOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN']
     },
     {
       id: 'companies',
@@ -40,7 +43,8 @@ const administration = {
       type: 'item',
       url: '/admin/companies',
       icon: icons.BankOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      requiredRoles: ['ADMIN']
     }
   ]
 };

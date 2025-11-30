@@ -15,6 +15,7 @@ const tools = {
   id: 'tools',
   title: 'Tools',
   type: 'group',
+  requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'TBA_FINANCE', 'INSURANCE_ADMIN'], // TBA staff and admins
   children: [
     {
       id: 'reports',
@@ -22,7 +23,8 @@ const tools = {
       type: 'item',
       url: '/tools/reports',
       icon: icons.FileTextOutlined,
-      breadcrumbs: false
+      breadcrumbs: false,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS', 'TBA_FINANCE', 'INSURANCE_ADMIN']
     },
     {
       id: 'system-settings',
@@ -30,7 +32,8 @@ const tools = {
       type: 'item',
       url: '/tools/settings/general',
       icon: icons.SettingOutlined,
-      breadcrumbs: false
+      breadcrumbs: false,
+      requiredRoles: ['ADMIN', 'TBA_OPERATIONS']
     }
   ]
 };

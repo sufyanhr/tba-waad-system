@@ -15,7 +15,9 @@ import axios from 'utils/axios'; // axiosServices الصحيح
 const initialState = {
   isLoggedIn: false,
   isInitialized: false,
-  user: null
+  user: null,
+  roles: [],
+  permissions: []
 };
 
 // ==============================|| TOKEN HELPERS ||============================== //
@@ -60,10 +62,20 @@ export const JWTProvider = ({ children }) => {
           const response = await axios.get('/auth/me'); // ✔ بدون /api
           const userData = response.data.data;
 
+          // Store user roles and permissions in localStorage
+          if (userData.roles) {
+            localStorage.setItem('userRoles', JSON.stringify(userData.roles));
+          }
+          if (userData.permissions) {
+            localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
+          }
+
           dispatch({
             type: LOGIN,
             payload: {
-              user: userData
+              user: userData,
+              roles: userData.roles || [],
+              permissions: userData.permissions || []
             }
           });
         } else {
@@ -89,14 +101,28 @@ export const JWTProvider = ({ children }) => {
 
     setSession(token);
 
+    // Store user roles and permissions in localStorage
+    if (userData.roles) {
+      localStorage.setItem('userRoles', JSON.stringify(userData.roles));
+    }
+    if (userData.permissions) {
+      localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
+    }
+
     dispatch({
       type: LOGIN,
-      payload: { user: userData }
+      payload: { 
+        user: userData,
+        roles: userData.roles || [],
+        permissions: userData.permissions || []
+      }
     });
   };
 
   const logout = () => {
     setSession(null);
+    localStorage.removeItem('userRoles');
+    localStorage.removeItem('userPermissions');
     dispatch({ type: LOGOUT });
     // redirect to login to ensure UI resets
     try {
@@ -106,12 +132,83 @@ export const JWTProvider = ({ children }) => {
     }
   };
 
+  // ==============================|| RBAC HELPER METHODS ||============================== //
+
+  /**
+   * Check if user has a specific role
+   * @param {string} roleName - The role to check (e.g., 'ADMIN', 'TBA_OPERATIONS')
+   * @returns {boolean}
+   */
+  const hasRole = (roleName) => {
+    if (!state.roles || state.roles.length === 0) return false;
+    return state.roles.includes(roleName);
+  };
+
+  /**
+   * Check if user has ANY of the specified roles
+   * @param {string[]} roleNames - Array of roles to check
+   * @returns {boolean}
+   */
+  const hasAnyRole = (roleNames) => {
+    if (!state.roles || state.roles.length === 0) return false;
+    return roleNames.some((role) => state.roles.includes(role));
+  };
+
+  /**
+   * Check if user has ALL of the specified roles
+   * @param {string[]} roleNames - Array of roles to check
+   * @returns {boolean}
+   */
+  const hasAllRoles = (roleNames) => {
+    if (!state.roles || state.roles.length === 0) return false;
+    return roleNames.every((role) => state.roles.includes(role));
+  };
+
+  /**
+   * Check if user has a specific permission
+   * @param {string} permission - The permission to check
+   * @returns {boolean}
+   */
+  const hasPermission = (permission) => {
+    if (!state.permissions || state.permissions.length === 0) return false;
+    return state.permissions.includes(permission);
+  };
+
+  /**
+   * Check if user is ADMIN
+   * @returns {boolean}
+   */
+  const isAdmin = () => {
+    return hasRole('ADMIN');
+  };
+
+  /**
+   * Check if user has any TBA role (TBA_OPERATIONS, TBA_MEDICAL_REVIEWER, TBA_FINANCE, etc.)
+   * @returns {boolean}
+   */
+  const isTBAStaff = () => {
+    if (!state.roles || state.roles.length === 0) return false;
+    return state.roles.some((role) => role.startsWith('TBA_'));
+  };
+
   if (!state.isInitialized) {
     return <Loader />;
   }
 
   return (
-    <JWTContext.Provider value={{ ...state, login, logout }}>
+    <JWTContext.Provider 
+      value={{ 
+        ...state, 
+        login, 
+        logout, 
+        hasRole, 
+        hasAnyRole, 
+        hasAllRoles, 
+        hasPermission,
+        isAdmin,
+        isTBAStaff
+      }}
+    >
       {children}
     </JWTContext.Provider>
   );

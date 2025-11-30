@@ -5,6 +5,7 @@ import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import RBACGuard from 'components/tba/RBACGuard';
+import ProtectedRoute from 'components/ProtectedRoute';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -70,6 +71,7 @@ const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/jwt/code-ver
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
+const MaintenanceUnauthorized = Loadable(lazy(() => import('pages/extra-pages/unauthorized')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -219,15 +221,27 @@ const MainRoutes = {
           children: [
             {
               path: 'users',
-              element: <AdminUsers />
+              element: (
+                <ProtectedRoute requiredRoles={['ADMIN']}>
+                  <AdminUsers />
+                </ProtectedRoute>
+              )
             },
             {
               path: 'roles',
-              element: <AdminRoles />
+              element: (
+                <ProtectedRoute requiredRoles={['ADMIN']}>
+                  <AdminRoles />
+                </ProtectedRoute>
+              )
             },
             {
               path: 'companies',
-              element: <AdminCompanies />
+              element: (
+                <ProtectedRoute requiredRoles={['ADMIN']}>
+                  <AdminCompanies />
+                </ProtectedRoute>
+              )
             }
           ]
         },
@@ -240,7 +254,11 @@ const MainRoutes = {
             },
             {
               path: 'settings',
-              element: <SystemSettings />,
+              element: (
+                <ProtectedRoute requiredRoles={['ADMIN', 'TBA_OPERATIONS']}>
+                  <SystemSettings />
+                </ProtectedRoute>
+              ),
               children: [
                 {
                   path: 'general',
@@ -296,8 +314,16 @@ const MainRoutes = {
         {
           path: '500',
           element: <MaintenanceError500 />
+        },
+        {
+          path: 'unauthorized',
+          element: <MaintenanceUnauthorized />
         }
       ]
+    },
+    {
+      path: '/unauthorized',
+      element: <MaintenanceUnauthorized />
     },
     {
       path: '/auth',
