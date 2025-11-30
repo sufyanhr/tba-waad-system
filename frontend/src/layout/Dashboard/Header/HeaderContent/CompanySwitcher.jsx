@@ -5,69 +5,62 @@ import useCompany from 'hooks/useCompany';
 import useAuth from 'hooks/useAuth';
 import axios from 'utils/axios';
 
-// ==============================|| COMPANY SWITCHER ||============================== //
+// ==============================|| EMPLOYER SWITCHER ||============================== //
 
 export default function CompanySwitcher() {
-  const { user, roles } = useAuth();
-  const { selectedCompanyId, setCompany } = useCompany();
-  const [companies, setCompanies] = useState([]);
+  const { roles } = useAuth();
+  const { selectedEmployerId, setCompany } = useCompany();
+  const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is EMPLOYER role
-  const isEmployer = roles?.includes('EMPLOYER');
-  const isProvider = roles?.includes('PROVIDER');
+  // Check if user is TBA staff (ADMIN, TBA_OPERATIONS, TBA_MEDICAL_REVIEWER, TBA_FINANCE)
+  const isTBAStaff = roles?.some((role) => ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE'].includes(role));
 
   useEffect(() => {
-    // If EMPLOYER, force their company
-    if (isEmployer && user?.companyId) {
-      setCompany(user.companyId, user.companyName || 'My Company');
+    // Only TBA staff see the selector
+    if (!isTBAStaff) {
       return;
     }
 
-    // If PROVIDER, no company switching
-    if (isProvider) {
-      return;
-    }
-
-    // Fetch companies for ADMIN/TBA staff
-    const fetchCompanies = async () => {
+    // Fetch employers for TBA staff
+    const fetchEmployers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/companies/all');
-        const companiesList = response.data.data || response.data || [];
-        setCompanies(companiesList);
+        const response = await axios.get('/employers/selector');
+        const employersList = response.data.data || response.data || [];
+        setEmployers(employersList);
 
-        // If no company selected and we have companies, select first one
-        if (!selectedCompanyId && companiesList.length > 0) {
-          setCompany(companiesList[0].id, companiesList[0].name);
+        // If no employer selected and we have employers, select first one
+        if (!selectedEmployerId && employersList.length > 0) {
+          setCompany(employersList[0].id, employersList[0].name);
         }
       } catch (error) {
-        console.error('Error fetching companies:', error);
-        setCompanies([]);
+        console.error('Error fetching employers:', error);
+        setEmployers([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCompanies();
+    fetchEmployers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEmployer, isProvider, user]);
+  }, [isTBAStaff]);
 
-  // Don't show for EMPLOYER or PROVIDER
-  if (isEmployer || isProvider) {
+  // Don't show for non-TBA staff
+  if (!isTBAStaff) {
     return null;
   }
 
-  const handleCompanyChange = (event) => {
-    const companyId = event.target.value;
-    const company = companies.find((c) => c.id === companyId);
-    if (company) {
-      setCompany(company.id, company.name);
+  const handleEmployerChange = (event) => {
+    const employerId = event.target.value;
+    const employer = employers.find((e) => e.id === employerId);
+    if (employer) {
+      setCompany(employer.id, employer.name);
     }
   };
 
-  const getCompanyInitials = (name) => {
-    if (!name) return 'C';
+  const getEmployerInitials = (name) => {
+    if (!name) return 'E';
     return name
       .split(' ')
       .map((word) => word[0])
@@ -89,8 +82,8 @@ export default function CompanySwitcher() {
     <Box sx={{ minWidth: 200 }}>
       <FormControl fullWidth size="small">
         <Select
-          value={selectedCompanyId || ''}
-          onChange={handleCompanyChange}
+          value={selectedEmployerId || ''}
+          onChange={handleEmployerChange}
           displayEmpty
           sx={{
             '& .MuiSelect-select': {
@@ -104,41 +97,43 @@ export default function CompanySwitcher() {
               return (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <BankOutlined />
-                  <Typography variant="body2">Select Company</Typography>
+                  <Typography variant="body2">Select Employer</Typography>
                 </Box>
               );
             }
-            const company = companies.find((c) => c.id === selected);
+            const employer = employers.find((e) => e.id === selected);
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: 'primary.main' }}>{getCompanyInitials(company?.name)}</Avatar>
-                <Typography variant="body2">{company?.name || 'Unknown'}</Typography>
+                <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: 'primary.main' }}>{getEmployerInitials(employer?.name)}</Avatar>
+                <Typography variant="body2">{employer?.name || 'Unknown'}</Typography>
               </Box>
             );
           }}
         >
-          {companies.length === 0 ? (
+          {employers.length === 0 ? (
             <MenuItem disabled>
               <Typography variant="body2" color="text.secondary">
-                No companies available
+                No employers available
               </Typography>
             </MenuItem>
           ) : (
-            companies.map((company) => (
-              <MenuItem key={company.id} value={company.id}>
+            employers.map((employer) => (
+              <MenuItem key={employer.id} value={employer.id}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                  <Avatar sx={{ width: 32, height: 32, fontSize: 14, bgcolor: 'primary.light' }}>{getCompanyInitials(company.name)}</Avatar>
+                  <Avatar sx={{ width: 32, height: 32, fontSize: 14, bgcolor: 'primary.light' }}>
+                    {getEmployerInitials(employer.name)}
+                  </Avatar>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" fontWeight={500}>
-                      {company.name}
+                      {employer.name}
                     </Typography>
-                    {company.code && (
+                    {employer.code && (
                       <Typography variant="caption" color="text.secondary">
-                        {company.code}
+                        {employer.code}
                       </Typography>
                     )}
                   </Box>
-                  {company.id === selectedCompanyId && <Chip label="Active" size="small" color="primary" />}
+                  {employer.id === selectedEmployerId && <Chip label="Active" size="small" color="primary" />}
                 </Box>
               </MenuItem>
             ))

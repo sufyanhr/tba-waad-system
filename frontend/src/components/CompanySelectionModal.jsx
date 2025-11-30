@@ -4,33 +4,31 @@ import { BankOutlined } from '@ant-design/icons';
 import useCompany from 'hooks/useCompany';
 import useAuth from 'hooks/useAuth';
 
-// ==============================|| COMPANY SELECTION MODAL ||============================== //
+// ==============================|| EMPLOYER SELECTION MODAL ||============================== //
 
 export default function CompanySelectionModal() {
-  const { selectedCompanyId, isInitialized } = useCompany();
+  const { selectedEmployerId, isInitialized } = useCompany();
   const { user, roles, isLoggedIn } = useAuth();
   const [open, setOpen] = useState(false);
 
-  // Check if user is EMPLOYER or PROVIDER (they don't need to select company)
-  const isEmployer = roles?.includes('EMPLOYER');
-  const isProvider = roles?.includes('PROVIDER');
-  const needsCompanySelection = !isEmployer && !isProvider;
+  // Check if user is TBA staff (only they need employer selection)
+  const isTBAStaff = roles?.some((role) => ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE'].includes(role));
 
   useEffect(() => {
     // Only show modal if:
     // 1. User is logged in
     // 2. Context is initialized
-    // 3. No company selected
-    // 4. User is not EMPLOYER or PROVIDER
-    if (isLoggedIn && isInitialized && !selectedCompanyId && needsCompanySelection) {
+    // 3. No employer selected
+    // 4. User is TBA staff
+    if (isLoggedIn && isInitialized && !selectedEmployerId && isTBAStaff) {
       setOpen(true);
     } else {
       setOpen(false);
     }
-  }, [isLoggedIn, isInitialized, selectedCompanyId, needsCompanySelection]);
+  }, [isLoggedIn, isInitialized, selectedEmployerId, isTBAStaff]);
 
-  // Don't render for EMPLOYER or PROVIDER
-  if (!needsCompanySelection) {
+  // Don't render for non-TBA staff
+  if (!isTBAStaff) {
     return null;
   }
 
@@ -61,18 +59,18 @@ export default function CompanySelectionModal() {
           >
             <BankOutlined style={{ fontSize: 24, color: 'var(--mui-palette-primary-main)' }} />
           </Box>
-          <Typography variant="h4">Select a Company</Typography>
+          <Typography variant="h4">Select an Employer</Typography>
         </Box>
       </DialogTitle>
 
       <DialogContent>
         <Alert severity="info" sx={{ mb: 2 }}>
-          Please select a company from the dropdown in the header to begin working with the system.
+          Please select an employer from the dropdown in the header to begin working with the system.
         </Alert>
 
         <Typography variant="body2" color="text.secondary">
-          The company selector is located in the top header bar, next to the language switcher. Once you select a company, all data will be
-          filtered to show only that company&apos;s information.
+          The employer selector is located in the top header bar, next to the language switcher. Once you select an employer, all data will
+          be filtered to show only that employer&apos;s information.
         </Typography>
 
         <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
@@ -87,7 +85,7 @@ export default function CompanySelectionModal() {
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
-          You must select a company to continue
+          You must select an employer to continue
         </Typography>
       </DialogActions>
     </Dialog>

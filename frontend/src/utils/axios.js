@@ -16,10 +16,10 @@ axiosServices.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Add Company ID header for multi-company filtering
-    const companyId = localStorage.getItem('selectedCompanyId');
-    if (companyId) {
-      config.headers['X-Company-ID'] = companyId;
+    // Add Employer ID header for multi-employer filtering (TBA staff only)
+    const employerId = localStorage.getItem('selectedEmployerId');
+    if (employerId) {
+      config.headers['X-Employer-ID'] = employerId;
     }
 
     return config;

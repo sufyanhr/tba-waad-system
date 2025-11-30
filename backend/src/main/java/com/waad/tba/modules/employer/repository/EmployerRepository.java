@@ -49,4 +49,8 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
               OR LOWER(e.code) LIKE LOWER(CONCAT('%', :q, '%')))
            """)
     Page<Employer> searchPagedByCompany(@Param("companyId") Long companyId, @Param("q") String q, Pageable pageable);
+    
+    // ✅ Find active employers for selector (multi-employer filter)
+    @Query("SELECT e FROM Employer e WHERE e.active = true ORDER BY e.name ASC")
+    java.util.List<Employer> findActiveEmployersForSelector();
 }

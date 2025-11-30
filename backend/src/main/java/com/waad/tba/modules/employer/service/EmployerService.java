@@ -4,6 +4,7 @@ import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.employer.dto.EmployerCreateDto;
 import com.waad.tba.modules.employer.dto.EmployerResponseDto;
+import com.waad.tba.modules.employer.dto.EmployerSelectorDto;
 import com.waad.tba.modules.employer.entity.Employer;
 import com.waad.tba.modules.employer.mapper.EmployerMapper;
 import com.waad.tba.modules.employer.repository.EmployerRepository;
@@ -120,5 +121,19 @@ public class EmployerService {
 
     public long count() {
         return repository.count();
+    }
+    
+    /**
+     * Get employer selector options for multi-employer filter
+     * Returns active employers only for dropdown selection
+     */
+    @Transactional(readOnly = true)
+    public List<EmployerSelectorDto> getSelectorOptions() {
+        log.debug("Fetching employer selector options");
+        List<Employer> employers = repository.findActiveEmployersForSelector();
+        
+        return employers.stream()
+                .map(e -> new EmployerSelectorDto(e.getId(), e.getName(), e.getCode()))
+                .toList();
     }
 }

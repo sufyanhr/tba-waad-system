@@ -3,6 +3,7 @@ package com.waad.tba.modules.employer.controller;
 import com.waad.tba.common.dto.ApiResponse;
 import com.waad.tba.modules.employer.dto.EmployerCreateDto;
 import com.waad.tba.modules.employer.dto.EmployerResponseDto;
+import com.waad.tba.modules.employer.dto.EmployerSelectorDto;
 import com.waad.tba.modules.employer.service.EmployerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,6 +26,20 @@ import java.util.List;
 public class EmployerController {
 
     private final EmployerService service;
+
+    @GetMapping("/selector")
+    @PreAuthorize("hasAnyAuthority('ADMIN','TBA_OPERATIONS','TBA_MEDICAL_REVIEWER','TBA_FINANCE')")
+    @Operation(summary = "Get employer selector options", description = "Returns active employers for dropdown/selector. Used by TBA staff to filter data by employer.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employer options retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=com.waad.tba.common.error.ApiError.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Only TBA staff can access", content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=com.waad.tba.common.error.ApiError.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error", content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=com.waad.tba.common.error.ApiError.class)))
+    })
+    public ResponseEntity<ApiResponse<List<EmployerSelectorDto>>> getSelectorOptions() {
+        List<EmployerSelectorDto> options = service.getSelectorOptions();
+        return ResponseEntity.ok(ApiResponse.success(options));
+    }
 
     /**
      * @deprecated Use GET /api/employers?page=&size=&search= instead (paginated search)

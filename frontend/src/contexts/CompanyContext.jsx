@@ -2,46 +2,46 @@ import { createContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
 // action types
-const SET_COMPANY = 'SET_COMPANY';
-const CLEAR_COMPANY = 'CLEAR_COMPANY';
+const SET_EMPLOYER = 'SET_EMPLOYER';
+const CLEAR_EMPLOYER = 'CLEAR_EMPLOYER';
 const INITIALIZE = 'INITIALIZE';
 
 // initial state
 const initialState = {
-  selectedCompanyId: null,
-  selectedCompanyName: null,
+  selectedEmployerId: null,
+  selectedEmployerName: null,
   isInitialized: false
 };
 
-// ==============================|| COMPANY REDUCER ||============================== //
+// ==============================|| EMPLOYER REDUCER ||============================== //
 
 const companyReducer = (state, action) => {
   switch (action.type) {
     case INITIALIZE:
       return {
         ...state,
-        selectedCompanyId: action.payload.companyId,
-        selectedCompanyName: action.payload.companyName,
+        selectedEmployerId: action.payload.employerId,
+        selectedEmployerName: action.payload.employerName,
         isInitialized: true
       };
-    case SET_COMPANY:
+    case SET_EMPLOYER:
       return {
         ...state,
-        selectedCompanyId: action.payload.companyId,
-        selectedCompanyName: action.payload.companyName
+        selectedEmployerId: action.payload.employerId,
+        selectedEmployerName: action.payload.employerName
       };
-    case CLEAR_COMPANY:
+    case CLEAR_EMPLOYER:
       return {
         ...state,
-        selectedCompanyId: null,
-        selectedCompanyName: null
+        selectedEmployerId: null,
+        selectedEmployerName: null
       };
     default:
       return state;
   }
 };
 
-// ==============================|| COMPANY CONTEXT ||============================== //
+// ==============================|| EMPLOYER CONTEXT ||============================== //
 
 const CompanyContext = createContext(null);
 
@@ -50,44 +50,44 @@ export const CompanyProvider = ({ children }) => {
 
   useEffect(() => {
     // Initialize from localStorage
-    const storedCompanyId = localStorage.getItem('selectedCompanyId');
-    const storedCompanyName = localStorage.getItem('selectedCompanyName');
+    const storedEmployerId = localStorage.getItem('selectedEmployerId');
+    const storedEmployerName = localStorage.getItem('selectedEmployerName');
 
     dispatch({
       type: INITIALIZE,
       payload: {
-        companyId: storedCompanyId ? parseInt(storedCompanyId, 10) : null,
-        companyName: storedCompanyName
+        employerId: storedEmployerId ? parseInt(storedEmployerId, 10) : null,
+        employerName: storedEmployerName
       }
     });
   }, []);
 
-  const setCompany = (companyId, companyName) => {
-    if (companyId) {
-      localStorage.setItem('selectedCompanyId', companyId.toString());
-      localStorage.setItem('selectedCompanyName', companyName || '');
+  const setCompany = (employerId, employerName) => {
+    if (employerId) {
+      localStorage.setItem('selectedEmployerId', employerId.toString());
+      localStorage.setItem('selectedEmployerName', employerName || '');
     } else {
-      localStorage.removeItem('selectedCompanyId');
-      localStorage.removeItem('selectedCompanyName');
+      localStorage.removeItem('selectedEmployerId');
+      localStorage.removeItem('selectedEmployerName');
     }
 
     dispatch({
-      type: SET_COMPANY,
-      payload: { companyId, companyName }
+      type: SET_EMPLOYER,
+      payload: { employerId, employerName }
     });
 
     // Trigger global refresh event
-    window.dispatchEvent(new CustomEvent('companyChanged', { detail: { companyId, companyName } }));
+    window.dispatchEvent(new CustomEvent('employerChanged', { detail: { employerId, employerName } }));
   };
 
   const clearCompany = () => {
-    localStorage.removeItem('selectedCompanyId');
-    localStorage.removeItem('selectedCompanyName');
+    localStorage.removeItem('selectedEmployerId');
+    localStorage.removeItem('selectedEmployerName');
 
-    dispatch({ type: CLEAR_COMPANY });
+    dispatch({ type: CLEAR_EMPLOYER });
 
     // Trigger global refresh event
-    window.dispatchEvent(new CustomEvent('companyChanged', { detail: { companyId: null, companyName: null } }));
+    window.dispatchEvent(new CustomEvent('employerChanged', { detail: { employerId: null, employerName: null } }));
   };
 
   return (
