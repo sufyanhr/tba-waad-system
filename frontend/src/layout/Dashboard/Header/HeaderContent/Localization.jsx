@@ -97,43 +97,19 @@ export default function Localization() {
                         <Grid container>
                           <Typography color="text.primary">English</Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ ml: '8px' }}>
-                            (UK)
+                            (US)
                           </Typography>
                         </Grid>
                       }
                     />
                   </ListItemButton>
-                  <ListItemButton selected={state.i18n === 'fr'} onClick={() => handleListItemClick('fr')}>
+                  <ListItemButton selected={state.i18n === 'ar'} onClick={() => handleListItemClick('ar')}>
                     <ListItemText
                       primary={
                         <Grid container>
-                          <Typography color="text.primary">français</Typography>
+                          <Typography color="text.primary">العربية</Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ ml: '8px' }}>
-                            (French)
-                          </Typography>
-                        </Grid>
-                      }
-                    />
-                  </ListItemButton>
-                  <ListItemButton selected={state.i18n === 'ro'} onClick={() => handleListItemClick('ro')}>
-                    <ListItemText
-                      primary={
-                        <Grid container>
-                          <Typography color="text.primary">Română</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: '8px' }}>
-                            (Romanian)
-                          </Typography>
-                        </Grid>
-                      }
-                    />
-                  </ListItemButton>
-                  <ListItemButton selected={state.i18n === 'zh'} onClick={() => handleListItemClick('zh')}>
-                    <ListItemText
-                      primary={
-                        <Grid container>
-                          <Typography color="text.primary">中国人</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: '8px' }}>
-                            (Chinese)
+                            (Arabic)
                           </Typography>
                         </Grid>
                       }

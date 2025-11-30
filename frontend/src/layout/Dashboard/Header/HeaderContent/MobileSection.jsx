@@ -11,9 +11,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 
 // project imports
-import Search from './Search';
 import Profile from './Profile';
-import Workspace from './Workspace';
 import IconButton from 'components/@extended/IconButton';
 import Transitions from 'components/@extended/Transitions';
 
@@ -92,10 +90,7 @@ export default function MobileSection() {
               <ClickAwayListener onClickAway={handleClose}>
                 <AppBar color="inherit">
                   <Toolbar>
-                    <Stack direction="row" sx={{ gap: 2, alignItems: 'center', width: 1 }}>
-                      <Workspace />
-                      <Divider orientation="vertical" flexItem sx={{ height: 22, alignSelf: 'center' }} />
-                      <Search />
+                    <Stack direction="row" sx={{ gap: 2, alignItems: 'center', width: 1, justifyContent: 'flex-end' }}>
                       <Profile />
                     </Stack>
                   </Toolbar>
