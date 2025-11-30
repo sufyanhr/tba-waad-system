@@ -30,8 +30,8 @@ export default function ProfileTab({ handleLogout }) {
 
   useEffect(() => {
     const pathToIndex = {
-      '/apps/profiles/user/personal': 0,
-      '/apps/profiles/account/basic': 1
+      '/profile/account': 0,
+      '/profile/settings': 1
     };
 
     setSelectedIndex(pathToIndex[location.pathname] ?? undefined);
@@ -39,13 +39,13 @@ export default function ProfileTab({ handleLogout }) {
 
   return (
     <List component="nav" sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
-      <ListItemButton selected={selectedIndex === 0} onClick={(event) => handleListItemClick(event, 0, '/apps/profiles/user/personal')}>
+      <ListItemButton selected={selectedIndex === 0} onClick={(event) => handleListItemClick(event, 0, '/profile/account')}>
         <ListItemIcon>
           <EditOutlined />
         </ListItemIcon>
         <ListItemText primary="Profile" />
       </ListItemButton>
-      <ListItemButton selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1, '/apps/profiles/account/basic')}>
+      <ListItemButton selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1, '/profile/settings')}>
         <ListItemIcon>
           <SettingOutlined />
         </ListItemIcon>

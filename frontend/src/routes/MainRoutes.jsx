@@ -57,13 +57,8 @@ const SystemSettingsTabSecurity = Loadable(lazy(() => import('sections/tools/sys
 const SystemSettingsTabAuditLog = Loadable(lazy(() => import('sections/tools/system-settings/TabAuditLog')));
 
 // render - Profile pages
-const AccountProfile = Loadable(lazy(() => import('pages/apps/profiles/account')));
-const AccountTabProfile = Loadable(lazy(() => import('sections/apps/profiles/account/TabProfile')));
-const AccountTabPersonal = Loadable(lazy(() => import('sections/apps/profiles/account/TabPersonal')));
-const AccountTabAccount = Loadable(lazy(() => import('sections/apps/profiles/account/TabAccount')));
-const AccountTabPassword = Loadable(lazy(() => import('sections/apps/profiles/account/TabPassword')));
-const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/account/TabRole')));
-const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
+const ProfileOverview = Loadable(lazy(() => import('pages/profile/ProfileOverview')));
+const AccountSettings = Loadable(lazy(() => import('pages/profile/AccountSettings')));
 
 // pages routing
 const AuthLogin = Loadable(lazy(() => import('pages/auth/jwt/login')));
@@ -280,33 +275,11 @@ const MainRoutes = {
           children: [
             {
               path: 'account',
-              element: <AccountProfile />,
-              children: [
-                {
-                  path: 'basic',
-                  element: <AccountTabProfile />
-                },
-                {
-                  path: 'personal',
-                  element: <AccountTabPersonal />
-                },
-                {
-                  path: 'my-account',
-                  element: <AccountTabAccount />
-                },
-                {
-                  path: 'password',
-                  element: <AccountTabPassword />
-                },
-                {
-                  path: 'role',
-                  element: <AccountTabRole />
-                },
-                {
-                  path: 'settings',
-                  element: <AccountTabSettings />
-                }
-              ]
+              element: <ProfileOverview />
+            },
+            {
+              path: 'settings',
+              element: <AccountSettings />
             }
           ]
         }
