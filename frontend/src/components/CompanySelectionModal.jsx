@@ -11,24 +11,24 @@ export default function CompanySelectionModal() {
   const { user, roles, isLoggedIn } = useAuth();
   const [open, setOpen] = useState(false);
 
-  // Check if user is TBA staff (only they need employer selection)
-  const isTBAStaff = roles?.some((role) => ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE'].includes(role));
+  // Show modal to all users except EMPLOYER, INSURANCE_ADMIN, PROVIDER
+  const shouldShowModal = roles && !roles.includes('EMPLOYER') && !roles.includes('INSURANCE_ADMIN') && !roles.includes('PROVIDER');
 
   useEffect(() => {
     // Only show modal if:
     // 1. User is logged in
     // 2. Context is initialized
     // 3. No employer selected
-    // 4. User is TBA staff
-    if (isLoggedIn && isInitialized && !selectedEmployerId && isTBAStaff) {
+    // 4. User should see the modal (not excluded roles)
+    if (isLoggedIn && isInitialized && !selectedEmployerId && shouldShowModal) {
       setOpen(true);
     } else {
       setOpen(false);
     }
-  }, [isLoggedIn, isInitialized, selectedEmployerId, isTBAStaff]);
+  }, [isLoggedIn, isInitialized, selectedEmployerId, shouldShowModal]);
 
-  // Don't render for non-TBA staff
-  if (!isTBAStaff) {
+  // Don't render for excluded roles
+  if (!shouldShowModal) {
     return null;
   }
 

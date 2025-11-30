@@ -16,10 +16,32 @@ axiosServices.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Add Employer ID header for multi-employer filtering (TBA staff only)
-    const employerId = localStorage.getItem('selectedEmployerId');
-    if (employerId) {
-      config.headers['X-Employer-ID'] = employerId;
+    // Add Employer ID header for multi-employer filtering
+    // Logic: 
+    // - If user has EMPLOYER role => use their employerId (auto-locked)
+    // - Else (TBA staff) => use selectedEmployerId from localStorage
+    try {
+      const userRolesStr = localStorage.getItem('userRoles');
+      const userRoles = userRolesStr ? JSON.parse(userRolesStr) : [];
+      
+      if (userRoles.includes('EMPLOYER')) {
+        // EMPLOYER role: get from user data (if available via token decode)
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.employerId) {
+            config.headers['X-Employer-ID'] = user.employerId.toString();
+          }
+        }
+      } else {
+        // TBA staff or other roles: use selected employer from switcher
+        const employerId = localStorage.getItem('selectedEmployerId');
+        if (employerId) {
+          config.headers['X-Employer-ID'] = employerId;
+        }
+      }
+    } catch (e) {
+      // Ignore parsing errors
     }
 
     return config;

@@ -22,6 +22,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     
     List<Member> findByEmployerId(Long employerId);
     
+    Long countByEmployerId(Long employerId);
+    
     List<Member> findByPolicyId(Long policyId);
     
     List<Member> findByStatus(Member.MemberStatus status);

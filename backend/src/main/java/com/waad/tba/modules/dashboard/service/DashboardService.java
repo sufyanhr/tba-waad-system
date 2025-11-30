@@ -29,14 +29,31 @@ public class DashboardService {
     private final ReviewerCompanyRepository reviewerRepository;
 
     @Transactional(readOnly = true)
-    public DashboardStatsDto getStats() {
-        log.debug("Fetching dashboard statistics");
+    public DashboardStatsDto getStats(Long employerId) {
+        log.debug("Fetching dashboard statistics for employerId: {}", employerId);
         
-        long totalMembers = memberRepository.count();
-        long totalClaims = claimRepository.count();
-        long pendingClaims = claimRepository.countByStatus(Claim.ClaimStatus.PENDING);
-        long approvedClaims = claimRepository.countByStatus(Claim.ClaimStatus.APPROVED);
-        long rejectedClaims = claimRepository.countByStatus(Claim.ClaimStatus.REJECTED);
+        long totalMembers;
+        long totalClaims;
+        long pendingClaims;
+        long approvedClaims;
+        long rejectedClaims;
+        
+        if (employerId != null) {
+            // Filter by employer
+            totalMembers = memberRepository.countByEmployerId(employerId);
+            totalClaims = claimRepository.countByMember_Employer_Id(employerId);
+            pendingClaims = claimRepository.countByMember_Employer_IdAndStatus(employerId, Claim.ClaimStatus.PENDING);
+            approvedClaims = claimRepository.countByMember_Employer_IdAndStatus(employerId, Claim.ClaimStatus.APPROVED);
+            rejectedClaims = claimRepository.countByMember_Employer_IdAndStatus(employerId, Claim.ClaimStatus.REJECTED);
+        } else {
+            // Global stats (all employers)
+            totalMembers = memberRepository.count();
+            totalClaims = claimRepository.count();
+            pendingClaims = claimRepository.countByStatus(Claim.ClaimStatus.PENDING);
+            approvedClaims = claimRepository.countByStatus(Claim.ClaimStatus.APPROVED);
+            rejectedClaims = claimRepository.countByStatus(Claim.ClaimStatus.REJECTED);
+        }
+        
         long totalEmployers = employerRepository.count();
         long totalInsurance = insuranceRepository.count();
         long totalReviewers = reviewerRepository.count();
@@ -54,10 +71,18 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClaimsPerDayDto> getClaimsPerDay(LocalDate startDate, LocalDate endDate) {
-        log.debug("Fetching claims per day from {} to {}", startDate, endDate);
+    public List<ClaimsPerDayDto> getClaimsPerDay(Long employerId, LocalDate startDate, LocalDate endDate) {
+        log.debug("Fetching claims per day from {} to {} for employerId: {}", startDate, endDate, employerId);
         
-        List<Object[]> results = claimRepository.getDailyStatistics(startDate, endDate);
+        List<Object[]> results;
+        
+        if (employerId != null) {
+            // Filter by employer
+            results = claimRepository.getDailyStatisticsByEmployer(employerId, startDate, endDate);
+        } else {
+            // Global stats
+            results = claimRepository.getDailyStatistics(startDate, endDate);
+        }
         
         return results.stream()
                 .map(row -> ClaimsPerDayDto.builder()

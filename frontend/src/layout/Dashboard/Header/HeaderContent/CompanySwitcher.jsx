@@ -13,16 +13,21 @@ export default function CompanySwitcher() {
   const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is TBA staff (ADMIN, TBA_OPERATIONS, TBA_MEDICAL_REVIEWER, TBA_FINANCE)
-  const isTBAStaff = roles?.some((role) => ['ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE'].includes(role));
+  // Check if user should see the employer switcher
+  // Show for ALL users EXCEPT: EMPLOYER, INSURANCE_ADMIN, PROVIDER
+  const shouldShowSwitcher =
+    roles &&
+    !roles.includes('EMPLOYER') &&
+    !roles.includes('INSURANCE_ADMIN') &&
+    !roles.includes('PROVIDER');
 
   useEffect(() => {
-    // Only TBA staff see the selector
-    if (!isTBAStaff) {
+    // Only fetch employers if switcher should be shown
+    if (!shouldShowSwitcher) {
       return;
     }
 
-    // Fetch employers for TBA staff
+    // Fetch employers for eligible users
     const fetchEmployers = async () => {
       try {
         setLoading(true);
@@ -44,10 +49,10 @@ export default function CompanySwitcher() {
 
     fetchEmployers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTBAStaff]);
+  }, [shouldShowSwitcher]);
 
-  // Don't show for non-TBA staff
-  if (!isTBAStaff) {
+  // Don't show for excluded roles
+  if (!shouldShowSwitcher) {
     return null;
   }
 

@@ -75,6 +75,23 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     List<Object[]> getDailyStatistics(@Param("startDate") LocalDate startDate, 
                                       @Param("endDate") LocalDate endDate);
     
+    // Employer-filtered queries
+    @Query("SELECT COUNT(c) FROM Claim c WHERE c.member.employer.id = :employerId")
+    Long countByMember_Employer_Id(@Param("employerId") Long employerId);
+    
+    @Query("SELECT COUNT(c) FROM Claim c WHERE c.member.employer.id = :employerId AND c.status = :status")
+    Long countByMember_Employer_IdAndStatus(@Param("employerId") Long employerId, @Param("status") Claim.ClaimStatus status);
+    
+    @Query("SELECT c.serviceDate, COUNT(c) " +
+           "FROM Claim c " +
+           "WHERE c.member.employer.id = :employerId " +
+           "AND c.serviceDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY c.serviceDate " +
+           "ORDER BY c.serviceDate")
+    List<Object[]> getDailyStatisticsByEmployer(@Param("employerId") Long employerId,
+                                                @Param("startDate") LocalDate startDate, 
+                                                @Param("endDate") LocalDate endDate);
+    
     // Financial summary
     @Query("SELECT SUM(c.totalClaimed), SUM(c.totalApproved) " +
            "FROM Claim c " +

@@ -69,6 +69,8 @@ export const JWTProvider = ({ children }) => {
           if (userData.permissions) {
             localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
           }
+          // Store full user data for EMPLOYER role auto-lock
+          localStorage.setItem('userData', JSON.stringify(userData));
 
           dispatch({
             type: LOGIN,
@@ -108,6 +110,8 @@ export const JWTProvider = ({ children }) => {
     if (userData.permissions) {
       localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
     }
+    // Store full user data for EMPLOYER role auto-lock
+    localStorage.setItem('userData', JSON.stringify(userData));
 
     dispatch({
       type: LOGIN,
@@ -123,6 +127,7 @@ export const JWTProvider = ({ children }) => {
     setSession(null);
     localStorage.removeItem('userRoles');
     localStorage.removeItem('userPermissions');
+    localStorage.removeItem('userData');
     dispatch({ type: LOGOUT });
     // redirect to login to ensure UI resets
     try {
