@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 // project imports
 import Profile from './Profile';
 import Localization from './Localization';
+import CompanySwitcher from './CompanySwitcher';
 import Notification from './Notification';
 import FullScreen from './FullScreen';
 import Customization from './Customization';
@@ -26,6 +27,7 @@ export default function HeaderContent() {
   const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   const localization = useMemo(() => <Localization />, []);
+  const companySwitcher = useMemo(() => <CompanySwitcher />, []);
 
   const megaMenu = useMemo(() => <MegaMenuSection />, []);
 
@@ -36,6 +38,8 @@ export default function HeaderContent() {
 
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
         {!downLG && megaMenu}
+        {!downLG && companySwitcher}
+        {!downLG && <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />}
         {localization}
         <Notification />
         {!downLG && <FullScreen />}

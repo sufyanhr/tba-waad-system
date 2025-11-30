@@ -10,10 +10,18 @@ const axiosServices = axios.create({
 // ==============================|| REQUEST INTERCEPTOR ||============================== //
 axiosServices.interceptors.request.use(
   (config) => {
+    // Add Authorization token
     const token = localStorage.getItem('serviceToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+
+    // Add Company ID header for multi-company filtering
+    const companyId = localStorage.getItem('selectedCompanyId');
+    if (companyId) {
+      config.headers['X-Company-ID'] = companyId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

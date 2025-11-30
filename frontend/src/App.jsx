@@ -13,6 +13,7 @@ import Metrics from 'metrics';
 
 // auth-provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
+import { CompanyProvider } from 'contexts/CompanyContext';
 
 // ==============================|| APP - THEME, ROUTER, LOCAL ||============================== //
 
@@ -24,12 +25,14 @@ export default function App() {
           <Locales>
             <ScrollTop>
               <AuthProvider>
-                <>
-                  <Notistack>
-                    <RouterProvider router={router} />
-                    <Snackbar />
-                  </Notistack>
-                </>
+                <CompanyProvider>
+                  <>
+                    <Notistack>
+                      <RouterProvider router={router} />
+                      <Snackbar />
+                    </Notistack>
+                  </>
+                </CompanyProvider>
               </AuthProvider>
             </ScrollTop>
           </Locales>
