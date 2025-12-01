@@ -1,16 +1,17 @@
 package com.waad.tba.modules.provider.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import com.waad.tba.modules.provider.entity.Provider.ContractStatus;
 import com.waad.tba.modules.provider.entity.Provider.ContractType;
 import com.waad.tba.modules.provider.entity.Provider.ProviderType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * DTO for provider response

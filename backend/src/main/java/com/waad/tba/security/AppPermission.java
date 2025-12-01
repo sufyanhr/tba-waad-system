@@ -17,6 +17,8 @@ public enum AppPermission {
     MANAGE_MEMBERS("Manage members and member information"),
     MANAGE_EMPLOYERS("Manage employer organizations"),
     MANAGE_PROVIDERS("Manage healthcare providers"),
+    MANAGE_PROVIDER_CONTRACTS("Manage provider-company contracts"),
+    VIEW_PROVIDER_CONTRACTS("View provider-company contracts"),
     MANAGE_CLAIMS("Manage insurance claims"),
     MANAGE_VISITS("Manage patient visits and appointments"),
     

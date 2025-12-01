@@ -1,16 +1,17 @@
 package com.waad.tba.modules.provider.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import com.waad.tba.modules.provider.entity.Provider.ContractStatus;
 import com.waad.tba.modules.provider.entity.Provider.ContractType;
 import com.waad.tba.modules.provider.entity.Provider.ProviderType;
+
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * DTO for updating an existing provider
