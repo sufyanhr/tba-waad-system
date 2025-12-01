@@ -1,5 +1,6 @@
-package com.waad.tba.modules.employer.dto;
+package com.waad.tba.modules.company.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,24 +8,26 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for Company
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployerResponseDto {
+public class CompanyDto {
+
     private Long id;
+
+    @NotBlank(message = "Company name is required")
     private String name;
+
+    @NotBlank(message = "Company code is required")
     private String code;
-    private Long companyId;
-    private String companyName;
-    private String companyCode;
-    private String contactName;
-    private String contactPhone;
-    private String contactEmail;
-    private String address;
-    private String phone;
-    private String email;
+
     private Boolean active;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 }

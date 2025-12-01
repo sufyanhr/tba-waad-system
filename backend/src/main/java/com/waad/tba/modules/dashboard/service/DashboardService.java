@@ -1,5 +1,12 @@
 package com.waad.tba.modules.dashboard.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.waad.tba.modules.claim.entity.Claim;
 import com.waad.tba.modules.claim.repository.ClaimRepository;
 import com.waad.tba.modules.dashboard.dto.ClaimsPerDayDto;
@@ -8,14 +15,9 @@ import com.waad.tba.modules.employer.repository.EmployerRepository;
 import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
 import com.waad.tba.modules.member.repository.MemberRepository;
 import com.waad.tba.modules.reviewer.repository.ReviewerCompanyRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

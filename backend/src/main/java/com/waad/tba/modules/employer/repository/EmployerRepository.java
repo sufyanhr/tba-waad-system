@@ -19,7 +19,7 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
     // Check if code exists for other employers (exclude current one during update)
     boolean existsByCodeAndIdNot(String code, Long id);
     
-    // Find by companyId
+    // Find by company
     Page<Employer> findByCompanyId(Long companyId, Pageable pageable);
 
     // OLD search (deprecated)
@@ -43,7 +43,7 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
     // ✅ NEW paginated search with companyId filter
     @Query("""
            SELECT e FROM Employer e
-           WHERE e.companyId = :companyId
+           WHERE e.company.id = :companyId
            AND (LOWER(e.name) LIKE LOWER(CONCAT('%', :q, '%'))
               OR LOWER(e.contactName) LIKE LOWER(CONCAT('%', :q, '%'))
               OR LOWER(e.code) LIKE LOWER(CONCAT('%', :q, '%')))

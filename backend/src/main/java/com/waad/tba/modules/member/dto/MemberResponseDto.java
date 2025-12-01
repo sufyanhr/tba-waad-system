@@ -16,7 +16,6 @@ public class MemberResponseDto {
     private Long id;
     private Long employerId;
     private String employerName;
-    private Long companyId;
     private String fullName;
     private String civilId;
     private String policyNumber;

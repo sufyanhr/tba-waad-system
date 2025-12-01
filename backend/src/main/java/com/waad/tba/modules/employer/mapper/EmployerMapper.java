@@ -15,7 +15,9 @@ public class EmployerMapper {
                 .id(entity.getId())
                 .name(entity.getName())
                 .code(entity.getCode())
-                .companyId(entity.getCompanyId())
+                .companyId(entity.getCompany() != null ? entity.getCompany().getId() : null)
+                .companyName(entity.getCompany() != null ? entity.getCompany().getName() : null)
+                .companyCode(entity.getCompany() != null ? entity.getCompany().getCode() : null)
                 .contactName(entity.getContactName())
                 .contactPhone(entity.getContactPhone())
                 .contactEmail(entity.getContactEmail())
@@ -34,7 +36,7 @@ public class EmployerMapper {
         return Employer.builder()
                 .name(dto.getName())
                 .code(dto.getCode())
-                .companyId(dto.getCompanyId())
+                // Company will be set in service layer
                 .contactName(dto.getContactName())
                 .contactPhone(dto.getContactPhone())
                 .contactEmail(dto.getContactEmail())
@@ -50,7 +52,7 @@ public class EmployerMapper {
         
         entity.setName(dto.getName());
         entity.setCode(dto.getCode());
-        entity.setCompanyId(dto.getCompanyId());
+        // Company cannot be changed after creation
         entity.setContactName(dto.getContactName());
         entity.setContactPhone(dto.getContactPhone());
         entity.setContactEmail(dto.getContactEmail());

@@ -43,10 +43,6 @@ public class Member {
     @JoinColumn(name = "policy_id")
     private Policy policy;
 
-    @NotNull(message = "Company ID is required")
-    @Column(nullable = false)
-    private Long companyId;
-
     // Personal Information
     @NotBlank(message = "First name is required")
     @Column(nullable = false, length = 100)

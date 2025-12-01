@@ -1,5 +1,6 @@
 package com.waad.tba.modules.employer.entity;
 
+import com.waad.tba.modules.company.entity.Company;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,9 +38,10 @@ public class Employer {
     @Column(nullable = false, unique = true)
     private String code;
 
-    @NotNull(message = "Company ID is required")
-    @Column(nullable = false)
-    private Long companyId;
+    @NotNull(message = "Company is required")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 
     private String contactName;
     

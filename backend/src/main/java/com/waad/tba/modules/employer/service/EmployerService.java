@@ -2,6 +2,8 @@ package com.waad.tba.modules.employer.service;
 
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.modules.company.entity.Company;
+import com.waad.tba.modules.company.repository.CompanyRepository;
 import com.waad.tba.modules.employer.dto.EmployerCreateDto;
 import com.waad.tba.modules.employer.dto.EmployerResponseDto;
 import com.waad.tba.modules.employer.dto.EmployerSelectorDto;
@@ -24,6 +26,7 @@ public class EmployerService {
 
     private final EmployerRepository repository;
     private final EmployerMapper mapper;
+    private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
     public List<EmployerResponseDto> findAll() {
@@ -46,9 +49,19 @@ public class EmployerService {
             throw new IllegalArgumentException("Employer code already exists: " + dto.getCode());
         }
         
+        // Validate company exists
+        Company company = companyRepository.findById(dto.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", dto.getCompanyId()));
+        
+        if (!company.getActive()) {
+            throw new IllegalArgumentException("Cannot create employer under inactive company: " + company.getName());
+        }
+        
         Employer entity = mapper.toEntity(dto);
+        entity.setCompany(company);
         Employer saved = repository.save(entity);
-        log.info("Created employer: {} with code: {}", saved.getName(), saved.getCode());
+        log.info("Created employer: {} with code: {} under company: {}", 
+                saved.getName(), saved.getCode(), company.getName());
         return mapper.toResponseDto(saved);
     }
 
@@ -60,6 +73,12 @@ public class EmployerService {
         // Validate unique code (exclude current employer)
         if (repository.existsByCodeAndIdNot(dto.getCode(), id)) {
             throw new IllegalArgumentException("Employer code already exists: " + dto.getCode());
+        }
+        
+        // Prevent company change
+        if (!entity.getCompany().getId().equals(dto.getCompanyId())) {
+            throw new IllegalArgumentException("Cannot change employer's company. Current company: " + 
+                    entity.getCompany().getName());
         }
 
         mapper.updateEntityFromDto(entity, dto);

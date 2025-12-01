@@ -28,7 +28,6 @@ public class MemberMapper {
                 .id(entity.getId())
                 .employerId(employerId)
                 .employerName(employerName)
-                .companyId(entity.getCompanyId())
                 .fullName(entity.getFullName())
                 .civilId(entity.getCivilId())
                 .policyNumber(entity.getCardNumber())
@@ -50,7 +49,6 @@ public class MemberMapper {
         
         return Member.builder()
                 .employer(employer)
-                .companyId(dto.getCompanyId())
                 .firstName(dto.getFullName().split(" ")[0])
                 .lastName(dto.getFullName().contains(" ") ? dto.getFullName().substring(dto.getFullName().indexOf(" ") + 1) : "")
                 .civilId(dto.getCivilId())
@@ -73,7 +71,6 @@ public class MemberMapper {
                 .orElseThrow(() -> new RuntimeException("Employer not found"));
         
         entity.setEmployer(employer);
-        entity.setCompanyId(dto.getCompanyId());
         entity.setFirstName(dto.getFullName().split(" ")[0]);
         entity.setLastName(dto.getFullName().contains(" ") ? dto.getFullName().substring(dto.getFullName().indexOf(" ") + 1) : "");
         entity.setCivilId(dto.getCivilId());

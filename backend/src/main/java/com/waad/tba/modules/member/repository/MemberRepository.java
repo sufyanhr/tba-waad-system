@@ -1,6 +1,8 @@
 package com.waad.tba.modules.member.repository;
 
-import com.waad.tba.modules.member.entity.Member;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,8 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.waad.tba.modules.member.entity.Member;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -40,9 +41,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByCivilIdAndIdNot(String civilId, Long id);
     boolean existsByCardNumberAndIdNot(String cardNumber, Long id);
     
-    Page<Member> findByCompanyId(Long companyId, Pageable pageable);
+    @Query("SELECT m FROM Member m WHERE m.employer.company.id = :companyId")
+    Page<Member> findByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
     
-    @Query("SELECT m FROM Member m WHERE m.companyId = :companyId AND (" +
+    @Query("SELECT m FROM Member m WHERE m.employer.company.id = :companyId AND (" +
            "LOWER(CONCAT(m.firstName, ' ', m.lastName)) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :search, '%')))")

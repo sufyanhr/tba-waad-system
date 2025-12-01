@@ -19,6 +19,8 @@ import com.waad.tba.modules.rbac.entity.Permission;
 import com.waad.tba.modules.rbac.repository.UserRepository;
 import com.waad.tba.modules.rbac.repository.RoleRepository;
 import com.waad.tba.modules.rbac.repository.PermissionRepository;
+import com.waad.tba.modules.company.entity.Company;
+import com.waad.tba.modules.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +44,7 @@ public class SystemAdminService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -60,10 +63,45 @@ public class SystemAdminService {
     @Transactional
     public ApiResponse<Void> initDefaults() {
         log.info("Initializing default RBAC data if missing...");
+        ensurePrimaryTenantCompany();
         ensurePermissions();
         ensureRoles();
         ensureAdminUser();
         return ApiResponse.success("Defaults initialized", null);
+    }
+
+    /**
+     * Ensure the primary tenant company (Waad) exists in the system.
+     * This is the main TPA company that owns all data.
+     * Creates only if not exists (based on code).
+     */
+    private void ensurePrimaryTenantCompany() {
+        String companyCode = "waad";
+        
+        Optional<Company> existing = companyRepository.findByCode(companyCode);
+        
+        if (existing.isPresent()) {
+            Company company = existing.get();
+            log.info("Primary tenant company already exists: ID={}, Code={}, Name={}", 
+                company.getId(), company.getCode(), company.getName());
+            return;
+        }
+        
+        // Create the primary tenant company
+        Company waadCompany = Company.builder()
+                .name("شركة وعد لإدارة النفقات الطبية")
+                .code(companyCode)
+                .active(true)
+                .build();
+        
+        Company savedCompany = companyRepository.save(waadCompany);
+        
+        log.info("✅ Primary tenant company created successfully!");
+        log.info("   Company ID: {}", savedCompany.getId());
+        log.info("   Company Code: {}", savedCompany.getCode());
+        log.info("   Company Name: {}", savedCompany.getName());
+        log.info("   Active: {}", savedCompany.getActive());
+        log.info("   Created At: {}", savedCompany.getCreatedAt());
     }
 
     @Transactional
@@ -88,7 +126,6 @@ public class SystemAdminService {
                 .phone("+218942345678")
                 .email("fatima.mahdi@example.ly")
                 .employer(employer)
-                .companyId(1L)
                 .relation(Member.MemberRelation.SELF)
                 .status(Member.MemberStatus.ACTIVE)
                 .gender(Member.Gender.FEMALE)
