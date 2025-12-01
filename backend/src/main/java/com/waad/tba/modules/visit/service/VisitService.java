@@ -1,22 +1,25 @@
 package com.waad.tba.modules.visit.service;
 
-import com.waad.tba.common.exception.ResourceNotFoundException;
-import com.waad.tba.modules.visit.dto.VisitCreateDto;
-import com.waad.tba.modules.visit.dto.VisitResponseDto;
-import com.waad.tba.modules.visit.entity.Visit;
-import com.waad.tba.modules.visit.mapper.VisitMapper;
-import com.waad.tba.modules.visit.repository.VisitRepository;
-import com.waad.tba.modules.member.entity.Member;
-import com.waad.tba.modules.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.modules.member.entity.Member;
+import com.waad.tba.modules.member.repository.MemberRepository;
+import com.waad.tba.modules.providercontract.service.ProviderCompanyContractService;
+import com.waad.tba.modules.visit.dto.VisitCreateDto;
+import com.waad.tba.modules.visit.dto.VisitResponseDto;
+import com.waad.tba.modules.visit.entity.Visit;
+import com.waad.tba.modules.visit.mapper.VisitMapper;
+import com.waad.tba.modules.visit.repository.VisitRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -26,6 +29,7 @@ public class VisitService {
     private final VisitRepository repository;
     private final MemberRepository memberRepository;
     private final VisitMapper mapper;
+    private final ProviderCompanyContractService providerContractService;
 
     @Transactional(readOnly = true)
     public List<VisitResponseDto> findAll() {
@@ -50,6 +54,12 @@ public class VisitService {
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
 
+        // Validate provider contract if providerId is provided
+        if (dto.getProviderId() != null) {
+            Long companyId = member.getEmployer().getCompany().getId();
+            providerContractService.validateActiveContract(companyId, dto.getProviderId());
+        }
+
         Visit entity = mapper.toEntity(dto, member);
         Visit saved = repository.save(entity);
         
@@ -66,6 +76,12 @@ public class VisitService {
 
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
+
+        // Validate provider contract if providerId is provided
+        if (dto.getProviderId() != null) {
+            Long companyId = member.getEmployer().getCompany().getId();
+            providerContractService.validateActiveContract(companyId, dto.getProviderId());
+        }
 
         mapper.updateEntityFromDto(entity, dto, member);
         Visit updated = repository.save(entity);

@@ -6,6 +6,7 @@ import com.waad.tba.modules.preauth.entity.*;
 import com.waad.tba.modules.preauth.repository.*;
 import com.waad.tba.modules.provider.entity.Provider;
 import com.waad.tba.modules.provider.repository.ProviderRepository;
+import com.waad.tba.modules.providercontract.service.ProviderCompanyContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class PreApprovalService {
     private final ChronicConditionRepository chronicConditionRepository;
     private final MemberRepository memberRepository;
     private final ProviderRepository providerRepository;
+    private final ProviderCompanyContractService providerContractService;
 
     /**
      * Check if pre-approval is required for a service
@@ -55,6 +57,20 @@ public class PreApprovalService {
 
         Provider provider = providerRepository.findById(providerId)
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
+
+        // Check if provider has active contract with member's company
+        Long companyId = member.getEmployer().getCompany().getId();
+        if (!providerContractService.hasActiveContract(companyId, providerId)) {
+            PreApprovalRequirement requirement = new PreApprovalRequirement();
+            requirement.setRequired(true);
+            requirement.setAllowed(false);
+            requirement.setReason("Provider does not have an active contract with this company");
+            requirement.setMemberId(memberId);
+            requirement.setServiceCode(serviceCode);
+            requirement.setProviderId(providerId);
+            requirement.setAmount(amount);
+            return requirement;
+        }
 
         // Check if member has chronic conditions
         boolean hasChronic = memberChronicRepository.hasActiveChronicCondition(memberId);
@@ -302,6 +318,7 @@ public class PreApprovalService {
     @lombok.Data
     public static class PreApprovalRequirement {
         private boolean required;
+        private boolean allowed;
         private Long memberId;
         private String serviceCode;
         private Long providerId;

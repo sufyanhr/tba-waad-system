@@ -8,6 +8,7 @@ import com.waad.tba.modules.claim.mapper.ClaimMapper;
 import com.waad.tba.modules.claim.repository.ClaimRepository;
 import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.repository.MemberRepository;
+import com.waad.tba.modules.providercontract.service.ProviderCompanyContractService;
 import com.waad.tba.modules.rbac.entity.User;
 import com.waad.tba.modules.rbac.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class ClaimService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
     private final ClaimMapper mapper;
+    private final ProviderCompanyContractService providerContractService;
 
     @Transactional(readOnly = true)
     public List<ClaimResponseDto> findAll() {
@@ -71,6 +73,12 @@ public class ClaimService {
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
 
+        // Validate provider has active contract with member's company
+        if (dto.getProviderId() != null) {
+            Long companyId = member.getEmployer().getCompany().getId();
+            providerContractService.validateActiveContract(companyId, dto.getProviderId());
+        }
+
         Claim entity = mapper.toEntity(dto, member);
         Claim saved = repository.save(entity);
         
@@ -87,6 +95,12 @@ public class ClaimService {
 
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
+
+        // Validate provider has active contract with member's company
+        if (dto.getProviderId() != null) {
+            Long companyId = member.getEmployer().getCompany().getId();
+            providerContractService.validateActiveContract(companyId, dto.getProviderId());
+        }
 
         mapper.updateEntityFromDto(entity, dto, member);
         Claim updated = repository.save(entity);

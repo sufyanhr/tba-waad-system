@@ -32,8 +32,10 @@ public class PreApprovalController {
      * Check if pre-approval is required for a service
      */
     @PostMapping("/check")
-    @Operation(summary = "Check if pre-approval is required", 
-               description = "Check if pre-approval is required for a specific service and member")
+    @Operation(
+        summary = "Check if pre-approval is required", 
+        description = "Check if pre-approval is required for a specific service and member. Provider must have an active contract with the member's company."
+    )
     public ResponseEntity<ApiResponse<PreApprovalCheckResponseDto>> checkApprovalRequired(
             @Valid @RequestBody PreApprovalCheckRequestDto request) {
         

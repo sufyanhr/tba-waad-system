@@ -285,6 +285,42 @@ public class ProviderCompanyContractService {
     }
 
     /**
+     * Validate that active contract exists, throw exception if not
+     */
+    @Transactional(readOnly = true)
+    public void validateActiveContract(Long companyId, Long providerId) {
+        if (!hasActiveContract(companyId, providerId)) {
+            throw new ValidationException(
+                "Provider (ID: " + providerId + ") has no active contract with company (ID: " + companyId + ")");
+        }
+    }
+
+    /**
+     * Get active contract between company and provider, throw exception if not found
+     */
+    @Transactional(readOnly = true)
+    public ProviderContractResponseDto getActiveContractOrThrow(Long companyId, Long providerId) {
+        ProviderCompanyContract contract = contractRepository
+                .findByCompanyIdAndProviderIdAndStatus(companyId, providerId, ProviderContractStatus.ACTIVE)
+                .orElseThrow(() -> new ValidationException(
+                    "No active contract found between company (ID: " + companyId + 
+                    ") and provider (ID: " + providerId + ")"));
+        
+        return contractMapper.toResponseDto(contract);
+    }
+
+    /**
+     * Get contract status between company and provider
+     * Returns null if no contract exists
+     */
+    @Transactional(readOnly = true)
+    public ProviderContractStatus getContractStatus(Long companyId, Long providerId) {
+        return contractRepository.findByCompanyIdAndProviderId(companyId, providerId)
+                .map(ProviderCompanyContract::getStatus)
+                .orElse(null);
+    }
+
+    /**
      * Get all contracts
      */
     @Transactional(readOnly = true)

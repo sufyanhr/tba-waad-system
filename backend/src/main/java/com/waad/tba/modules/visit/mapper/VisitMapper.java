@@ -1,10 +1,11 @@
 package com.waad.tba.modules.visit.mapper;
 
+import org.springframework.stereotype.Component;
+
+import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.visit.dto.VisitCreateDto;
 import com.waad.tba.modules.visit.dto.VisitResponseDto;
 import com.waad.tba.modules.visit.entity.Visit;
-import com.waad.tba.modules.member.entity.Member;
-import org.springframework.stereotype.Component;
 
 @Component
 public class VisitMapper {
@@ -24,6 +25,7 @@ public class VisitMapper {
                 .memberId(entity.getMember() != null ? entity.getMember().getId() : null)
                 .memberName(memberName)
                 .memberNumber(memberNumber)
+                .providerId(entity.getProviderId())
                 .visitDate(entity.getVisitDate())
                 .doctorName(entity.getDoctorName())
                 .specialty(entity.getSpecialty())
@@ -42,6 +44,7 @@ public class VisitMapper {
         
         return Visit.builder()
                 .member(member)
+                .providerId(dto.getProviderId())
                 .visitDate(dto.getVisitDate())
                 .doctorName(dto.getDoctorName())
                 .specialty(dto.getSpecialty())
@@ -57,6 +60,7 @@ public class VisitMapper {
         if (dto == null) return;
         
         entity.setMember(member);
+        entity.setProviderId(dto.getProviderId());
         entity.setVisitDate(dto.getVisitDate());
         entity.setDoctorName(dto.getDoctorName());
         entity.setSpecialty(dto.getSpecialty());
