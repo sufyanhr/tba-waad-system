@@ -1,34 +1,33 @@
 package com.waad.tba.modules.admin.system;
 
-import com.waad.tba.common.dto.ApiResponse;
-import com.waad.tba.modules.claim.repository.ClaimRepository;
-import com.waad.tba.modules.visit.repository.VisitRepository;
-import com.waad.tba.modules.member.repository.MemberRepository;
-import com.waad.tba.modules.employer.repository.EmployerRepository;
-import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
-import com.waad.tba.modules.reviewer.repository.ReviewerCompanyRepository;
-import com.waad.tba.modules.claim.entity.Claim;
-import com.waad.tba.modules.visit.entity.Visit;
-import com.waad.tba.modules.member.entity.Member;
-import com.waad.tba.modules.employer.entity.Employer;
-import com.waad.tba.modules.insurance.entity.InsuranceCompany;
-import com.waad.tba.modules.reviewer.entity.ReviewerCompany;
-import com.waad.tba.modules.rbac.entity.User;
-import com.waad.tba.modules.rbac.entity.Role;
-import com.waad.tba.modules.rbac.entity.Permission;
-import com.waad.tba.modules.rbac.repository.UserRepository;
-import com.waad.tba.modules.rbac.repository.RoleRepository;
-import com.waad.tba.modules.rbac.repository.PermissionRepository;
-import com.waad.tba.modules.company.entity.Company;
-import com.waad.tba.modules.company.repository.CompanyRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.*;
+import com.waad.tba.common.dto.ApiResponse;
+import com.waad.tba.modules.claim.entity.Claim;
+import com.waad.tba.modules.claim.repository.ClaimRepository;
+import com.waad.tba.modules.company.entity.Company;
+import com.waad.tba.modules.company.repository.CompanyRepository;
+import com.waad.tba.modules.employer.entity.Employer;
+import com.waad.tba.modules.employer.repository.EmployerRepository;
+import com.waad.tba.modules.insurance.entity.InsuranceCompany;
+import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
+import com.waad.tba.modules.member.entity.Member;
+import com.waad.tba.modules.member.repository.MemberRepository;
+import com.waad.tba.modules.rbac.repository.PermissionRepository;
+import com.waad.tba.modules.rbac.repository.RoleRepository;
+import com.waad.tba.modules.rbac.repository.UserRepository;
+import com.waad.tba.modules.reviewer.entity.ReviewerCompany;
+import com.waad.tba.modules.reviewer.repository.ReviewerCompanyRepository;
+import com.waad.tba.modules.visit.entity.Visit;
+import com.waad.tba.modules.visit.repository.VisitRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -62,11 +61,9 @@ public class SystemAdminService {
 
     @Transactional
     public ApiResponse<Void> initDefaults() {
-        log.info("Initializing default RBAC data if missing...");
+        log.info("Initializing default system data...");
         ensurePrimaryTenantCompany();
-        ensurePermissions();
-        ensureRoles();
-        ensureAdminUser();
+        // RBAC initialization moved to RbacDataInitializer
         return ApiResponse.success("Defaults initialized", null);
     }
 
@@ -183,47 +180,5 @@ public class SystemAdminService {
         return ApiResponse.success("Sample test data inserted", null);
     }
 
-    private void ensurePermissions() {
-        List<String> basePermissions = Arrays.asList(
-                "rbac.view","rbac.manage","user.view","user.manage","role.view","role.manage","permission.view","permission.manage",
-                "insurance.view","insurance.manage","reviewer.view","reviewer.manage","employer.view","employer.manage","member.view","member.manage",
-                "visit.view","visit.manage","claim.view","claim.manage","claim.approve","claim.reject","dashboard.view","system.manage"
-        );
-        for (String pName : basePermissions) {
-            permissionRepository.findByName(pName).orElseGet(() -> permissionRepository.save(Permission.builder().name(pName).description(pName + " permission").build()));
-        }
-    }
-
-    private void ensureRoles() {
-        List<Permission> allPermissions = permissionRepository.findAll();
-        roleRepository.findByName("ADMIN").orElseGet(() -> roleRepository.save(Role.builder().name("ADMIN").description("Administrator").permissions(new HashSet<>(allPermissions)).build()));
-        roleRepository.findByName("MANAGER").orElseGet(() -> {
-            Set<Permission> perms = new HashSet<>();
-            allPermissions.forEach(p -> {
-                if (p.getName().contains(".view") || p.getName().startsWith("claim") || p.getName().startsWith("member")) {
-                    perms.add(p);
-                }
-            });
-            return roleRepository.save(Role.builder().name("MANAGER").description("Manager role").permissions(perms).build());
-        });
-        roleRepository.findByName("USER").orElseGet(() -> {
-            Set<Permission> perms = new HashSet<>();
-            allPermissions.forEach(p -> { if (p.getName().contains(".view")) perms.add(p); });
-            return roleRepository.save(Role.builder().name("USER").description("User role").permissions(perms).build());
-        });
-    }
-
-    private void ensureAdminUser() {
-        if (userRepository.findByUsername("admin").isPresent()) return;
-        Role adminRole = roleRepository.findByName("ADMIN").orElseThrow(() -> new IllegalStateException("ADMIN role missing"));
-        User admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin123"))
-                .fullName("System Administrator")
-                .email("admin@tba-waad.com")
-                .active(true)
-                .roles(new HashSet<>(Collections.singletonList(adminRole)))
-                .build();
-        userRepository.save(admin);
-    }
+    // RBAC initialization methods removed - now handled by RbacDataInitializer
 }

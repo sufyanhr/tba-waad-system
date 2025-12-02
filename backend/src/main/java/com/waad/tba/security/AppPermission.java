@@ -1,42 +1,136 @@
 package com.waad.tba.security;
 
 /**
- * Application Permission Constants
- * Defines all available permissions in the TBA-WAAD system
+ * Complete enumeration of all system permissions.
+ * These are used to control access at the granular level.
+ * Roles are assigned a set of these permissions.
+ * 
+ * Permission Naming Convention: {VERB}_{RESOURCE}
+ * Example: MANAGE_MEMBERS, VIEW_REPORTS, APPROVE_CLAIMS
+ * 
+ * @author TBA WAAD System
+ * @version 2.0 (Clean RBAC Foundation)
  */
 public enum AppPermission {
     
-    // System Settings Module
-    MANAGE_SYSTEM_SETTINGS("Manage system settings and configurations"),
+    // ============================================
+    // RBAC Management (Super Admin Only)
+    // ============================================
+    MANAGE_RBAC("إدارة الأدوار والصلاحيات", "Full control over roles, permissions, and user assignments"),
     
-    // User & Role Management
-    MANAGE_USERS("Manage user accounts"),
-    MANAGE_ROLES("Manage roles and permissions"),
+    // ============================================
+    // System Administration (Super Admin Only)
+    // ============================================
+    MANAGE_SYSTEM_SETTINGS("إدارة إعدادات النظام", "Configure system-wide settings and parameters"),
     
-    // Core Business Modules
-    MANAGE_MEMBERS("Manage members and member information"),
-    MANAGE_EMPLOYERS("Manage employer organizations"),
-    MANAGE_PROVIDERS("Manage healthcare providers"),
-    MANAGE_PROVIDER_CONTRACTS("Manage provider-company contracts"),
-    VIEW_PROVIDER_CONTRACTS("View provider-company contracts"),
-    MANAGE_CLAIMS("Manage insurance claims"),
-    MANAGE_VISITS("Manage patient visits and appointments"),
+    // ============================================
+    // Company Management
+    // ============================================
+    MANAGE_COMPANIES("إدارة الشركات", "Create, update, delete, and view all companies in the system"),
+    VIEW_COMPANIES("عرض الشركات", "View company information"),
     
-    // Reporting & Analytics
-    MANAGE_REPORTS("Access and generate reports");
+    // ============================================
+    // Insurance Company Management
+    // ============================================
+    MANAGE_INSURANCE("إدارة شركات التأمين", "Full management of insurance companies"),
+    VIEW_INSURANCE("عرض شركات التأمين", "View insurance company information"),
+    
+    // ============================================
+    // Reviewer Company Management
+    // ============================================
+    MANAGE_REVIEWER("إدارة شركات المراجعة الطبية", "Full management of medical reviewer companies"),
+    VIEW_REVIEWER("عرض شركات المراجعة", "View reviewer company information"),
+    
+    // ============================================
+    // Provider Management
+    // ============================================
+    MANAGE_PROVIDERS("إدارة مقدمي الخدمة", "Full management of healthcare providers"),
+    VIEW_PROVIDERS("عرض مقدمي الخدمة", "View provider information"),
+    
+    // ============================================
+    // Employer Management
+    // ============================================
+    MANAGE_EMPLOYERS("إدارة أصحاب العمل", "Full management of employer companies"),
+    VIEW_EMPLOYERS("عرض أصحاب العمل", "View employer information"),
+    
+    // ============================================
+    // Member Management
+    // ============================================
+    MANAGE_MEMBERS("إدارة الأعضاء", "Create, update, delete, and view members"),
+    VIEW_MEMBERS("عرض الأعضاء", "View member information only"),
+    
+    // ============================================
+    // Claims Management
+    // ============================================
+    MANAGE_CLAIMS("إدارة المطالبات", "Full management of claims (create, update, delete)"),
+    VIEW_CLAIMS("عرض المطالبات", "View claim information"),
+    CREATE_CLAIM("إنشاء مطالبة", "Submit new claims to the system"),
+    UPDATE_CLAIM("تحديث مطالبة", "Update existing claim information"),
+    APPROVE_CLAIMS("الموافقة على المطالبات", "Approve claims for payment"),
+    REJECT_CLAIMS("رفض المطالبات", "Reject claims with reasons"),
+    VIEW_CLAIM_STATUS("عرض حالة المطالبة", "View current status of submitted claims"),
+    
+    // ============================================
+    // Visit Management
+    // ============================================
+    MANAGE_VISITS("إدارة الزيارات", "Full management of medical visits"),
+    VIEW_VISITS("عرض الزيارات", "View visit information"),
+    
+    // ============================================
+    // Pre-Authorization Management
+    // ============================================
+    MANAGE_PREAUTH("إدارة الموافقات المسبقة", "Full management of pre-authorizations"),
+    VIEW_PREAUTH("عرض الموافقات المسبقة", "View pre-authorization information"),
+    
+    // ============================================
+    // Reports and Analytics
+    // ============================================
+    MANAGE_REPORTS("إدارة التقارير", "Create, customize, and manage report templates"),
+    VIEW_REPORTS("عرض التقارير", "View system reports and analytics"),
+    
+    // ============================================
+    // Basic Data Access (Minimal Permission)
+    // ============================================
+    VIEW_BASIC_DATA("عرض البيانات الأساسية", "View basic system information (read-only access)");
 
+    // ============================================
+    // Enum Properties
+    // ============================================
+    
+    private final String displayNameAr;
     private final String description;
 
-    AppPermission(String description) {
+    AppPermission(String displayNameAr, String description) {
+        this.displayNameAr = displayNameAr;
         this.description = description;
     }
 
+    /**
+     * Get the permission name (enum name itself).
+     * This is used in @PreAuthorize annotations.
+     * Example: "MANAGE_MEMBERS"
+     */
     public String getPermissionName() {
         return this.name();
     }
 
+    /**
+     * Get the Arabic display name for UI.
+     */
+    public String getDisplayNameAr() {
+        return displayNameAr;
+    }
+
+    /**
+     * Get the English description.
+     */
     public String getDescription() {
-        return this.description;
+        return description;
+    }
+
+    @Override
+    public String toString() {
+        return getPermissionName();
     }
 
     /**
