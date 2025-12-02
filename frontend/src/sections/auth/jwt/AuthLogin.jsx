@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Link as RouterLink, useSearchParams } from 'react-router-dom';
+import { Link as RouterLink, useSearchParams, useNavigate } from 'react-router-dom';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -37,6 +37,7 @@ export default function AuthLogin({ isDemo = false }) {
   const [checked, setChecked] = React.useState(false);
 
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => {
@@ -68,9 +69,12 @@ export default function AuthLogin({ isDemo = false }) {
           try {
             // Backend expects identifier (username or email) and password
             const trimmedIdentifier = values.email.trim();
-            await login(trimmedIdentifier, values.password);
+            const redirectPath = await login(trimmedIdentifier, values.password);
             setStatus({ success: true });
             setSubmitting(false);
+            
+            // Phase B2: Auto-redirect based on user role
+            navigate(redirectPath);
           } catch (err) {
             console.error('Login error:', err);
             setStatus({ success: false });

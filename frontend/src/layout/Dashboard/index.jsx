@@ -14,7 +14,6 @@ import HorizontalBar from './Drawer/HorizontalBar';
 import Loader from 'components/Loader';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import AuthGuard from 'utils/route-guard/AuthGuard';
-import CompanySelectionModal from 'components/CompanySelectionModal';
 
 import { MenuOrientation } from 'config';
 import useConfig from 'hooks/useConfig';
@@ -67,7 +66,6 @@ export default function DashboardLayout() {
           </Container>
         </Box>
       </Box>
-      <CompanySelectionModal />
     </AuthGuard>
   );
 }

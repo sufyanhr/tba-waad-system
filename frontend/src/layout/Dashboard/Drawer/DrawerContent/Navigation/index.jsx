@@ -5,17 +5,17 @@ import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // project imports
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
-import menuItem from 'menu-items';
 
 import useConfig from 'hooks/useConfig';
 import useAuth from 'hooks/useAuth';
+import useRBACSidebar from 'hooks/useRBACSidebar';
 import { HORIZONTAL_MAX_ITEM, MenuOrientation } from 'config';
-import { useGetMenu, useGetMenuMaster } from 'api/menu';
-import { filterMenuByPermissions } from 'utils/rbac';
+import { useGetMenuMaster } from 'api/menu';
 
 function isFound(arr, str) {
   return arr.items.some((element) => {
@@ -31,10 +31,12 @@ function isFound(arr, str) {
 export default function Navigation() {
   const { state } = useConfig();
   const { user } = useAuth();
-  const { menuLoading } = useGetMenu();
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+
+  // Phase B2: Use dynamic RBAC sidebar
+  const { sidebarItems, loading } = useRBACSidebar();
 
   const [selectedID, setSelectedID] = useState('');
   const [selectedItems, setSelectedItems] = useState('');
@@ -42,16 +44,41 @@ export default function Navigation() {
   const [menuItems, setMenuItems] = useState({ items: [] });
 
   useLayoutEffect(() => {
-    // Simply use static menu items and filter by permissions
-    const rawMenuItems = { items: [...menuItem.items] };
-    
-    // Filter menu items based on user permissions
-    const filteredItems = filterMenuByPermissions(rawMenuItems.items, user);
-    setMenuItems({ items: filteredItems });
-    // eslint-disable-next-line
-  }, [menuLoading, user]);
+    if (!loading && sidebarItems.length > 0) {
+      // Convert flat sidebarItems to menu structure
+      // For now, we'll create a single group with all items as children
+      const menuStructure = {
+        items: [
+          {
+            id: 'main-group',
+            type: 'group',
+            title: '',
+            children: sidebarItems.map(item => ({
+              id: item.id,
+              title: item.label,
+              type: 'item',
+              url: item.path,
+              icon: item.icon,
+              breadcrumbs: false
+            }))
+          }
+        ]
+      };
+      
+      setMenuItems(menuStructure);
+    }
+  }, [loading, sidebarItems]);
 
   const isHorizontal = state.menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
+
+  // Show loading spinner while fetching feature toggles
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
 
   const lastItem = isHorizontal ? HORIZONTAL_MAX_ITEM : null;
   let lastItemIndex = menuItems.items.length - 1;

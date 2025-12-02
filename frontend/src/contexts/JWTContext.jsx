@@ -121,7 +121,28 @@ export const JWTProvider = ({ children }) => {
         permissions: userData.permissions || []
       }
     });
+
+    // Phase B2: Auto-redirect based on role
+    return getRedirectPath(userData.roles);
   };
+
+  /**
+   * Phase B2: Get redirect path based on user role
+   * @param {string[]} roles - Array of user roles
+   * @returns {string} - Redirect path
+   */
+  const getRedirectPath = useCallback((roles) => {
+    if (!roles || roles.length === 0) return '/tba/profile';
+
+    // Priority order for roles
+    if (roles.includes('SUPER_ADMIN')) return '/tba/dashboard';
+    if (roles.includes('INSURANCE_ADMIN')) return '/tba/dashboard';
+    if (roles.includes('EMPLOYER_ADMIN')) return '/tba/members';
+    if (roles.includes('PROVIDER')) return '/tba/claims';
+    
+    // Default fallback
+    return '/tba/profile';
+  }, []);
 
   const logout = () => {
     setSession(null);
@@ -211,7 +232,8 @@ export const JWTProvider = ({ children }) => {
         hasAllRoles, 
         hasPermission,
         isAdmin,
-        isTBAStaff
+        isTBAStaff,
+        getRedirectPath
       }}
     >
       {children}
