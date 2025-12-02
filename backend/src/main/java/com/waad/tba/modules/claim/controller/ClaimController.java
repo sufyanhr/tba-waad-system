@@ -36,7 +36,7 @@ public class ClaimController {
      */
     @Deprecated
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('claim.view')")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
     @Operation(summary = "List all claims", description = "Returns a list of all claims.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims retrieved successfully"),
@@ -52,7 +52,7 @@ public class ClaimController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('claim.view')")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
     @Operation(summary = "Get claim by ID", description = "Returns detailed claim information including status and amounts.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim retrieved successfully"),
@@ -68,7 +68,7 @@ public class ClaimController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('claim.manage')")
+    @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
     @Operation(
         summary = "Create claim", 
         description = "Creates a new claim with initial details. Provider must have an active contract with the member's company."
@@ -88,7 +88,7 @@ public class ClaimController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('claim.manage')")
+    @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
     @Operation(
         summary = "Update claim", 
         description = "Updates claim details by ID. Provider must have an active contract with the member's company."
@@ -110,7 +110,7 @@ public class ClaimController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('claim.manage')")
+    @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
     @Operation(summary = "Delete claim", description = "Deletes a claim by ID.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim deleted successfully"),
@@ -130,7 +130,7 @@ public class ClaimController {
      */
     @Deprecated
     @GetMapping("/search")
-    @PreAuthorize("hasAuthority('claim.view')")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
     @Operation(summary = "Search claims", description = "Search claims by query string.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims retrieved successfully"),
@@ -145,7 +145,7 @@ public class ClaimController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('claim.view')")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
     @Operation(summary = "Paginate claims", description = "Returns a page of claims with pagination parameters")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims page retrieved successfully"),
@@ -171,7 +171,7 @@ public class ClaimController {
     }
 
     @GetMapping("/count")
-    @PreAuthorize("hasAuthority('claim.view')")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
     @Operation(summary = "Count claims", description = "Returns total number of claims")
     public ResponseEntity<ApiResponse<Long>> count() {
         long total = service.count();
@@ -179,7 +179,7 @@ public class ClaimController {
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasAuthority('claim.view')")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
     @Operation(summary = "Get claims by status", description = "Returns a list of claims filtered by status.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims retrieved successfully"),
@@ -195,7 +195,7 @@ public class ClaimController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAuthority('claim.approve')")
+    @PreAuthorize("hasAuthority('APPROVE_CLAIMS')")
     @Operation(summary = "Approve claim", description = "Approves a claim and sets the approved amount.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim approved successfully"),
@@ -226,7 +226,7 @@ public class ClaimController {
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAuthority('claim.reject')")
+    @PreAuthorize("hasAuthority('REJECT_CLAIMS')")
     @Operation(summary = "Reject claim", description = "Rejects a claim and records the rejection reason.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim rejected successfully"),

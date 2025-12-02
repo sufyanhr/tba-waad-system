@@ -41,6 +41,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByCivilIdAndIdNot(String civilId, Long id);
     boolean existsByCardNumberAndIdNot(String cardNumber, Long id);
     
+    // Paginated queries for employer filtering
+    Page<Member> findByEmployerIdPaged(Long employerId, Pageable pageable);
+    
+    @Query("SELECT m FROM Member m WHERE m.employer.id = :employerId AND (" +
+           "LOWER(CONCAT(m.firstName, ' ', m.lastName)) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Member> searchByEmployer(@Param("employerId") Long employerId, @Param("search") String search, Pageable pageable);
+    
     @Query("SELECT m FROM Member m WHERE m.employer.company.id = :companyId")
     Page<Member> findByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
     
@@ -55,4 +64,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
            "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<Member> searchPaged(@Param("search") String search, Pageable pageable);
+    
+    // Insurance Company filtering (for INSURANCE_ADMIN)
+    @Query("SELECT m FROM Member m WHERE m.insuranceCompany.id = :companyId")
+    Page<Member> findByInsuranceCompanyIdPaged(@Param("companyId") Long companyId, Pageable pageable);
+    
+    @Query("SELECT m FROM Member m WHERE m.insuranceCompany.id = :companyId AND (" +
+           "LOWER(CONCAT(m.firstName, ' ', m.lastName)) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Member> searchByInsuranceCompany(@Param("companyId") Long companyId, @Param("search") String search, Pageable pageable);
 }

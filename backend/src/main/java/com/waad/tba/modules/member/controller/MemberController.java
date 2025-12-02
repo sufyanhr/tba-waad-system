@@ -1,22 +1,32 @@
 package com.waad.tba.modules.member.controller;
 
-import com.waad.tba.common.dto.ApiResponse;
-import com.waad.tba.common.dto.PaginationResponse;
-import com.waad.tba.modules.member.dto.MemberCreateDto;
-import com.waad.tba.modules.member.dto.MemberResponseDto;
-import com.waad.tba.modules.member.service.MemberService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.waad.tba.common.dto.ApiResponse;
+import com.waad.tba.common.dto.PaginationResponse;
+import com.waad.tba.modules.member.dto.MemberCreateDto;
+import com.waad.tba.modules.member.dto.MemberResponseDto;
+import com.waad.tba.modules.member.service.MemberService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/members")
@@ -27,7 +37,7 @@ public class MemberController {
     private final MemberService service;
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
+    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
     @Operation(summary = "Get member by ID", description = "Returns a member by ID.")
     public ResponseEntity<ApiResponse<MemberResponseDto>> getById(
             @Parameter(name = "id", description = "Member ID", required = true)
@@ -68,7 +78,7 @@ public class MemberController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
+    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
     @Operation(summary = "List members with pagination", description = "Returns a paginated list of members with optional company filter and search")
     public ResponseEntity<ApiResponse<PaginationResponse<MemberResponseDto>>> list(
             @Parameter(name = "page", description = "Page number (1-based)") 

@@ -53,6 +53,8 @@ public class JwtTokenProvider {
                 .claim("email", user.getEmail())
                 .claim("roles", roles)
                 .claim("permissions", permissions)
+                .claim("employerId", user.getEmployerId()) // Phase 8: Add employer ID
+                .claim("companyId", user.getCompanyId())   // Phase 8: Add company ID
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key)

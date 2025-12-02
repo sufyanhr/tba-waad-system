@@ -24,6 +24,16 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     List<Claim> findByMemberId(Long memberId);
     List<Claim> findByProviderId(Long providerId);
     
+    // Data-level filtering methods for Phase 8.1
+    @Query("SELECT c FROM Claim c WHERE c.member.employer.id = :employerId")
+    List<Claim> findByMemberEmployerId(@Param("employerId") Long employerId);
+    
+    // Insurance Company filtering (for INSURANCE_ADMIN) - Phase 8.2
+    @Query("SELECT c FROM Claim c WHERE c.member.insuranceCompany.id = :companyId")
+    List<Claim> findByMemberInsuranceCompanyId(@Param("companyId") Long companyId);
+    
+    List<Claim> findByCreatedById(Long userId);
+    
     // Find by status
     List<Claim> findByStatus(Claim.ClaimStatus status);
     Long countByStatus(Claim.ClaimStatus status);

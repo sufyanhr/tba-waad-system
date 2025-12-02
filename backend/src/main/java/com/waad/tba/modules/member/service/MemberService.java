@@ -1,18 +1,26 @@
 package com.waad.tba.modules.member.service;
 
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.modules.audit.service.AuditTrailService;
+import com.waad.tba.modules.employer.repository.EmployerRepository;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
 import com.waad.tba.modules.member.dto.MemberResponseDto;
 import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.mapper.MemberMapper;
 import com.waad.tba.modules.member.repository.MemberRepository;
-import com.waad.tba.modules.employer.repository.EmployerRepository;
+import com.waad.tba.modules.rbac.entity.User;
+import com.waad.tba.security.AuthorizationService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -22,12 +30,34 @@ public class MemberService {
     private final MemberRepository repository;
     private final EmployerRepository employerRepository;
     private final MemberMapper mapper;
+    private final AuthorizationService authorizationService;
+    private final AuditTrailService auditTrailService;
 
     @Transactional(readOnly = true)
     public MemberResponseDto findById(Long id) {
         log.debug("Finding member by id: {}", id);
+        
+        // Get current user and validate access
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser == null) {
+            log.warn("No authenticated user found when accessing member: {}", id);
+            throw new AccessDeniedException("Authentication required");
+        }
+        
+        // Check if user can access this member
+        if (!authorizationService.canAccessMember(currentUser, id)) {
+            log.warn("Access denied: user {} attempted to view member {}", 
+                currentUser.getUsername(), id);
+            throw new AccessDeniedException("You are not allowed to view this member");
+        }
+        
         Member entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", id));
+        
+        // Audit log: Member viewed
+        auditTrailService.logView("Member", id, currentUser);
+        
+        log.debug("Member {} accessed successfully by user {}", id, currentUser.getUsername());
         return mapper.toResponseDto(entity);
     }
 
@@ -51,6 +81,12 @@ public class MemberService {
         }
 
         Member entity = mapper.toEntity(dto);
+        
+        // Automatically set insuranceCompany from employer (Phase 8.2)
+        // In this system, Member.insuranceCompany should be set based on the employer's insurance company
+        // For now, we keep it null and let it be set manually or through a different process
+        // TODO: Link Employer to InsuranceCompany in the data model
+        
         Member saved = repository.save(entity);
         
         log.info("Member created successfully with id: {}", saved.getId());
@@ -102,23 +138,86 @@ public class MemberService {
     public Page<MemberResponseDto> findAllPaginated(Long companyId, String search, Pageable pageable) {
         log.debug("Finding members with pagination. companyId={}, search={}", companyId, search);
         
+        // Get current user and apply employer-level filtering
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser == null) {
+            log.warn("No authenticated user found when accessing members list");
+            return Page.empty(pageable);
+        }
+        
         Page<Member> page;
         
-        if (companyId != null) {
-            if (search != null && !search.isBlank()) {
-                page = repository.searchPagedByCompany(companyId, search, pageable);
+        // Apply data-level security based on user role
+        if (authorizationService.isSuperAdmin(currentUser)) {
+            // SUPER_ADMIN: Access to all members
+            log.debug("SUPER_ADMIN access: returning all members");
+            page = findAllMembersWithFilters(companyId, search, pageable);
+            
+        } else if (authorizationService.isInsuranceAdmin(currentUser)) {
+            // INSURANCE_ADMIN: Filter by insurance company
+            Long companyFilter = authorizationService.getCompanyFilterForUser(currentUser);
+            if (companyFilter != null) {
+                log.info("Applying insurance company filter: companyId={} for user {}", 
+                    companyFilter, currentUser.getUsername());
+                
+                // Override companyId parameter with user's companyId
+                if (search != null && !search.isBlank()) {
+                    page = repository.searchByInsuranceCompany(companyFilter, search, pageable);
+                } else {
+                    page = repository.findByInsuranceCompanyIdPaged(companyFilter, pageable);
+                }
             } else {
-                page = repository.findByCompanyId(companyId, pageable);
+                log.debug("INSURANCE_ADMIN access: returning all members (no company filter)");
+                page = findAllMembersWithFilters(companyId, search, pageable);
             }
+            
+        } else if (authorizationService.isEmployerAdmin(currentUser)) {
+            // EMPLOYER_ADMIN: Filter by employer
+            Long employerId = authorizationService.getEmployerFilterForUser(currentUser);
+            if (employerId == null) {
+                log.warn("EMPLOYER_ADMIN user {} has no employerId assigned", currentUser.getUsername());
+                return Page.empty(pageable);
+            }
+            
+            log.info("Applying employer filter: employerId={} for user {}", 
+                employerId, currentUser.getUsername());
+            
+            if (search != null && !search.isBlank()) {
+                page = repository.searchByEmployer(employerId, search, pageable);
+            } else {
+                page = repository.findByEmployerIdPaged(employerId, pageable);
+            }
+            
         } else {
-            if (search != null && !search.isBlank()) {
-                page = repository.searchPaged(search, pageable);
-            } else {
-                page = repository.findAll(pageable);
-            }
+            // PROVIDER, REVIEWER, USER: No access to member list
+            log.warn("Access denied: user {} with roles {} attempted to access members list", 
+                currentUser.getUsername(), 
+                currentUser.getRoles().stream()
+                    .map(r -> r.getName())
+                    .collect(Collectors.joining(", ")));
+            return Page.empty(pageable);
         }
         
         return page.map(mapper::toResponseDto);
+    }
+    
+    /**
+     * Helper method to find members with company and search filters (for admins only)
+     */
+    private Page<Member> findAllMembersWithFilters(Long companyId, String search, Pageable pageable) {
+        if (companyId != null) {
+            if (search != null && !search.isBlank()) {
+                return repository.searchPagedByCompany(companyId, search, pageable);
+            } else {
+                return repository.findByCompanyId(companyId, pageable);
+            }
+        } else {
+            if (search != null && !search.isBlank()) {
+                return repository.searchPaged(search, pageable);
+            } else {
+                return repository.findAll(pageable);
+            }
+        }
     }
 
     @Transactional(readOnly = true)

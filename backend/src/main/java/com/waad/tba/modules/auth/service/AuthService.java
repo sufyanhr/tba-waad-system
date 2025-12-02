@@ -90,6 +90,8 @@ public class AuthService {
                         .email(user.getEmail())
                         .roles(roles)
                         .permissions(permissions)
+                        .employerId(user.getEmployerId())   // Phase 8: Add employer ID
+                        .companyId(user.getCompanyId())     // Phase 8: Add company ID
                         .build())
                 .build();
     }
@@ -151,6 +153,8 @@ public class AuthService {
                 .email(user.getEmail())
                 .roles(roles)
                 .permissions(permissions)
+                .employerId(user.getEmployerId())   // Phase 8: Add employer ID
+                .companyId(user.getCompanyId())     // Phase 8: Add company ID
                 .build();
     }
 

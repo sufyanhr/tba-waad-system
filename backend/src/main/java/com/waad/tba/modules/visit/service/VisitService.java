@@ -1,10 +1,12 @@
 package com.waad.tba.modules.visit.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,11 +14,14 @@ import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.repository.MemberRepository;
 import com.waad.tba.modules.providercontract.service.ProviderCompanyContractService;
+import com.waad.tba.modules.rbac.entity.User;
 import com.waad.tba.modules.visit.dto.VisitCreateDto;
 import com.waad.tba.modules.visit.dto.VisitResponseDto;
 import com.waad.tba.modules.visit.entity.Visit;
 import com.waad.tba.modules.visit.mapper.VisitMapper;
 import com.waad.tba.modules.visit.repository.VisitRepository;
+import com.waad.tba.security.AuthorizationService;
+import com.waad.tba.modules.audit.service.AuditTrailService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +35,64 @@ public class VisitService {
     private final MemberRepository memberRepository;
     private final VisitMapper mapper;
     private final ProviderCompanyContractService providerContractService;
+    private final AuthorizationService authorizationService;
+    private final AuditTrailService auditTrailService;
 
     @Transactional(readOnly = true)
     public List<VisitResponseDto> findAll() {
-        log.debug("Finding all visits");
-        return repository.findAll().stream()
+        log.debug("Finding all visits with data-level filtering");
+        
+        // Get current user and apply role-based filtering
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser == null) {
+            log.warn("No authenticated user found when accessing visits list");
+            return Collections.emptyList();
+        }
+        
+        List<Visit> visits;
+        
+        // Apply data-level security based on user role
+        if (authorizationService.isSuperAdmin(currentUser)) {
+            // SUPER_ADMIN: Access to all visits
+            log.debug("SUPER_ADMIN access: returning all visits");
+            visits = repository.findAll();
+            
+        } else if (authorizationService.isInsuranceAdmin(currentUser)) {
+            // INSURANCE_ADMIN: Filter by insurance company
+            Long companyFilter = authorizationService.getCompanyFilterForUser(currentUser);
+            if (companyFilter != null) {
+                log.info("Applying insurance company filter for visits: companyId={} for user {}", 
+                    companyFilter, currentUser.getUsername());
+                // Get visits for members belonging to this insurance company
+                visits = repository.findByMemberInsuranceCompanyId(companyFilter);
+            } else {
+                log.debug("INSURANCE_ADMIN access: returning all visits (no company filter)");
+                visits = repository.findAll();
+            }
+            
+        } else if (authorizationService.isEmployerAdmin(currentUser)) {
+            // EMPLOYER_ADMIN: Filter by employer
+            Long employerId = authorizationService.getEmployerFilterForUser(currentUser);
+            if (employerId == null) {
+                log.warn("EMPLOYER_ADMIN user {} has no employerId assigned", currentUser.getUsername());
+                return Collections.emptyList();
+            }
+            
+            log.info("Applying employer filter for visits: employerId={} for user {}", 
+                employerId, currentUser.getUsername());
+            visits = repository.findByMemberEmployerId(employerId);
+            
+        } else {
+            // REVIEWER, PROVIDER, USER: No access to visits list
+            log.warn("Access denied: user {} with roles {} attempted to access visits list", 
+                currentUser.getUsername(), 
+                currentUser.getRoles().stream()
+                    .map(r -> r.getName())
+                    .collect(Collectors.joining(", ")));
+            return Collections.emptyList();
+        }
+        
+        return visits.stream()
                 .map(mapper::toResponseDto)
                 .collect(Collectors.toList());
     }
@@ -42,8 +100,28 @@ public class VisitService {
     @Transactional(readOnly = true)
     public VisitResponseDto findById(Long id) {
         log.debug("Finding visit by id: {}", id);
+        
+        // Get current user and validate access
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser == null) {
+            log.warn("No authenticated user found when accessing visit: {}", id);
+            throw new AccessDeniedException("Authentication required");
+        }
+        
+        // Check if user can access this visit
+        if (!authorizationService.canAccessVisit(currentUser, id)) {
+            log.warn("Access denied: user {} attempted to view visit {}", 
+                currentUser.getUsername(), id);
+            throw new AccessDeniedException("Access denied to this visit");
+        }
+        
         Visit entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", id));
+        
+        // Audit log: Visit viewed
+        auditTrailService.logView("Visit", id, currentUser);
+        
+        log.debug("Visit {} accessed successfully by user {}", id, currentUser.getUsername());
         return mapper.toResponseDto(entity);
     }
 
