@@ -75,7 +75,7 @@ public class RbacDataInitializer implements CommandLineRunner {
             log.info("✅ Step 3/3: Super Admin user initialized");
             
             log.info("╔════════════════════════════════════════════════════════════╗");
-            log.info("║  RBAC System Initialized Successfully!                     ║");
+            log.info("║  RBAC Initialization Completed Successfully!               ║");
             log.info("║                                                            ║");
             log.info("║  Login Credentials:                                        ║");
             log.info("║  Username: superadmin                                      ║");
@@ -92,22 +92,25 @@ public class RbacDataInitializer implements CommandLineRunner {
     /**
      * Step 1: Create all permissions from AppPermission enum.
      * Returns a map of permission name -> Permission entity for role assignment.
+     * 100% Idempotent - checks existence before insert.
      */
     private Map<String, Permission> ensureAllPermissions() {
         log.info("📋 Initializing permissions from AppPermission enum...");
         
         Map<String, Permission> permissionMap = new HashMap<>();
         int created = 0;
-        int existing = 0;
+        int skipped = 0;
         
         for (AppPermission appPerm : AppPermission.values()) {
             String permName = appPerm.getPermissionName();
             
+            // Check if permission already exists
             Optional<Permission> existingPerm = permissionRepository.findByName(permName);
             
             if (existingPerm.isPresent()) {
                 permissionMap.put(permName, existingPerm.get());
-                existing++;
+                skipped++;
+                log.debug("   ⏭️  Skipping existing permission: {}", permName);
             } else {
                 Permission newPerm = Permission.builder()
                         .name(permName)
@@ -121,7 +124,7 @@ public class RbacDataInitializer implements CommandLineRunner {
             }
         }
         
-        log.info("   📊 Permissions: {} created, {} existing, {} total", created, existing, permissionMap.size());
+        log.info("   📊 Permissions: {} created, {} skipped, {} total", created, skipped, permissionMap.size());
         return permissionMap;
     }
 
@@ -227,40 +230,41 @@ public class RbacDataInitializer implements CommandLineRunner {
     }
 
     /**
-     * Helper method to create or update a role with specified permissions.
+     * Helper method to create a role with specified permissions.
+     * 100% Idempotent - skips if role already exists, no updates on existing roles.
      */
     private Role ensureRole(String roleName, String displayNameAr, String description, 
                            Map<String, Permission> permissionMap, List<String> permissionNames) {
         
+        // Check if role already exists
         Optional<Role> existingRole = roleRepository.findByName(roleName);
         
+        if (existingRole.isPresent()) {
+            // Role exists - SKIP creation and permission mapping
+            log.debug("   ⏭️  Skipping existing role: {}", roleName);
+            return existingRole.get();
+        }
+        
+        // Role doesn't exist - create it with permissions
         Set<Permission> permissions = permissionNames.stream()
                 .map(permissionMap::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         
-        if (existingRole.isPresent()) {
-            Role role = existingRole.get();
-            role.setPermissions(permissions);
-            role.setDescription(description + " | " + displayNameAr);
-            Role updated = roleRepository.save(role);
-            log.debug("   🔄 Updated role: {} ({} permissions)", roleName, permissions.size());
-            return updated;
-        } else {
-            Role newRole = Role.builder()
-                    .name(roleName)
-                    .description(description + " | " + displayNameAr)
-                    .permissions(permissions)
-                    .build();
-            
-            Role saved = roleRepository.save(newRole);
-            log.debug("   ➕ Created role: {} ({} permissions)", roleName, permissions.size());
-            return saved;
-        }
+        Role newRole = Role.builder()
+                .name(roleName)
+                .description(description + " | " + displayNameAr)
+                .permissions(permissions)
+                .build();
+        
+        Role saved = roleRepository.save(newRole);
+        log.debug("   ➕ Created role: {} ({} permissions)", roleName, permissions.size());
+        return saved;
     }
 
     /**
      * Step 3: Create single superadmin user if not exists.
+     * 100% Idempotent - checks existence before insert.
      */
     private void ensureSuperAdminUser(Map<String, Role> roleMap) {
         log.info("👤 Initializing super admin user...");
@@ -269,18 +273,21 @@ public class RbacDataInitializer implements CommandLineRunner {
         String email = "superadmin@tba.sa";
         String password = "Admin@123";
         
+        // Check if superadmin user already exists
         Optional<User> existingUser = userRepository.findByUsername(username);
         
         if (existingUser.isPresent()) {
-            log.info("   ℹ️  Super admin user already exists: {}", username);
+            log.info("   ⏭️  Skipping existing user: {}", username);
             return;
         }
         
+        // Get SUPER_ADMIN role
         Role superAdminRole = roleMap.get("SUPER_ADMIN");
         if (superAdminRole == null) {
             throw new IllegalStateException("SUPER_ADMIN role not found!");
         }
         
+        // Create superadmin user with SUPER_ADMIN role
         User superAdmin = User.builder()
                 .username(username)
                 .email(email)
@@ -291,6 +298,6 @@ public class RbacDataInitializer implements CommandLineRunner {
                 .build();
         
         userRepository.save(superAdmin);
-        log.info("   ✅ Super admin user created: {}", username);
+        log.info("   ✅ Created user: {}", username);
     }
 }
