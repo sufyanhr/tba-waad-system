@@ -28,6 +28,13 @@ const TbaReviewerCompanies = Loadable(lazy(() => import('pages/tba/reviewer-comp
 const TbaMedicalPackages = Loadable(lazy(() => import('pages/tba/medical-packages')));
 const TbaInsuranceCompanies = Loadable(lazy(() => import('pages/tba/insurance-companies')));
 
+// render - TBA New Pages (Phase B1)
+const TbaSettings = Loadable(lazy(() => import('pages/tba/settings')));
+const TbaRBAC = Loadable(lazy(() => import('pages/tba/rbac')));
+const TbaAudit = Loadable(lazy(() => import('pages/tba/audit')));
+const TbaCompanies = Loadable(lazy(() => import('pages/tba/companies')));
+const TbaModernDashboard = Loadable(lazy(() => import('pages/tba/dashboard/ModernDashboard')));
+
 // render - Members module
 const MembersList = Loadable(lazy(() => import('pages/tba/members/MembersList')));
 const MemberCreate = Loadable(lazy(() => import('pages/tba/members/MemberCreate')));
@@ -98,6 +105,10 @@ const MainRoutes = {
         {
           path: 'tba',
           children: [
+            {
+              path: 'dashboard',
+              element: <TbaModernDashboard />
+            },
             {
               path: 'medical-services',
               element: <TbaMedicalServices />
@@ -213,6 +224,22 @@ const MainRoutes = {
             {
               path: 'provider-contracts',
               element: <TbaProviderContracts />
+            },
+            {
+              path: 'settings',
+              element: <TbaSettings />
+            },
+            {
+              path: 'rbac',
+              element: <TbaRBAC />
+            },
+            {
+              path: 'audit',
+              element: <TbaAudit />
+            },
+            {
+              path: 'companies',
+              element: <TbaCompanies />
             }
           ]
         },
