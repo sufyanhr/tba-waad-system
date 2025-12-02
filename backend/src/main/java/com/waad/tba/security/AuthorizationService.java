@@ -1,21 +1,23 @@
 package com.waad.tba.security;
 
-import com.waad.tba.modules.rbac.entity.Role;
-import com.waad.tba.modules.rbac.entity.User;
-import com.waad.tba.modules.rbac.repository.UserRepository;
-import com.waad.tba.modules.member.entity.Member;
-import com.waad.tba.modules.member.repository.MemberRepository;
-import com.waad.tba.modules.claim.entity.Claim;
-import com.waad.tba.modules.claim.repository.ClaimRepository;
-import com.waad.tba.modules.visit.entity.Visit;
-import com.waad.tba.modules.visit.repository.VisitRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.waad.tba.modules.claim.entity.Claim;
+import com.waad.tba.modules.claim.repository.ClaimRepository;
+import com.waad.tba.modules.company.service.CompanySettingsService;
+import com.waad.tba.modules.member.entity.Member;
+import com.waad.tba.modules.member.repository.MemberRepository;
+import com.waad.tba.modules.rbac.entity.User;
+import com.waad.tba.modules.rbac.repository.UserRepository;
+import com.waad.tba.modules.visit.entity.Visit;
+import com.waad.tba.modules.visit.repository.VisitRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Authorization Service - Phase 8
@@ -35,6 +37,7 @@ public class AuthorizationService {
     private final MemberRepository memberRepository;
     private final ClaimRepository claimRepository;
     private final VisitRepository visitRepository;
+    private final CompanySettingsService companySettingsService;
 
     /**
      * Get currently authenticated user from security context.
@@ -372,5 +375,142 @@ public class AuthorizationService {
 
         log.warn("Access denied: user {} attempted to modify claim {}", user.getUsername(), claimId);
         return false;
+    }
+
+    // =========================================================================
+    // Phase 9: Feature Toggle Methods
+    // =========================================================================
+
+    /**
+     * Check if EMPLOYER_ADMIN user can view claims based on feature toggle.
+     * This works ON TOP of RBAC permissions.
+     * 
+     * @param user Current user
+     * @return true if user can view claims
+     */
+    public boolean canEmployerViewClaims(User user) {
+        if (user == null) {
+            log.warn("FeatureCheck: user=null feature=VIEW_CLAIMS result=DENIED (null user)");
+            return false;
+        }
+
+        // Non-employer users: always allow (controlled by RBAC)
+        if (!isEmployerAdmin(user)) {
+            log.debug("FeatureCheck: user={} feature=VIEW_CLAIMS result=ALLOWED (not EMPLOYER_ADMIN)", 
+                user.getUsername());
+            return true;
+        }
+
+        // EMPLOYER_ADMIN: check feature toggle
+        if (user.getEmployerId() == null) {
+            log.warn("FeatureCheck: user={} feature=VIEW_CLAIMS result=DENIED (no employerId)", 
+                user.getUsername());
+            return false;
+        }
+
+        boolean result = companySettingsService.canEmployerViewClaims(user.getEmployerId());
+        log.info("FeatureCheck: employerId={} user={} feature=VIEW_CLAIMS result={}", 
+            user.getEmployerId(), user.getUsername(), result ? "ALLOWED" : "DENIED");
+        
+        return result;
+    }
+
+    /**
+     * Check if EMPLOYER_ADMIN user can view visits based on feature toggle.
+     * 
+     * @param user Current user
+     * @return true if user can view visits
+     */
+    public boolean canEmployerViewVisits(User user) {
+        if (user == null) {
+            log.warn("FeatureCheck: user=null feature=VIEW_VISITS result=DENIED (null user)");
+            return false;
+        }
+
+        // Non-employer users: always allow (controlled by RBAC)
+        if (!isEmployerAdmin(user)) {
+            log.debug("FeatureCheck: user={} feature=VIEW_VISITS result=ALLOWED (not EMPLOYER_ADMIN)", 
+                user.getUsername());
+            return true;
+        }
+
+        // EMPLOYER_ADMIN: check feature toggle
+        if (user.getEmployerId() == null) {
+            log.warn("FeatureCheck: user={} feature=VIEW_VISITS result=DENIED (no employerId)", 
+                user.getUsername());
+            return false;
+        }
+
+        boolean result = companySettingsService.canEmployerViewVisits(user.getEmployerId());
+        log.info("FeatureCheck: employerId={} user={} feature=VIEW_VISITS result={}", 
+            user.getEmployerId(), user.getUsername(), result ? "ALLOWED" : "DENIED");
+        
+        return result;
+    }
+
+    /**
+     * Check if EMPLOYER_ADMIN user can edit members based on feature toggle.
+     * 
+     * @param user Current user
+     * @return true if user can edit members
+     */
+    public boolean canEmployerEditMembers(User user) {
+        if (user == null) {
+            log.warn("FeatureCheck: user=null feature=EDIT_MEMBERS result=DENIED (null user)");
+            return false;
+        }
+
+        // Non-employer users: always allow (controlled by RBAC)
+        if (!isEmployerAdmin(user)) {
+            log.debug("FeatureCheck: user={} feature=EDIT_MEMBERS result=ALLOWED (not EMPLOYER_ADMIN)", 
+                user.getUsername());
+            return true;
+        }
+
+        // EMPLOYER_ADMIN: check feature toggle
+        if (user.getEmployerId() == null) {
+            log.warn("FeatureCheck: user={} feature=EDIT_MEMBERS result=DENIED (no employerId)", 
+                user.getUsername());
+            return false;
+        }
+
+        boolean result = companySettingsService.canEmployerEditMembers(user.getEmployerId());
+        log.info("FeatureCheck: employerId={} user={} feature=EDIT_MEMBERS result={}", 
+            user.getEmployerId(), user.getUsername(), result ? "ALLOWED" : "DENIED");
+        
+        return result;
+    }
+
+    /**
+     * Check if EMPLOYER_ADMIN user can download attachments based on feature toggle.
+     * 
+     * @param user Current user
+     * @return true if user can download attachments
+     */
+    public boolean canEmployerDownloadAttachments(User user) {
+        if (user == null) {
+            log.warn("FeatureCheck: user=null feature=DOWNLOAD_ATTACHMENTS result=DENIED (null user)");
+            return false;
+        }
+
+        // Non-employer users: always allow (controlled by RBAC)
+        if (!isEmployerAdmin(user)) {
+            log.debug("FeatureCheck: user={} feature=DOWNLOAD_ATTACHMENTS result=ALLOWED (not EMPLOYER_ADMIN)", 
+                user.getUsername());
+            return true;
+        }
+
+        // EMPLOYER_ADMIN: check feature toggle
+        if (user.getEmployerId() == null) {
+            log.warn("FeatureCheck: user={} feature=DOWNLOAD_ATTACHMENTS result=DENIED (no employerId)", 
+                user.getUsername());
+            return false;
+        }
+
+        boolean result = companySettingsService.canEmployerDownloadAttachments(user.getEmployerId());
+        log.info("FeatureCheck: employerId={} user={} feature=DOWNLOAD_ATTACHMENTS result={}", 
+            user.getEmployerId(), user.getUsername(), result ? "ALLOWED" : "DENIED");
+        
+        return result;
     }
 }

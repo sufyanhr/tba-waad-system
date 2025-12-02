@@ -65,6 +65,16 @@ public class MemberService {
     public MemberResponseDto create(MemberCreateDto dto) {
         log.info("Creating new member: {}", dto.getFullName());
 
+        // Phase 9: Check if EMPLOYER_ADMIN can edit members
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser != null && authorizationService.isEmployerAdmin(currentUser)) {
+            if (!authorizationService.canEmployerEditMembers(currentUser)) {
+                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to create member but feature EDIT_MEMBERS is disabled", 
+                    currentUser.getUsername());
+                throw new AccessDeniedException("Your employer account does not have permission to create members");
+            }
+        }
+
         // Validate employer exists
         if (!employerRepository.existsById(dto.getEmployerId())) {
             throw new ResourceNotFoundException("Employer", "id", dto.getEmployerId());
@@ -97,6 +107,16 @@ public class MemberService {
     public MemberResponseDto update(Long id, MemberCreateDto dto) {
         log.info("Updating member with id: {}", id);
         
+        // Phase 9: Check if EMPLOYER_ADMIN can edit members
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser != null && authorizationService.isEmployerAdmin(currentUser)) {
+            if (!authorizationService.canEmployerEditMembers(currentUser)) {
+                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to update member {} but feature EDIT_MEMBERS is disabled", 
+                    currentUser.getUsername(), id);
+                throw new AccessDeniedException("Your employer account does not have permission to edit members");
+            }
+        }
+        
         Member entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", id));
 
@@ -125,6 +145,16 @@ public class MemberService {
     @Transactional
     public void delete(Long id) {
         log.info("Deleting member with id: {}", id);
+        
+        // Phase 9: Check if EMPLOYER_ADMIN can edit members
+        User currentUser = authorizationService.getCurrentUser();
+        if (currentUser != null && authorizationService.isEmployerAdmin(currentUser)) {
+            if (!authorizationService.canEmployerEditMembers(currentUser)) {
+                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to delete member {} but feature EDIT_MEMBERS is disabled", 
+                    currentUser.getUsername(), id);
+                throw new AccessDeniedException("Your employer account does not have permission to delete members");
+            }
+        }
         
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Member", "id", id);

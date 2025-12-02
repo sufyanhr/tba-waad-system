@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.modules.audit.service.AuditTrailService;
 import com.waad.tba.modules.claim.dto.ClaimCreateDto;
 import com.waad.tba.modules.claim.dto.ClaimResponseDto;
 import com.waad.tba.modules.claim.entity.Claim;
@@ -24,7 +25,6 @@ import com.waad.tba.modules.providercontract.service.ProviderCompanyContractServ
 import com.waad.tba.modules.rbac.entity.User;
 import com.waad.tba.modules.rbac.repository.UserRepository;
 import com.waad.tba.security.AuthorizationService;
-import com.waad.tba.modules.audit.service.AuditTrailService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +80,14 @@ public class ClaimService {
             claims = repository.findAll();
             
         } else if (authorizationService.isEmployerAdmin(currentUser)) {
-            // EMPLOYER_ADMIN: Filter by employer
+            // EMPLOYER_ADMIN: Check feature toggle first (Phase 9)
+            if (!authorizationService.canEmployerViewClaims(currentUser)) {
+                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to view claims but feature VIEW_CLAIMS is disabled", 
+                    currentUser.getUsername());
+                return Collections.emptyList();
+            }
+            
+            // Feature enabled: Filter by employer
             Long employerId = authorizationService.getEmployerFilterForUser(currentUser);
             if (employerId == null) {
                 log.warn("EMPLOYER_ADMIN user {} has no employerId assigned", currentUser.getUsername());
@@ -121,6 +128,15 @@ public class ClaimService {
         if (currentUser == null) {
             log.warn("No authenticated user found when accessing claim: {}", id);
             throw new AccessDeniedException("Authentication required");
+        }
+        
+        // Phase 9: Check feature toggle for EMPLOYER_ADMIN
+        if (authorizationService.isEmployerAdmin(currentUser)) {
+            if (!authorizationService.canEmployerViewClaims(currentUser)) {
+                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to view claim {} but feature VIEW_CLAIMS is disabled", 
+                    currentUser.getUsername(), id);
+                throw new AccessDeniedException("Your employer account does not have permission to view claims");
+            }
         }
         
         // Check if user can access this claim
