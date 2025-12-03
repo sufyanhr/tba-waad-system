@@ -10,7 +10,6 @@ import Box from '@mui/material/Box';
 import Drawer from './Drawer';
 import Header from './Header';
 import Footer from './Footer';
-import HorizontalBar from './Drawer/HorizontalBar';
 import Loader from 'components/Loader';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import AuthGuard from 'utils/route-guard/AuthGuard';
@@ -30,7 +29,6 @@ export default function DashboardLayout() {
   const { state } = useConfig();
 
   const isContainer = state.container;
-  const isHorizontal = state.menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
 
   // set media wise responsive drawer
   useEffect(() => {
@@ -46,10 +44,10 @@ export default function DashboardLayout() {
     <AuthGuard>
       <Box sx={{ display: 'flex', width: '100%' }}>
         <Header />
-        {!isHorizontal ? <Drawer /> : <HorizontalBar />}
+        <Drawer />
 
         <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
-          <Toolbar sx={{ mt: isHorizontal ? 8 : 'inherit' }} />
+          <Toolbar />
           <Container
             maxWidth={isContainer ? 'xl' : false}
             sx={{

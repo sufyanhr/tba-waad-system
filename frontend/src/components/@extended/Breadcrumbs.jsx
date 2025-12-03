@@ -14,7 +14,7 @@ import { FormattedMessage } from 'react-intl';
 
 // project imports
 import MainCard from 'components/MainCard';
-import navigation from 'menu-items';
+import useRBACSidebar from 'hooks/useRBACSidebar';
 import { APP_DEFAULT_PATH } from 'config';
 import { ThemeDirection } from 'config';
 
@@ -41,6 +41,7 @@ export default function Breadcrumbs({
 }) {
   const theme = useTheme();
   const location = useLocation();
+  const { sidebarItems } = useRBACSidebar();
 
   const [main, setMain] = useState();
   const [item, setItem] = useState();
@@ -61,6 +62,9 @@ export default function Breadcrumbs({
   }
 
   useEffect(() => {
+    // Phase B2: Use dynamic sidebar items from useRBACSidebar
+    const navigation = { items: [{ type: 'group', children: sidebarItems }] };
+    
     navigation?.items?.map((menu) => {
       if (menu.type && menu.type === 'group') {
         if (menu?.url && menu.url === customLocation) {
@@ -72,7 +76,7 @@ export default function Breadcrumbs({
       }
       return false;
     });
-  });
+  }, [sidebarItems, customLocation]);
 
   // set active item state
   const getCollapse = (menu) => {

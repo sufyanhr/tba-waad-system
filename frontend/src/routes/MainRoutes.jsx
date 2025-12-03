@@ -6,6 +6,7 @@ import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import RBACGuard from 'components/tba/RBACGuard';
 import ProtectedRoute from 'components/ProtectedRoute';
+import RoleGuard from 'utils/route-guard/RoleGuard';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -34,6 +35,9 @@ const TbaRBAC = Loadable(lazy(() => import('pages/tba/rbac')));
 const TbaAudit = Loadable(lazy(() => import('pages/tba/audit')));
 const TbaCompanies = Loadable(lazy(() => import('pages/tba/companies')));
 const TbaModernDashboard = Loadable(lazy(() => import('pages/tba/dashboard/ModernDashboard')));
+
+// render - Error pages (Phase B2)
+const Forbidden403 = Loadable(lazy(() => import('pages/tba/errors/Forbidden403')));
 
 // render - Members module
 const MembersList = Loadable(lazy(() => import('pages/tba/members/MembersList')));
@@ -107,139 +111,215 @@ const MainRoutes = {
           children: [
             {
               path: 'dashboard',
-              element: <TbaModernDashboard />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaModernDashboard />
+                </RoleGuard>
+              )
             },
             {
               path: 'medical-services',
-              element: <TbaMedicalServices />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaMedicalServices />
+                </RoleGuard>
+              )
             },
             {
               path: 'medical-categories',
-              element: <TbaMedicalCategories />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaMedicalCategories />
+                </RoleGuard>
+              )
             },
             {
               path: 'medical-packages',
-              element: <TbaMedicalPackages />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaMedicalPackages />
+                </RoleGuard>
+              )
             },
             {
               path: 'providers',
-              element: <TbaProviders />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaProviders />
+                </RoleGuard>
+              )
             },
             {
               path: 'reviewer-companies',
-              element: <TbaReviewerCompanies />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaReviewerCompanies />
+                </RoleGuard>
+              )
             },
             {
               path: 'insurance-companies',
-              element: <TbaInsuranceCompanies />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaInsuranceCompanies />
+                </RoleGuard>
+              )
             },
             {
               path: 'members',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN']} permissions={['MANAGE_MEMBERS']}>
                   <MembersList />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'members/create',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN']} permissions={['MANAGE_MEMBERS']}>
                   <MemberCreate />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'members/edit/:id',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN']} permissions={['MANAGE_MEMBERS']}>
                   <MemberEdit />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'members/view/:id',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_MEMBERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN']} permissions={['MANAGE_MEMBERS']}>
                   <MemberView />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'employers',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_EMPLOYERS']}>
                   <EmployersList />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'employers/create',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_EMPLOYERS']}>
                   <EmployerCreate />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'employers/edit/:id',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_EMPLOYERS']}>
                   <EmployerEdit />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'employers/view/:id',
               element: (
-                <RBACGuard requiredPermissions={['MANAGE_EMPLOYERS']}>
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_EMPLOYERS']}>
                   <EmployerView />
-                </RBACGuard>
+                </RoleGuard>
               )
             },
             {
               path: 'claims',
-              element: <TbaClaims />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER']} featureToggle="canViewClaims">
+                  <TbaClaims />
+                </RoleGuard>
+              )
             },
             {
               path: 'visits',
-              element: <TbaVisits />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER']} featureToggle="canViewVisits">
+                  <TbaVisits />
+                </RoleGuard>
+              )
             },
             {
               path: 'policies',
-              element: <TbaPolicies />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaPolicies />
+                </RoleGuard>
+              )
             },
             {
               path: 'benefit-packages',
-              element: <TbaBenefitPackages />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaBenefitPackages />
+                </RoleGuard>
+              )
             },
             {
               path: 'pre-authorizations',
-              element: <TbaPreAuthorizations />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaPreAuthorizations />
+                </RoleGuard>
+              )
             },
             {
               path: 'invoices',
-              element: <TbaInvoices />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaInvoices />
+                </RoleGuard>
+              )
             },
             {
               path: 'provider-contracts',
-              element: <TbaProviderContracts />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaProviderContracts />
+                </RoleGuard>
+              )
             },
             {
               path: 'settings',
-              element: <TbaSettings />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaSettings />
+                </RoleGuard>
+              )
             },
             {
               path: 'rbac',
-              element: <TbaRBAC />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN']}>
+                  <TbaRBAC />
+                </RoleGuard>
+              )
             },
             {
               path: 'audit',
-              element: <TbaAudit />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+                  <TbaAudit />
+                </RoleGuard>
+              )
             },
             {
               path: 'companies',
-              element: <TbaCompanies />
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN']}>
+                  <TbaCompanies />
+                </RoleGuard>
+              )
+            },
+            {
+              path: '403',
+              element: <Forbidden403 />
             }
           ]
         },
