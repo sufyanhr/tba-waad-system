@@ -8,10 +8,6 @@ import RBACGuard from 'components/tba/RBACGuard';
 import ProtectedRoute from 'components/ProtectedRoute';
 import RoleGuard from 'utils/route-guard/RoleGuard';
 
-// render - dashboard
-const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
-const DashboardAnalytics = Loadable(lazy(() => import('pages/dashboard/analytics')));
-
 // render - TBA pages
 const TbaMedicalServices = Loadable(lazy(() => import('pages/tba/medical-services')));
 const TbaMedicalCategories = Loadable(lazy(() => import('pages/tba/medical-categories')));
@@ -93,19 +89,6 @@ const MainRoutes = {
       path: '/',
       element: <DashboardLayout />,
       children: [
-        {
-          path: 'dashboard',
-          children: [
-            {
-              path: 'default',
-              element: <DashboardDefault />
-            },
-            {
-              path: 'analytics',
-              element: <DashboardAnalytics />
-            }
-          ]
-        },
         {
           path: 'tba',
           children: [
