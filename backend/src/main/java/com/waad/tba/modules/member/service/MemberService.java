@@ -215,7 +215,7 @@ public class MemberService {
             if (search != null && !search.isBlank()) {
                 page = repository.searchByEmployer(employerId, search, pageable);
             } else {
-                page = repository.findByEmployerIdPaged(employerId, pageable);
+                page = repository.findByEmployerId(employerId, pageable);
             }
             
         } else {

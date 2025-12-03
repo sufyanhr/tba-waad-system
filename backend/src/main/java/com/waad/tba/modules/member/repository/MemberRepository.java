@@ -42,7 +42,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByCardNumberAndIdNot(String cardNumber, Long id);
     
     // Paginated queries for employer filtering
-    Page<Member> findByEmployerIdPaged(Long employerId, Pageable pageable);
+    Page<Member> findByEmployerId(Long employerId, Pageable pageable);
     
     @Query("SELECT m FROM Member m WHERE m.employer.id = :employerId AND (" +
            "LOWER(CONCAT(m.firstName, ' ', m.lastName)) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
