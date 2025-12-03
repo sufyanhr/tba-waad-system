@@ -102,6 +102,14 @@ public class CompanySettings {
     @Column(name = "can_download_attachments", nullable = false)
     private Boolean canDownloadAttachments = true;
 
+    /**
+     * UI visibility configuration stored as JSONB in PostgreSQL.
+     * We keep it as String here and parse/serialize using Jackson in the service layer.
+     * Default: '{}' (empty JSON means all features visible)
+     */
+    @Column(name = "ui_visibility", columnDefinition = "jsonb")
+    private String uiVisibility;
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

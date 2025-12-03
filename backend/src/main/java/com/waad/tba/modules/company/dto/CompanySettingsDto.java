@@ -59,4 +59,9 @@ public class CompanySettingsDto {
      * Company name (for display purposes)
      */
     private String companyName;
+    
+    /**
+     * UI visibility configuration (Phase B4)
+     */
+    private UiVisibilityDto uiVisibility;
 }

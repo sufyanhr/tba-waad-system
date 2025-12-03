@@ -6,8 +6,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.company.dto.CompanySettingsDto;
+import com.waad.tba.modules.company.dto.UiVisibilityDto;
 import com.waad.tba.modules.company.entity.CompanySettings;
 import com.waad.tba.modules.company.repository.CompanySettingsRepository;
 
@@ -15,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * CompanySettingsService - Phase 9
+ * CompanySettingsService - Phase 9 + Phase B4
  * 
  * Service for managing company settings and feature toggles.
  * Provides methods to create, update, and retrieve employer feature settings.
@@ -26,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CompanySettingsService {
 
     private final CompanySettingsRepository repository;
+    private final ObjectMapper objectMapper;
 
     /**
      * Get settings for a specific employer.
@@ -177,7 +181,7 @@ public class CompanySettingsService {
      * @return Settings DTO
      */
     public CompanySettingsDto toDto(CompanySettings settings) {
-        return CompanySettingsDto.builder()
+        CompanySettingsDto dto = CompanySettingsDto.builder()
                 .id(settings.getId())
                 .companyId(settings.getCompanyId())
                 .employerId(settings.getEmployerId())
@@ -186,6 +190,11 @@ public class CompanySettingsService {
                 .canEditMembers(settings.getCanEditMembers())
                 .canDownloadAttachments(settings.getCanDownloadAttachments())
                 .build();
+        
+        // Parse and set UI visibility (Phase B4)
+        dto.setUiVisibility(parseUiVisibility(settings.getUiVisibility()));
+        
+        return dto;
     }
 
     /**
@@ -281,5 +290,92 @@ public class CompanySettingsService {
             employerId, result ? "ALLOWED" : "DENIED");
         
         return result;
+    }
+
+    // ============================================================================
+    // Phase B4 - UI Visibility Methods
+    // ============================================================================
+
+    /**
+     * Get UI visibility settings for an employer.
+     * Returns default (all enabled) if not configured.
+     * 
+     * @param employerId Employer ID
+     * @return UiVisibilityDto with visibility settings
+     */
+    @Transactional(readOnly = true)
+    public UiVisibilityDto getUiVisibilityForEmployer(Long employerId) {
+        log.debug("Getting UI visibility for employer: {}", employerId);
+        CompanySettings settings = getOrCreateSettingsForEmployer(employerId);
+        return parseUiVisibility(settings.getUiVisibility());
+    }
+
+    /**
+     * Update UI visibility settings for an employer.
+     * 
+     * @param employerId Employer ID
+     * @param uiVisibilityDto New visibility settings
+     * @return Updated visibility settings
+     */
+    @Transactional
+    public UiVisibilityDto updateUiVisibilityForEmployer(Long employerId, UiVisibilityDto uiVisibilityDto) {
+        log.info("Updating UI visibility for employer: {}", employerId);
+        CompanySettings settings = getOrCreateSettingsForEmployer(employerId);
+        settings.setUiVisibility(toUiVisibilityJson(uiVisibilityDto));
+        CompanySettings saved = repository.save(settings);
+        log.info("UI visibility updated successfully for employer: {}", employerId);
+        return parseUiVisibility(saved.getUiVisibility());
+    }
+
+    /**
+     * Helper to get or create settings for an employer.
+     * Used by UI visibility methods.
+     */
+    private CompanySettings getOrCreateSettingsForEmployer(Long employerId) {
+        return repository.findByEmployerId(employerId)
+            .orElseGet(() -> {
+                log.info("Settings not found for employer {}. Creating with defaults.", employerId);
+                CompanySettings created = new CompanySettings();
+                created.setEmployerId(employerId);
+                created.setCompanyId(1L); // Default company ID
+                created.setCanViewClaims(false);
+                created.setCanViewVisits(false);
+                created.setCanEditMembers(true);
+                created.setCanDownloadAttachments(true);
+                created.setUiVisibility(toUiVisibilityJson(UiVisibilityDto.defaultAllEnabled()));
+                return repository.save(created);
+            });
+    }
+
+    /**
+     * Parse JSON string to UiVisibilityDto.
+     * Returns default (all enabled) if JSON is empty or invalid.
+     */
+    private UiVisibilityDto parseUiVisibility(String json) {
+        if (json == null || json.isBlank() || json.equals("{}")) {
+            return UiVisibilityDto.defaultAllEnabled();
+        }
+        try {
+            return objectMapper.readValue(json, UiVisibilityDto.class);
+        } catch (Exception ex) {
+            log.warn("Failed to parse UI visibility JSON: {}. Using defaults.", ex.getMessage());
+            return UiVisibilityDto.defaultAllEnabled();
+        }
+    }
+
+    /**
+     * Convert UiVisibilityDto to JSON string.
+     * Returns empty JSON {} if DTO is null or serialization fails.
+     */
+    private String toUiVisibilityJson(UiVisibilityDto dto) {
+        if (dto == null) {
+            dto = UiVisibilityDto.defaultAllEnabled();
+        }
+        try {
+            return objectMapper.writeValueAsString(dto);
+        } catch (JsonProcessingException ex) {
+            log.warn("Failed to serialize UI visibility DTO: {}. Using empty JSON.", ex.getMessage());
+            return "{}";
+        }
     }
 }

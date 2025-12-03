@@ -12,6 +12,7 @@ import ModernPageHeader from 'components/tba/ModernPageHeader';
 import KpiCard from 'components/tba/dashboard/KpiCard';
 import RecentMembers from 'components/tba/dashboard/RecentMembers';
 import QuickActions from 'components/tba/dashboard/QuickActions';
+import useCompanyUiVisibility from 'hooks/useCompanyUiVisibility';
 import axios from 'utils/axios';
 
 // Lazy load chart components for better performance
@@ -46,10 +47,10 @@ ChartJS.register(
 
 /**
  * ModernDashboard Component
- * Phase B3 - Modern Clean SaaS Dashboard
+ * Phase B3 + Phase B4 - Modern Clean SaaS Dashboard with UI Visibility
  * 
  * Features:
- * - 4 KPI Cards (Members, Claims, Visits, Employers)
+ * - 4 KPI Cards (Members, Claims, Visits, Employers) - Visibility configurable
  * - 2 Charts (Monthly Members Growth, Claims/Visits Trend)
  * - Recent Members List
  * - Quick Actions
@@ -64,6 +65,9 @@ const ModernDashboard = () => {
     employersCount: 0
   });
   const [loading, setLoading] = useState(true);
+  
+  // Phase B4: Get UI visibility settings
+  const { uiVisibility, loading: visibilityLoading } = useCompanyUiVisibility();
 
   // Fetch dashboard statistics
   useEffect(() => {
@@ -212,45 +216,58 @@ const ModernDashboard = () => {
 
       {/* KPI Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          {loading ? (
-            <Skeleton variant="rounded" height={180} />
-          ) : (
-            <KpiCard
-              title="عدد الأعضاء"
-              value={stats.membersCount}
-              icon={TeamOutlined}
-              color="primary"
-              sparklineData={membersSparkline}
-            />
-          )}
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          {loading ? (
-            <Skeleton variant="rounded" height={180} />
-          ) : (
-            <KpiCard
-              title="عدد المطالبات"
-              value={stats.claimsCount}
-              icon={FileTextOutlined}
-              color="warning"
-              sparklineData={claimsSparkline}
-            />
-          )}
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          {loading ? (
-            <Skeleton variant="rounded" height={180} />
-          ) : (
-            <KpiCard
-              title="عدد الزيارات"
-              value={stats.visitsCount}
-              icon={MedicineBoxOutlined}
-              color="success"
-              sparklineData={visitsSparkline}
-            />
-          )}
-        </Grid>
+        {/* Members KPI - Conditional based on UI visibility */}
+        {uiVisibility.dashboard?.showMembersKpi && (
+          <Grid item xs={12} sm={6} md={3}>
+            {loading ? (
+              <Skeleton variant="rounded" height={180} />
+            ) : (
+              <KpiCard
+                title="عدد الأعضاء"
+                value={stats.membersCount}
+                icon={TeamOutlined}
+                color="primary"
+                sparklineData={membersSparkline}
+              />
+            )}
+          </Grid>
+        )}
+        
+        {/* Claims KPI - Conditional based on UI visibility */}
+        {uiVisibility.dashboard?.showClaimsKpi && (
+          <Grid item xs={12} sm={6} md={3}>
+            {loading ? (
+              <Skeleton variant="rounded" height={180} />
+            ) : (
+              <KpiCard
+                title="عدد المطالبات"
+                value={stats.claimsCount}
+                icon={FileTextOutlined}
+                color="warning"
+                sparklineData={claimsSparkline}
+              />
+            )}
+          </Grid>
+        )}
+        
+        {/* Visits KPI - Conditional based on UI visibility */}
+        {uiVisibility.dashboard?.showVisitsKpi && (
+          <Grid item xs={12} sm={6} md={3}>
+            {loading ? (
+              <Skeleton variant="rounded" height={180} />
+            ) : (
+              <KpiCard
+                title="عدد الزيارات"
+                value={stats.visitsCount}
+                icon={MedicineBoxOutlined}
+                color="success"
+                sparklineData={visitsSparkline}
+              />
+            )}
+          </Grid>
+        )}
+        
+        {/* Employers KPI - Always visible (not configurable) */}
         <Grid item xs={12} sm={6} md={3}>
           {loading ? (
             <Skeleton variant="rounded" height={180} />
