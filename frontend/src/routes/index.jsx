@@ -5,13 +5,13 @@ import MainRoutes from './MainRoutes';
 import LoginRoutes from './LoginRoutes';
 
 // ==============================|| ROUTING RENDER ||============================== //
-// Root path redirects to dashboard (no landing page)
 
+// Redirect root "/" → modern dashboard
 const router = createBrowserRouter(
   [
     {
       path: '/',
-      element: <Navigate to="/dashboard/default" replace />
+      element: <Navigate to="/tba/dashboard" replace />
     },
     LoginRoutes,
     MainRoutes
