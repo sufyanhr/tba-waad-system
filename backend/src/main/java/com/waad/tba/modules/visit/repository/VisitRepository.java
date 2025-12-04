@@ -28,15 +28,15 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
            "LOWER(v.doctorName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(v.specialty) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(v.diagnosis) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(m.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(m.lastName) LIKE LOWER(CONCAT('%', :query, '%'))")
+           "LOWER(m.fullNameEnglish) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(m.fullNameArabic) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<Visit> search(@Param("query") String query);
 
     @Query("SELECT v FROM Visit v LEFT JOIN v.member m WHERE " +
            "LOWER(v.doctorName) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(v.specialty) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(v.diagnosis) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(m.firstName) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(m.lastName) LIKE LOWER(CONCAT('%', :q, '%'))")
+           "LOWER(m.fullNameEnglish) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+           "LOWER(m.fullNameArabic) LIKE LOWER(CONCAT('%', :q, '%'))")
     Page<Visit> searchPaged(@Param("q") String q, Pageable pageable);
 }

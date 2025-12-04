@@ -1,257 +1,193 @@
 package com.waad.tba.modules.member.service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.waad.tba.common.exception.ResourceNotFoundException;
-import com.waad.tba.modules.audit.service.AuditTrailService;
+import com.waad.tba.modules.employer.entity.Employer;
 import com.waad.tba.modules.employer.repository.EmployerRepository;
+import com.waad.tba.modules.insurance.entity.InsuranceCompany;
+import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
+import com.waad.tba.modules.member.dto.FamilyMemberDto;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
-import com.waad.tba.modules.member.dto.MemberResponseDto;
+import com.waad.tba.modules.member.dto.MemberUpdateDto;
+import com.waad.tba.modules.member.dto.MemberViewDto;
+import com.waad.tba.modules.member.entity.FamilyMember;
 import com.waad.tba.modules.member.entity.Member;
-import com.waad.tba.modules.member.mapper.MemberMapper;
+import com.waad.tba.modules.member.mapper.MemberMapperV2;
+import com.waad.tba.modules.member.repository.FamilyMemberRepository;
 import com.waad.tba.modules.member.repository.MemberRepository;
-import com.waad.tba.modules.rbac.entity.User;
-import com.waad.tba.security.AuthorizationService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberRepository repository;
-    private final EmployerRepository employerRepository;
-    private final MemberMapper mapper;
-    private final AuthorizationService authorizationService;
-    private final AuditTrailService auditTrailService;
+    private final MemberRepository memberRepository;
+    private final FamilyMemberRepository familyRepo;
+    private final MemberMapperV2 mapper;
 
-    @Transactional(readOnly = true)
-    public MemberResponseDto findById(Long id) {
-        log.debug("Finding member by id: {}", id);
-        
-        // Get current user and validate access
-        User currentUser = authorizationService.getCurrentUser();
-        if (currentUser == null) {
-            log.warn("No authenticated user found when accessing member: {}", id);
-            throw new AccessDeniedException("Authentication required");
+    private final EmployerRepository employerRepo;
+    private final InsuranceCompanyRepository insuranceRepo;
+
+    /* ============================================================
+     * CREATE MEMBER + FAMILY
+     * ============================================================ */
+    @Transactional
+    public MemberViewDto createMember(MemberCreateDto dto) {
+
+        // Validate employer
+        Employer employer = employerRepo.findById(dto.getEmployerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employer not found with id: " + dto.getEmployerId()));
+
+        // Validate insurance company (optional)
+        InsuranceCompany insuranceCompany = null;
+        if (dto.getInsuranceCompanyId() != null) {
+            insuranceCompany = insuranceRepo.findById(dto.getInsuranceCompanyId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Insurance company not found"));
         }
-        
-        // Check if user can access this member
-        if (!authorizationService.canAccessMember(currentUser, id)) {
-            log.warn("Access denied: user {} attempted to view member {}", 
-                currentUser.getUsername(), id);
-            throw new AccessDeniedException("You are not allowed to view this member");
+
+        // Convert DTO → Entity
+        Member member = mapper.toEntity(dto);
+        member.setEmployer(employer);
+        member.setInsuranceCompany(insuranceCompany);
+
+        // Save member first
+        Member savedMember = memberRepository.save(member);
+
+        // Save family members
+        List<FamilyMember> family = dto.getFamilyMembers() != null
+                ? dto.getFamilyMembers().stream()
+                        .map(mapper::toFamilyMemberEntity)
+                        .peek(f -> f.setMember(savedMember))
+                        .collect(Collectors.toList())
+                : List.of();
+
+        if (!family.isEmpty()) {
+            familyRepo.saveAll(family);
         }
-        
-        Member entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Member", "id", id));
-        
-        // Audit log: Member viewed
-        auditTrailService.logView("Member", id, currentUser);
-        
-        log.debug("Member {} accessed successfully by user {}", id, currentUser.getUsername());
-        return mapper.toResponseDto(entity);
+
+        return mapper.toViewDto(savedMember, family);
     }
 
+    /* ============================================================
+     * UPDATE MEMBER + SYNC FAMILY MEMBERS
+     * ============================================================ */
     @Transactional
-    public MemberResponseDto create(MemberCreateDto dto) {
-        log.info("Creating new member: {}", dto.getFullName());
+    public MemberViewDto updateMember(Long id, MemberUpdateDto dto) {
 
-        // Phase 9: Check if EMPLOYER_ADMIN can edit members
-        User currentUser = authorizationService.getCurrentUser();
-        if (currentUser != null && authorizationService.isEmployerAdmin(currentUser)) {
-            if (!authorizationService.canEmployerEditMembers(currentUser)) {
-                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to create member but feature EDIT_MEMBERS is disabled", 
-                    currentUser.getUsername());
-                throw new AccessDeniedException("Your employer account does not have permission to create members");
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found: " + id));
+
+        // Update member fields from DTO
+        mapper.updateEntityFromDto(member, dto);
+
+        // Update insurance company relation if provided
+        if (dto.getInsuranceCompanyId() != null) {
+            InsuranceCompany insuranceCompany = insuranceRepo.findById(dto.getInsuranceCompanyId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Insurance company not found"));
+            member.setInsuranceCompany(insuranceCompany);
+        }
+
+        memberRepository.save(member);
+
+        /* ---------------------------------------------------------
+         * SYNC FAMILY MEMBERS (add / update / delete)
+         * --------------------------------------------------------- */
+
+        List<FamilyMember> existing = familyRepo.findByMemberId(member.getId());
+
+        List<Long> incomingIds = dto.getFamilyMembers() != null
+                ? dto.getFamilyMembers().stream()
+                        .map(FamilyMemberDto::getId)
+                        .filter(f -> f != null)
+                        .collect(Collectors.toList())
+                : List.of();
+
+        // Delete removed family members
+        for (FamilyMember fm : existing) {
+            if (!incomingIds.contains(fm.getId())) {
+                familyRepo.delete(fm);
             }
         }
 
-        // Validate employer exists
-        if (!employerRepository.existsById(dto.getEmployerId())) {
-            throw new ResourceNotFoundException("Employer", "id", dto.getEmployerId());
-        }
-        
-        // Validate unique civilId
-        if (repository.existsByCivilId(dto.getCivilId())) {
-            throw new IllegalArgumentException("Civil ID already exists: " + dto.getCivilId());
-        }
-        
-        // Validate unique cardNumber (policyNumber)
-        if (repository.existsByCardNumber(dto.getPolicyNumber())) {
-            throw new IllegalArgumentException("Card number already exists: " + dto.getPolicyNumber());
-        }
+        // Add/update incoming
+        if (dto.getFamilyMembers() != null) {
+            for (FamilyMemberDto fmd : dto.getFamilyMembers()) {
+                FamilyMember fm;
 
-        Member entity = mapper.toEntity(dto);
-        
-        // Automatically set insuranceCompany from employer (Phase 8.2)
-        // In this system, Member.insuranceCompany should be set based on the employer's insurance company
-        // For now, we keep it null and let it be set manually or through a different process
-        // TODO: Link Employer to InsuranceCompany in the data model
-        
-        Member saved = repository.save(entity);
-        
-        log.info("Member created successfully with id: {}", saved.getId());
-        return mapper.toResponseDto(saved);
-    }
-
-    @Transactional
-    public MemberResponseDto update(Long id, MemberCreateDto dto) {
-        log.info("Updating member with id: {}", id);
-        
-        // Phase 9: Check if EMPLOYER_ADMIN can edit members
-        User currentUser = authorizationService.getCurrentUser();
-        if (currentUser != null && authorizationService.isEmployerAdmin(currentUser)) {
-            if (!authorizationService.canEmployerEditMembers(currentUser)) {
-                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to update member {} but feature EDIT_MEMBERS is disabled", 
-                    currentUser.getUsername(), id);
-                throw new AccessDeniedException("Your employer account does not have permission to edit members");
-            }
-        }
-        
-        Member entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Member", "id", id));
-
-        // Validate employer exists
-        if (!employerRepository.existsById(dto.getEmployerId())) {
-            throw new ResourceNotFoundException("Employer", "id", dto.getEmployerId());
-        }
-        
-        // Validate unique civilId (excluding current member)
-        if (repository.existsByCivilIdAndIdNot(dto.getCivilId(), id)) {
-            throw new IllegalArgumentException("Civil ID already exists: " + dto.getCivilId());
-        }
-        
-        // Validate unique cardNumber (excluding current member)
-        if (repository.existsByCardNumberAndIdNot(dto.getPolicyNumber(), id)) {
-            throw new IllegalArgumentException("Card number already exists: " + dto.getPolicyNumber());
-        }
-
-        mapper.updateEntityFromDto(entity, dto);
-        Member updated = repository.save(entity);
-        
-        log.info("Member updated successfully: {}", id);
-        return mapper.toResponseDto(updated);
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        log.info("Deleting member with id: {}", id);
-        
-        // Phase 9: Check if EMPLOYER_ADMIN can edit members
-        User currentUser = authorizationService.getCurrentUser();
-        if (currentUser != null && authorizationService.isEmployerAdmin(currentUser)) {
-            if (!authorizationService.canEmployerEditMembers(currentUser)) {
-                log.warn("FeatureCheck: EMPLOYER_ADMIN user {} attempted to delete member {} but feature EDIT_MEMBERS is disabled", 
-                    currentUser.getUsername(), id);
-                throw new AccessDeniedException("Your employer account does not have permission to delete members");
-            }
-        }
-        
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Member", "id", id);
-        }
-        
-        repository.deleteById(id);
-        log.info("Member deleted successfully: {}", id);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<MemberResponseDto> findAllPaginated(Long companyId, String search, Pageable pageable) {
-        log.debug("Finding members with pagination. companyId={}, search={}", companyId, search);
-        
-        // Get current user and apply employer-level filtering
-        User currentUser = authorizationService.getCurrentUser();
-        if (currentUser == null) {
-            log.warn("No authenticated user found when accessing members list");
-            return Page.empty(pageable);
-        }
-        
-        Page<Member> page;
-        
-        // Apply data-level security based on user role
-        if (authorizationService.isSuperAdmin(currentUser)) {
-            // SUPER_ADMIN: Access to all members
-            log.debug("SUPER_ADMIN access: returning all members");
-            page = findAllMembersWithFilters(companyId, search, pageable);
-            
-        } else if (authorizationService.isInsuranceAdmin(currentUser)) {
-            // INSURANCE_ADMIN: Filter by insurance company
-            Long companyFilter = authorizationService.getCompanyFilterForUser(currentUser);
-            if (companyFilter != null) {
-                log.info("Applying insurance company filter: companyId={} for user {}", 
-                    companyFilter, currentUser.getUsername());
-                
-                // Override companyId parameter with user's companyId
-                if (search != null && !search.isBlank()) {
-                    page = repository.searchByInsuranceCompany(companyFilter, search, pageable);
+                if (fmd.getId() != null) {
+                    fm = existing.stream()
+                            .filter(e -> e.getId().equals(fmd.getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new ResourceNotFoundException("Family member not found: " + fmd.getId()));
                 } else {
-                    page = repository.findByInsuranceCompanyIdPaged(companyFilter, pageable);
+                    fm = new FamilyMember();
+                    fm.setMember(member);
                 }
-            } else {
-                log.debug("INSURANCE_ADMIN access: returning all members (no company filter)");
-                page = findAllMembersWithFilters(companyId, search, pageable);
-            }
-            
-        } else if (authorizationService.isEmployerAdmin(currentUser)) {
-            // EMPLOYER_ADMIN: Filter by employer
-            Long employerId = authorizationService.getEmployerFilterForUser(currentUser);
-            if (employerId == null) {
-                log.warn("EMPLOYER_ADMIN user {} has no employerId assigned", currentUser.getUsername());
-                return Page.empty(pageable);
-            }
-            
-            log.info("Applying employer filter: employerId={} for user {}", 
-                employerId, currentUser.getUsername());
-            
-            if (search != null && !search.isBlank()) {
-                page = repository.searchByEmployer(employerId, search, pageable);
-            } else {
-                page = repository.findByEmployerId(employerId, pageable);
-            }
-            
-        } else {
-            // PROVIDER, REVIEWER, USER: No access to member list
-            log.warn("Access denied: user {} with roles {} attempted to access members list", 
-                currentUser.getUsername(), 
-                currentUser.getRoles().stream()
-                    .map(r -> r.getName())
-                    .collect(Collectors.joining(", ")));
-            return Page.empty(pageable);
-        }
-        
-        return page.map(mapper::toResponseDto);
-    }
-    
-    /**
-     * Helper method to find members with company and search filters (for admins only)
-     */
-    private Page<Member> findAllMembersWithFilters(Long companyId, String search, Pageable pageable) {
-        if (companyId != null) {
-            if (search != null && !search.isBlank()) {
-                return repository.searchPagedByCompany(companyId, search, pageable);
-            } else {
-                return repository.findByCompanyId(companyId, pageable);
-            }
-        } else {
-            if (search != null && !search.isBlank()) {
-                return repository.searchPaged(search, pageable);
-            } else {
-                return repository.findAll(pageable);
+
+                // Update fields
+                FamilyMember newEntity = mapper.toFamilyMemberEntity(fmd);
+                newEntity.setId(fm.getId());
+                newEntity.setMember(member);
+
+                familyRepo.save(newEntity);
             }
         }
+
+        List<FamilyMember> updatedFamily = familyRepo.findByMemberId(member.getId());
+
+        return mapper.toViewDto(member, updatedFamily);
     }
 
+    /* ============================================================
+     * FIND ONE MEMBER
+     * ============================================================ */
     @Transactional(readOnly = true)
-    public long count() {
-        return repository.count();
+    public MemberViewDto getMember(Long id) {
+
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found: " + id));
+
+        List<FamilyMember> family = familyRepo.findByMemberId(member.getId());
+
+        return mapper.toViewDto(member, family);
+    }
+
+    /* ============================================================
+     * LIST MEMBERS WITH PAGINATION AND SEARCH
+     * ============================================================ */
+    @Transactional(readOnly = true)
+    public Page<MemberViewDto> listMembers(Pageable pageable, String search) {
+        Page<Member> memberPage;
+        
+        if (search != null && !search.isBlank()) {
+            memberPage = memberRepository.searchPaged(search, pageable);
+        } else {
+            memberPage = memberRepository.findAll(pageable);
+        }
+        
+        return memberPage.map(member -> {
+            List<FamilyMember> family = familyRepo.findByMemberId(member.getId());
+            return mapper.toViewDto(member, family);
+        });
+    }
+
+    /* ============================================================
+     * DELETE MEMBER (Soft Delete)
+     * ============================================================ */
+    @Transactional
+    public void deleteMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        member.setActive(false);
+        memberRepository.save(member);
     }
 }

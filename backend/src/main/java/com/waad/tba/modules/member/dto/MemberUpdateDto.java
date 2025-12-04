@@ -1,49 +1,39 @@
 package com.waad.tba.modules.member.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.util.List;
 
 import com.waad.tba.modules.member.entity.Member;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Schema(description = "DTO for creating a new member")
+@Schema(description = "DTO for updating an existing member")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberCreateDto {
-    
+public class MemberUpdateDto {
+
     // Personal Information
-    @Schema(description = "Full name in Arabic", example = "أحمد محمد علي", required = true)
-    @NotBlank(message = "Full name in Arabic is required")
+    @Schema(description = "Full name in Arabic", example = "أحمد محمد علي")
     private String fullNameArabic;
 
     @Schema(description = "Full name in English", example = "Ahmed Mohammed Ali")
     private String fullNameEnglish;
 
-    @Schema(description = "Civil ID", example = "289123456789", required = true)
-    @NotBlank(message = "Civil ID is required")
-    private String civilId;
-
     @Schema(description = "Card number", example = "MEM-123456")
     private String cardNumber;
 
-    @Schema(description = "Birth date", example = "1990-01-15", required = true)
-    @NotNull(message = "Birth date is required")
+    @Schema(description = "Birth date", example = "1990-01-15")
     private LocalDate birthDate;
 
-    @Schema(description = "Gender", example = "MALE", required = true)
-    @NotNull(message = "Gender is required")
+    @Schema(description = "Gender", example = "MALE")
     private Member.Gender gender;
 
     @Schema(description = "Marital status", example = "MARRIED")
@@ -73,10 +63,6 @@ public class MemberCreateDto {
     private Long insuranceCompanyId;
 
     // Employment Information
-    @Schema(description = "Employer ID", example = "1", required = true)
-    @NotNull(message = "Employer is required")
-    private Long employerId;
-
     @Schema(description = "Employee number", example = "EMP-001")
     private String employeeNumber;
 
@@ -99,13 +85,16 @@ public class MemberCreateDto {
     @Schema(description = "Card status", example = "ACTIVE")
     private Member.CardStatus cardStatus;
 
+    @Schema(description = "Blocked reason", example = "Exceeded limit")
+    private String blockedReason;
+
     @Schema(description = "Notes", example = "VIP member")
     private String notes;
 
     @Schema(description = "Active flag", example = "true")
     private Boolean active;
 
-    // Family Members
+    // Family Members (for sync: add new, update existing, delete removed)
     @Schema(description = "List of family members")
     @Valid
     private List<FamilyMemberDto> familyMembers;

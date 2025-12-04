@@ -1,37 +1,24 @@
 package com.waad.tba.modules.member.mapper;
 
-import com.waad.tba.modules.member.dto.MemberCreateDto;
-import com.waad.tba.modules.member.dto.MemberResponseDto;
-import com.waad.tba.modules.member.entity.Member;
-import com.waad.tba.modules.employer.entity.Employer;
-import com.waad.tba.modules.employer.repository.EmployerRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
-public class MemberMapper {
+import com.waad.tba.modules.member.dto.MemberResponseDto;
+import com.waad.tba.modules.member.entity.Member;
 
-    private final EmployerRepository employerRepository;
+@Component
+public class MemberMapper {
 
     public MemberResponseDto toResponseDto(Member entity) {
         if (entity == null) return null;
-        
-        String employerName = null;
-        Long employerId = null;
-        if (entity.getEmployer() != null) {
-            employerId = entity.getEmployer().getId();
-            employerName = entity.getEmployer().getName();
-        }
-        
+
         return MemberResponseDto.builder()
                 .id(entity.getId())
-                .employerId(employerId)
-                .employerName(employerName)
-                .fullName(entity.getFullName())
+                .employerId(entity.getEmployer() != null ? entity.getEmployer().getId() : null)
+                .employerName(entity.getEmployer() != null ? entity.getEmployer().getName() : null)
+                .fullName(entity.getFullName()) // يستخدم getFullName() من الـ Entity
                 .civilId(entity.getCivilId())
-                .policyNumber(entity.getCardNumber())
-                .dateOfBirth(entity.getDateOfBirth())
+                .policyNumber(entity.getPolicyNumber())
+                .dateOfBirth(entity.getBirthDate()) // ملاحظة: DTO يستخدم dateOfBirth لكن Entity يستخدم birthDate
                 .gender(entity.getGender() != null ? entity.getGender().name() : null)
                 .phone(entity.getPhone())
                 .email(entity.getEmail())
@@ -39,48 +26,5 @@ public class MemberMapper {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
-    }
-
-    public Member toEntity(MemberCreateDto dto) {
-        if (dto == null) return null;
-        
-        Employer employer = employerRepository.findById(dto.getEmployerId())
-                .orElseThrow(() -> new RuntimeException("Employer not found"));
-        
-        return Member.builder()
-                .employer(employer)
-                .firstName(dto.getFullName().split(" ")[0])
-                .lastName(dto.getFullName().contains(" ") ? dto.getFullName().substring(dto.getFullName().indexOf(" ") + 1) : "")
-                .civilId(dto.getCivilId())
-                .cardNumber(dto.getPolicyNumber())
-                .dateOfBirth(dto.getDateOfBirth())
-                .gender(dto.getGender() != null ? Member.Gender.valueOf(dto.getGender()) : null)
-                .phone(dto.getPhone())
-                .email(dto.getEmail())
-                .relation(Member.MemberRelation.SELF)
-                .status(Member.MemberStatus.ACTIVE)
-                .startDate(java.time.LocalDate.now())
-                .active(dto.getActive() != null ? dto.getActive() : true)
-                .build();
-    }
-
-    public void updateEntityFromDto(Member entity, MemberCreateDto dto) {
-        if (dto == null) return;
-        
-        Employer employer = employerRepository.findById(dto.getEmployerId())
-                .orElseThrow(() -> new RuntimeException("Employer not found"));
-        
-        entity.setEmployer(employer);
-        entity.setFirstName(dto.getFullName().split(" ")[0]);
-        entity.setLastName(dto.getFullName().contains(" ") ? dto.getFullName().substring(dto.getFullName().indexOf(" ") + 1) : "");
-        entity.setCivilId(dto.getCivilId());
-        entity.setCardNumber(dto.getPolicyNumber());
-        entity.setDateOfBirth(dto.getDateOfBirth());
-        entity.setGender(dto.getGender() != null ? Member.Gender.valueOf(dto.getGender()) : null);
-        entity.setPhone(dto.getPhone());
-        entity.setEmail(dto.getEmail());
-        if (dto.getActive() != null) {
-            entity.setActive(dto.getActive());
-        }
     }
 }

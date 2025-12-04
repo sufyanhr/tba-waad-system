@@ -6,20 +6,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.waad.tba.common.dto.ApiResponse;
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
-import com.waad.tba.modules.member.dto.MemberResponseDto;
+import com.waad.tba.modules.member.dto.MemberUpdateDto;
+import com.waad.tba.modules.member.dto.MemberViewDto;
 import com.waad.tba.modules.member.service.MemberService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,92 +24,70 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
-@Tag(name = "Members", description = "APIs for managing members")
+@Tag(name = "Members", description = "APIs for managing insurance members")
 public class MemberController {
 
-    private final MemberService service;
-
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
-    @Operation(summary = "Get member by ID", description = "Returns a member by ID.")
-    public ResponseEntity<ApiResponse<MemberResponseDto>> getById(
-            @Parameter(name = "id", description = "Member ID", required = true)
-            @PathVariable Long id) {
-        MemberResponseDto dto = service.findById(id);
-        return ResponseEntity.ok(ApiResponse.success(dto));
-    }
+    private final MemberService memberService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
-    @Operation(summary = "Create member", description = "Creates a new member.")
-    public ResponseEntity<ApiResponse<MemberResponseDto>> create(
-            @Valid @RequestBody MemberCreateDto dto) {
-        MemberResponseDto created = service.create(dto);
+    @Operation(summary = "Create member", description = "Creates a new member with optional family members")
+    public ResponseEntity<ApiResponse<MemberViewDto>> create(@Valid @RequestBody MemberCreateDto dto) {
+        MemberViewDto created = memberService.createMember(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Member created successfully", created));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
-    @Operation(summary = "Update member", description = "Updates an existing member.")
-    public ResponseEntity<ApiResponse<MemberResponseDto>> update(
-            @Parameter(name = "id", description = "Member ID", required = true)
-            @PathVariable Long id,
-            @Valid @RequestBody MemberCreateDto dto) {
-        MemberResponseDto updated = service.update(id, dto);
+    @Operation(summary = "Update member", description = "Updates an existing member and syncs family members")
+    public ResponseEntity<ApiResponse<MemberViewDto>> update(
+            @Parameter(description = "Member ID", required = true) @PathVariable Long id,
+            @Valid @RequestBody MemberUpdateDto dto) {
+        MemberViewDto updated = memberService.updateMember(id, dto);
         return ResponseEntity.ok(ApiResponse.success("Member updated successfully", updated));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
-    @Operation(summary = "Delete member", description = "Deletes a member by ID.")
-    public ResponseEntity<ApiResponse<Void>> delete(
-            @Parameter(name = "id", description = "Member ID", required = true)
-            @PathVariable Long id) {
-        service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Member deleted successfully", null));
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
+    @Operation(summary = "Get member by ID", description = "Returns member details with family members")
+    public ResponseEntity<ApiResponse<MemberViewDto>> get(
+            @Parameter(description = "Member ID", required = true) @PathVariable Long id) {
+        MemberViewDto member = memberService.getMember(id);
+        return ResponseEntity.ok(ApiResponse.success(member));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
-    @Operation(summary = "List members with pagination", description = "Returns a paginated list of members with optional company filter and search")
-    public ResponseEntity<ApiResponse<PaginationResponse<MemberResponseDto>>> list(
-            @Parameter(name = "page", description = "Page number (1-based)") 
-            @RequestParam(defaultValue = "1") int page,
-            @Parameter(name = "size", description = "Page size") 
-            @RequestParam(defaultValue = "10") int size,
-            @Parameter(name = "search", description = "Search query") 
-            @RequestParam(required = false) String search,
-            @Parameter(name = "companyId", description = "Filter by company ID") 
-            @RequestParam(required = false) Long companyId,
-            @Parameter(name = "sortBy", description = "Sort by field") 
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @Parameter(name = "sortDir", description = "Sort direction") 
-            @RequestParam(defaultValue = "desc") String sortDir) {
+    @Operation(summary = "List members with pagination", description = "Returns paginated list of members")
+    public ResponseEntity<ApiResponse<PaginationResponse<MemberViewDto>>> list(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort by field") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Sort direction (asc/desc)") @RequestParam(defaultValue = "desc") String sortDir,
+            @Parameter(description = "Search query") @RequestParam(required = false) String search) {
         
-        org.springframework.data.domain.Pageable pageable = PageRequest.of(
-            Math.max(0, page - 1), 
-            size,
-            Sort.by(Sort.Direction.fromString(sortDir), sortBy)
-        );
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
         
-        Page<MemberResponseDto> pageResult = service.findAllPaginated(companyId, search, pageable);
+        Page<MemberViewDto> pageResult = memberService.listMembers(pageRequest, search);
         
-        PaginationResponse<MemberResponseDto> response = PaginationResponse.<MemberResponseDto>builder()
+        PaginationResponse<MemberViewDto> response = PaginationResponse.<MemberViewDto>builder()
                 .items(pageResult.getContent())
                 .total(pageResult.getTotalElements())
-                .page(page)
-                .size(size)
+                .page(pageResult.getNumber())
+                .size(pageResult.getSize())
                 .build();
         
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/count")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
-    @Operation(summary = "Count members", description = "Returns total number of members")
-    public ResponseEntity<ApiResponse<Long>> count() {
-        long total = service.count();
-        return ResponseEntity.ok(ApiResponse.success(total));
+    @Operation(summary = "Delete member", description = "Soft deletes a member (sets active=false)")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @Parameter(description = "Member ID", required = true) @PathVariable Long id) {
+        memberService.deleteMember(id);
+        return ResponseEntity.ok(ApiResponse.success("Member deleted successfully", null));
     }
 }

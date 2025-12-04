@@ -10,14 +10,17 @@ import lombok.ToString;
 @ToString
 @Builder
 public class ApiError {
-    @Schema(description = "Always 'error'", example = "error")
-    private final String status;
+    @Schema(description = "Always false for errors", example = "false")
+    private final boolean success;
 
     @Schema(description = "Standard error code identifying the failure type", example = "USER_NOT_FOUND")
-    private final String code;
+    private final String errorCode;
 
     @Schema(description = "Human readable error message", example = "The requested user does not exist")
     private final String message;
+
+    @Schema(description = "Unique tracking ID for this error (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
+    private final String trackingId;
 
     @Schema(description = "Timestamp in ISO-8601 UTC format", example = "2025-01-01T10:00:00Z")
     private final String timestamp;
@@ -28,11 +31,12 @@ public class ApiError {
     @Schema(description = "Optional additional details (validation errors, context, etc.)")
     private final Object details;
 
-    public static ApiError of(ErrorCode code, String message, String path, Object details, String timestamp) {
+    public static ApiError of(ErrorCode code, String message, String path, Object details, String timestamp, String trackingId) {
         return ApiError.builder()
-                .status("error")
-                .code(code.name())
+                .success(false)
+                .errorCode(code.name())
                 .message(message)
+                .trackingId(trackingId)
                 .timestamp(timestamp)
                 .path(path)
                 .details(details)

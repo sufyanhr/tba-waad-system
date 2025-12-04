@@ -116,18 +116,17 @@ public class SystemAdminService {
 
         // Member
         Member member = Member.builder()
-                .firstName("Fatima")
-                .lastName("Al-Mahdi")
+                .fullNameArabic("فاطمة المهدي")
+                .fullNameEnglish("Fatima Al-Mahdi")
                 .civilId("198912345678")
                 .cardNumber("MBR-0001")
                 .phone("+218942345678")
                 .email("fatima.mahdi@example.ly")
                 .employer(employer)
-                .relation(Member.MemberRelation.SELF)
                 .status(Member.MemberStatus.ACTIVE)
                 .gender(Member.Gender.FEMALE)
-                .dateOfBirth(LocalDate.of(1989, 1, 1))
-                .startDate(LocalDate.now())
+                .birthDate(LocalDate.of(1989, 1, 1))
+                .joinDate(LocalDate.now())
                 .active(true)
                 .build();
         memberRepository.save(member);
