@@ -72,13 +72,7 @@ export default function EmployersPage() {
       {
         header: 'Status',
         accessorKey: 'active',
-        cell: ({ getValue }) => (
-          <Chip
-            label={getValue() ? 'Active' : 'Inactive'}
-            color={getValue() ? 'success' : 'default'}
-            size="small"
-          />
-        )
+        cell: ({ getValue }) => <Chip label={getValue() ? 'Active' : 'Inactive'} color={getValue() ? 'success' : 'default'} size="small" />
       }
     ],
     []
@@ -182,8 +176,7 @@ export default function EmployersPage() {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete employer "{employerToDelete?.name}"?
-            This action cannot be undone.
+            Are you sure you want to delete employer "{employerToDelete?.name}"? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

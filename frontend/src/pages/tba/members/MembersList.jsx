@@ -1,377 +1,182 @@
-import { useState, useEffect, useMemo } from 'react';
+// src/pages/tba/members/MembersList.jsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// material-ui
 import {
   Box,
   Button,
-  Chip,
+  CircularProgress,
   IconButton,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Tooltip,
   Typography,
   TablePagination
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
-  Search as SearchIcon
-} from '@mui/icons-material';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
-// project imports
 import MainCard from 'components/MainCard';
-import RBACGuard from 'components/tba/RBACGuard';
-import TableSkeleton from 'components/tba/LoadingSkeleton';
-import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
-import membersService from 'services/members.service';
-import useAuth from 'hooks/useAuth';
-import { useSnackbar } from 'notistack';
+import { useMembersList } from 'hooks/useMembers';
+import * as membersService from 'services/members.service';
 
-// third-party
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper
-} from '@tanstack/react-table';
-
-// ==============================|| MEMBERS LIST PAGE ||============================== //
-
-const columnHelper = createColumnHelper();
-
-export default function MembersList() {
+const MembersList = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { enqueueSnackbar } = useSnackbar();
+  const [searchInput, setSearchInput] = useState('');
 
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [memberToDelete, setMemberToDelete] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
+  const { data, loading, error, params, setParams, refresh } = useMembersList({
+    page: 0,
+    size: 10,
+    sortBy: 'id',
+    sortDir: 'DESC'
+  });
 
-  // Define table columns
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('fullName', {
-        header: 'Member Name',
-        cell: (info) => (
-          <Typography variant="body2" fontWeight={500}>
-            {info.getValue()}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('civilId', {
-        header: 'Civil ID',
-        cell: (info) => info.getValue()
-      }),
-      columnHelper.accessor('policyNumber', {
-        header: 'Policy Number',
-        cell: (info) => (
-          <Typography variant="body2" color="primary">
-            {info.getValue()}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('employerName', {
-        header: 'Employer',
-        cell: (info) => info.getValue() || '-'
-      }),
-      columnHelper.accessor('phone', {
-        header: 'Phone',
-        cell: (info) => info.getValue() || '-'
-      }),
-      columnHelper.accessor('active', {
-        header: 'Status',
-        cell: (info) => (
-          <Chip
-            label={info.getValue() ? 'Active' : 'Inactive'}
-            color={info.getValue() ? 'success' : 'default'}
-            size="small"
-          />
-        )
-      }),
-      columnHelper.display({
-        id: 'actions',
-        header: 'Actions',
-        cell: (info) => (
-          <Stack direction="row" spacing={0.5} justifyContent="center">
-            <Tooltip title="View">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={() => handleViewMember(info.row.original.id)}
-              >
-                <VisibilityIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <RBACGuard permission="MEMBER_MANAGE">
-              <Tooltip title="Edit">
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => handleEditMember(info.row.original.id)}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDeleteClick(info.row.original)}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </RBACGuard>
-          </Stack>
-        )
-      })
-    ],
-    []
-  );
-
-  // Load members from API
-  const loadMembers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const result = await membersService.list({
-        page: page + 1, // Backend uses 1-based pagination
-        size: rowsPerPage,
-        search: searchTerm,
-        sortBy: 'createdAt',
-        sortDir: 'desc'
-      });
-
-      if (result.success) {
-        setMembers(result.data?.items || []);
-        setTotalCount(result.data?.total || 0);
-      } else {
-        setError(result.error);
-        setMembers([]);
-        setTotalCount(0);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to load members');
-      setMembers([]);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setParams((prev) => ({ ...prev, page: 0, search: searchInput.trim() }));
   };
 
-  useEffect(() => {
-    loadMembers();
-  }, [page, rowsPerPage, searchTerm]);
-
-  // Event handlers
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleChangePage = (_, newPage) => {
+    setParams((prev) => ({ ...prev, page: newPage }));
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    setParams((prev) => ({
+      ...prev,
+      page: 0,
+      size: parseInt(event.target.value, 10)
+    }));
   };
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-    setPage(0);
-  };
-
-  const handleViewMember = (id) => {
-    navigate(`/tba/members/${id}`);
-  };
-
-  const handleEditMember = (id) => {
-    navigate(`/tba/members/edit/${id}`);
-  };
-
-  const handleDeleteClick = (member) => {
-    setMemberToDelete(member);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
+  const handleDelete = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف المشترك؟ (سيتم الإخفاء فقط)')) return;
     try {
-      const result = await membersService.delete(memberToDelete.id);
-      
-      if (result.success) {
-        enqueueSnackbar(result.message, { variant: 'success' });
-        setDeleteDialogOpen(false);
-        setMemberToDelete(null);
-        loadMembers();
-      } else {
-        enqueueSnackbar(result.error, { variant: 'error' });
-      }
+      await membersService.deleteMember(id);
+      refresh();
     } catch (err) {
-      enqueueSnackbar('Failed to delete member', { variant: 'error' });
+      console.error('Failed to delete member', err);
+      alert('حدث خطأ أثناء الحذف');
     }
   };
 
-  const handleDeleteCancel = () => {
-    setDeleteDialogOpen(false);
-    setMemberToDelete(null);
-  };
-
-  const handleCreateMember = () => {
-    navigate('/tba/members/create');
-  };
-
-  const handleRetry = () => {
-    loadMembers();
-  };
-
-  // Initialize React Table
-  const table = useReactTable({
-    data: members,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-    pageCount: Math.ceil(totalCount / rowsPerPage)
-  });
-
   return (
-    <RBACGuard permission="MEMBER_VIEW">
-      <MainCard
-        title="Members"
-        secondary={
-          <RBACGuard permission="MEMBER_MANAGE">
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateMember}>
-              Add Member
+    <MainCard title="الأعضاء (المؤمن عليهم)">
+      <Stack spacing={2}>
+        {/* شريط الأكشن العلوي */}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ xs: 'stretch', sm: 'center' }}
+          spacing={2}
+        >
+          <Typography variant="body2" color="text.secondary">
+            عرض قائمة المؤمن عليهم مع إمكانية البحث والفرز.
+          </Typography>
+
+          <Stack direction="row" spacing={1}>
+            <form onSubmit={handleSearchSubmit}>
+              <Stack direction="row" spacing={1}>
+                <TextField
+                  size="small"
+                  placeholder="بحث بالاسم أو الرقم الوطني..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                />
+                <Button type="submit" variant="outlined">
+                  بحث
+                </Button>
+              </Stack>
+            </form>
+
+            <Button variant="contained" color="primary" onClick={() => navigate('/tba/members/create')}>
+              إضافة مشترك جديد
             </Button>
-          </RBACGuard>
-        }
-      >
-        <Stack spacing={3}>
-          {/* Search Bar */}
-          <TextField
-            placeholder="Search by name, civil ID, or policy number..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
-            }}
-            fullWidth
-          />
-
-          {/* Error State */}
-          {error && !loading && (
-            <ErrorFallback error={error} onRetry={handleRetry} />
-          )}
-
-          {/* Loading State */}
-          {loading && <TableSkeleton rows={rowsPerPage} columns={7} />}
-
-          {/* Empty State */}
-          {!loading && !error && members.length === 0 && (
-            <EmptyState
-              title="No members found"
-              description={
-                searchTerm
-                  ? 'Try adjusting your search criteria'
-                  : 'Get started by adding your first member'
-              }
-              action={handleCreateMember}
-              actionLabel="Add Member"
-            />
-          )}
-
-          {/* Data Table */}
-          {!loading && !error && members.length > 0 && (
-            <Box sx={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <th
-                          key={header.id}
-                          style={{
-                            textAlign: 'left',
-                            padding: '12px 16px',
-                            borderBottom: '1px solid #e0e0e0',
-                            fontWeight: 600,
-                            color: '#666'
-                          }}
-                        >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      style={{
-                        borderBottom: '1px solid #f0f0f0',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fafafa')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} style={{ padding: '12px 16px' }}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Box>
-          )}
-
-          {/* Pagination */}
-          {!loading && !error && totalCount > 0 && (
-            <TablePagination
-              component="div"
-              count={totalCount}
-              page={page}
-              onPageChange={handleChangePage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-            />
-          )}
+          </Stack>
         </Stack>
 
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete member "<strong>{memberToDelete?.fullName}</strong>"? This action cannot
-              be undone.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleDeleteCancel}>Cancel</Button>
-            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </MainCard>
-    </RBACGuard>
+        {/* جدول البيانات */}
+        <Box sx={{ position: 'relative', minHeight: 200 }}>
+          {loading && (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              sx={{ position: 'absolute', inset: 0, zIndex: 1, bgcolor: 'rgba(255,255,255,0.5)' }}
+            >
+              <CircularProgress />
+            </Stack>
+          )}
+
+          {error && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              حدث خطأ أثناء جلب البيانات.
+            </Typography>
+          )}
+
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">#</TableCell>
+                <TableCell>اسم المشترك (عربي)</TableCell>
+                <TableCell>اسم المشترك (إنجليزي)</TableCell>
+                <TableCell>الرقم الوطني</TableCell>
+                <TableCell>جهة العمل</TableCell>
+                <TableCell>الحالة</TableCell>
+                <TableCell align="center">إجراءات</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && !loading && (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    لا توجد بيانات حالياً
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {data.items.map((member, index) => (
+                <TableRow key={member.id} hover>
+                  <TableCell align="center">{data.page * data.size + index + 1}</TableCell>
+                  <TableCell>{member.fullNameArabic || '-'}</TableCell>
+                  <TableCell>{member.fullNameEnglish || '-'}</TableCell>
+                  <TableCell>{member.civilId || '-'}</TableCell>
+                  <TableCell>{member.employerName || '-'}</TableCell>
+                  <TableCell>{member.status || '-'}</TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={0.5} justifyContent="center">
+                      <IconButton size="small" onClick={() => navigate(`/tba/members/view/${member.id}`)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => navigate(`/tba/members/edit/${member.id}`)}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(member.id)}>
+                        <DeleteOutlineOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          <TablePagination
+            component="div"
+            count={data.total}
+            page={params.page}
+            onPageChange={handleChangePage}
+            rowsPerPage={params.size}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="عدد الصفوف في الصفحة"
+          />
+        </Box>
+      </Stack>
+    </MainCard>
   );
-}
+};
+
+export default MembersList;

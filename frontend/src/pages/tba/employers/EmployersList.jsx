@@ -1,417 +1,185 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// material-ui
 import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   IconButton,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  TablePagination,
-  Tooltip,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  TablePagination
 } from '@mui/material';
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-  EyeOutlined
-} from '@ant-design/icons';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
-// project imports
 import MainCard from 'components/MainCard';
-import RBACGuard from 'components/tba/RBACGuard';
-import TableSkeleton from 'components/tba/LoadingSkeleton';
-import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
-import employersService from 'services/employers.service';
-import useAuth from 'hooks/useAuth';
-import { useSnackbar } from 'notistack';
+import { useEmployersList } from 'hooks/useEmployers';
+import * as employersService from 'services/employers.service';
 
-// third-party
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper
-} from '@tanstack/react-table';
-
-// ==============================|| EMPLOYERS LIST PAGE ||============================== //
-
-const columnHelper = createColumnHelper();
-
-export default function EmployersList() {
+const EmployersList = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { enqueueSnackbar } = useSnackbar();
+  const [searchInput, setSearchInput] = useState('');
 
-  // State
-  const [employers, setEmployers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalElements, setTotalElements] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedEmployer, setSelectedEmployer] = useState(null);
+  const { data, loading, error, params, setParams, refresh } = useEmployersList({
+    page: 0,
+    size: 10,
+    sortBy: 'id',
+    sortDir: 'DESC'
+  });
 
-  // Column definitions
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('name', {
-        header: 'Employer Name',
-        cell: (info) => (
-          <Typography variant="body2" fontWeight={500}>
-            {info.getValue()}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('code', {
-        header: 'Code',
-        cell: (info) => (
-          <Typography variant="body2" color="text.secondary">
-            {info.getValue()}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('contactName', {
-        header: 'Contact Person',
-        cell: (info) => info.getValue() || '-'
-      }),
-      columnHelper.accessor('phone', {
-        header: 'Phone',
-        cell: (info) => info.getValue() || '-'
-      }),
-      columnHelper.accessor('email', {
-        header: 'Email',
-        cell: (info) => info.getValue() || '-'
-      }),
-      columnHelper.accessor('active', {
-        header: 'Status',
-        cell: (info) => (
-          <Chip
-            label={info.getValue() ? 'Active' : 'Inactive'}
-            color={info.getValue() ? 'success' : 'default'}
-            size="small"
-          />
-        )
-      }),
-      columnHelper.accessor('id', {
-        header: 'Actions',
-        cell: (info) => (
-          <Stack direction="row" spacing={0.5}>
-            <Tooltip title="View">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={() => handleView(info.getValue())}
-              >
-                <EyeOutlined />
-              </IconButton>
-            </Tooltip>
-            <RBACGuard requiredPermission="EMPLOYER_UPDATE">
-              <Tooltip title="Edit">
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => handleEdit(info.getValue())}
-                >
-                  <EditOutlined />
-                </IconButton>
-              </Tooltip>
-            </RBACGuard>
-            <RBACGuard requiredPermission="EMPLOYER_DELETE">
-              <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => openDeleteDialog(info.row.original)}
-                >
-                  <DeleteOutlined />
-                </IconButton>
-              </Tooltip>
-            </RBACGuard>
-          </Stack>
-        )
-      })
-    ],
-    [navigate]
-  );
-
-  // Load employers
-  const loadEmployers = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await employersService.list({
-        page,
-        size: rowsPerPage,
-        search: searchTerm,
-        status: statusFilter || undefined
-      });
-
-      if (result.success) {
-        const responseData = result.data;
-        setEmployers(responseData.content || []);
-        setTotalElements(responseData.totalElements || 0);
-      } else {
-        setError(result.error);
-        enqueueSnackbar(result.error, { variant: 'error' });
-      }
-    } catch (err) {
-      const errorMessage = err.message || 'Failed to load employers';
-      setError(errorMessage);
-      enqueueSnackbar(errorMessage, { variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setParams((prev) => ({ ...prev, page: 0, search: searchInput.trim() }));
   };
 
-  useEffect(() => {
-    loadEmployers();
-  }, [page, rowsPerPage, searchTerm, statusFilter]);
-
-  // Handlers
-  const handleRetry = () => {
-    loadEmployers();
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleChangePage = (_, newPage) => {
+    setParams((prev) => ({ ...prev, page: newPage }));
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    setParams((prev) => ({
+      ...prev,
+      page: 0,
+      size: parseInt(event.target.value, 10)
+    }));
   };
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    setPage(0);
-  };
-
-  const handleStatusChange = (event) => {
-    setStatusFilter(event.target.value);
-    setPage(0);
-  };
-
-  const handleCreate = () => {
-    navigate('/tpa/employers/create');
-  };
-
-  const handleView = (id) => {
-    navigate(`/tpa/employers/view/${id}`);
-  };
-
-  const handleEdit = (id) => {
-    navigate(`/tpa/employers/edit/${id}`);
-  };
-
-  const openDeleteDialog = (employer) => {
-    setSelectedEmployer(employer);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedEmployer) return;
-
+  const handleDelete = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف جهة العمل؟')) return;
     try {
-      const result = await employersService.delete(selectedEmployer.id);
-      
-      if (result.success) {
-        enqueueSnackbar(result.message || 'Employer deleted successfully', { variant: 'success' });
-        setDeleteDialogOpen(false);
-        setSelectedEmployer(null);
-        loadEmployers();
-      } else {
-        enqueueSnackbar(result.error, { variant: 'error' });
-      }
+      await employersService.deleteEmployer(id);
+      refresh();
     } catch (err) {
-      enqueueSnackbar(err.message || 'Failed to delete employer', { variant: 'error' });
+      console.error('Failed to delete employer', err);
+      alert('حدث خطأ أثناء الحذف');
     }
   };
 
-  // React Table initialization
-  const table = useReactTable({
-    data: employers,
-    columns,
-    getCoreRowModel: getCoreRowModel()
-  });
-
   return (
-    <RBACGuard requiredPermission="EMPLOYER_READ">
-      <MainCard
-        title="Employers"
-        content={false}
-        secondary={
-          <RBACGuard requiredPermission="EMPLOYER_CREATE">
-            <Button
-              variant="contained"
-              startIcon={<PlusOutlined />}
-              onClick={handleCreate}
-            >
-              Add Employer
+    <MainCard title="جهات العمل (Employers)">
+      <Stack spacing={2}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ xs: 'stretch', sm: 'center' }}
+          spacing={2}
+        >
+          <Typography variant="body2" color="text.secondary">
+            عرض قائمة جهات العمل مع إمكانية البحث والفرز.
+          </Typography>
+
+          <Stack direction="row" spacing={1}>
+            <form onSubmit={handleSearchSubmit}>
+              <Stack direction="row" spacing={1}>
+                <TextField
+                  size="small"
+                  placeholder="بحث بالاسم أو الكود..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                />
+                <Button type="submit" variant="outlined">
+                  بحث
+                </Button>
+              </Stack>
+            </form>
+
+            <Button variant="contained" color="primary" onClick={() => navigate('/tba/employers/create')}>
+              إضافة جهة عمل جديدة
             </Button>
-          </RBACGuard>
-        }
-      >
-        {/* Filters */}
-        <Box sx={{ p: 2 }}>
-          <Stack direction="row" spacing={2}>
-            <TextField
-              fullWidth
-              placeholder="Search employers by name, code, or contact..."
-              value={searchTerm}
-              onChange={handleSearch}
-              InputProps={{
-                startAdornment: <SearchOutlined style={{ marginRight: 8 }} />
-              }}
-            />
-            <FormControl sx={{ minWidth: 180 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={handleStatusChange}
-                label="Status"
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="true">Active</MenuItem>
-                <MenuItem value="false">Inactive</MenuItem>
-              </Select>
-            </FormControl>
           </Stack>
-        </Box>
+        </Stack>
 
-        {/* Loading State */}
-        {loading && <TableSkeleton rows={rowsPerPage} columns={7} />}
+        <Box sx={{ position: 'relative', minHeight: 200 }}>
+          {loading && (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 1,
+                bgcolor: 'rgba(255,255,255,0.5)'
+              }}
+            >
+              <CircularProgress />
+            </Stack>
+          )}
 
-        {/* Error State */}
-        {!loading && error && (
-          <ErrorFallback error={error} onRetry={handleRetry} />
-        )}
+          {error && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              حدث خطأ أثناء جلب البيانات.
+            </Typography>
+          )}
 
-        {/* Empty State */}
-        {!loading && !error && employers.length === 0 && (
-          <EmptyState
-            title="No employers found"
-            description={
-              searchTerm || statusFilter
-                ? 'Try adjusting your search or filter criteria'
-                : 'Get started by adding your first employer'
-            }
-            action={handleCreate}
-            actionLabel="Add Employer"
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">#</TableCell>
+                <TableCell>اسم جهة العمل</TableCell>
+                <TableCell>كود الشركة</TableCell>
+                <TableCell>رقم الهاتف</TableCell>
+                <TableCell align="center">الحالة</TableCell>
+                <TableCell align="center">إجراءات</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && !loading && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    لا توجد بيانات حالياً
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {data.items.map((employer, index) => (
+                <TableRow key={employer.id} hover>
+                  <TableCell align="center">{data.page * data.size + index + 1}</TableCell>
+                  <TableCell>{employer.name || '-'}</TableCell>
+                  <TableCell>{employer.companyCode || '-'}</TableCell>
+                  <TableCell>{employer.phone || '-'}</TableCell>
+                  <TableCell align="center">
+                    <Chip label={employer.active ? 'نشط' : 'غير نشط'} color={employer.active ? 'success' : 'default'} size="small" />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={0.5} justifyContent="center">
+                      <IconButton size="small" onClick={() => navigate(`/tba/employers/view/${employer.id}`)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => navigate(`/tba/employers/edit/${employer.id}`)}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(employer.id)}>
+                        <DeleteOutlineOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          <TablePagination
+            component="div"
+            count={data.total}
+            page={params.page}
+            onPageChange={handleChangePage}
+            rowsPerPage={params.size}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="عدد الصفوف في الصفحة"
           />
-        )}
-
-        {/* Data Table */}
-        {!loading && !error && employers.length > 0 && (
-          <>
-            <Box sx={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <th
-                          key={header.id}
-                          style={{
-                            padding: '16px',
-                            textAlign: 'left',
-                            borderBottom: '1px solid #e0e0e0',
-                            fontWeight: 600,
-                            backgroundColor: '#fafafa'
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      style={{
-                        borderBottom: '1px solid #f0f0f0',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f5f5f5';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          style={{
-                            padding: '16px'
-                          }}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Box>
-
-            {/* Pagination */}
-            <TablePagination
-              component="div"
-              count={totalElements}
-              page={page}
-              onPageChange={handleChangePage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-            />
-          </>
-        )}
-
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete employer "{selectedEmployer?.name}"?
-              This action cannot be undone.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleDelete} color="error" variant="contained">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </MainCard>
-    </RBACGuard>
+        </Box>
+      </Stack>
+    </MainCard>
   );
-}
+};
+
+export default EmployersList;

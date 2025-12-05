@@ -34,7 +34,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import visitsService from 'services/visits.service';
-import membersService from 'services/members.service';
+import * as membersService from 'services/members.service';
 import providersService from 'services/providers.service';
 import { EMPLOYERS } from 'constants/companies';
 import MainCard from 'components/MainCard';
@@ -96,11 +96,9 @@ export default function VisitsList() {
   // Load members
   const loadMembers = useCallback(async () => {
     try {
-      const response = await membersService.list({ size: 1000 });
-      if (response.success) {
-        const membersList = response.data?.content || [];
-        setMembers(membersList);
-      }
+      const response = await membersService.getMembers({ size: 1000 });
+      const membersList = response.items || [];
+      setMembers(membersList);
     } catch (err) {
       console.error('Error loading members:', err);
     }

@@ -1,237 +1,121 @@
-import { useState, useEffect } from 'react';
+// src/pages/tba/members/MemberView.jsx
 import { useNavigate, useParams } from 'react-router-dom';
-
-// material-ui
-import {
-  Box,
-  Button,
-  Grid,
-  Typography,
-  Chip,
-  Stack,
-  CircularProgress,
-  Divider
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-// project imports
+import { Box, Button, CircularProgress, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import MainCard from 'components/MainCard';
-import { getMemberById } from 'api/members';
-import { useSnackbar } from 'notistack';
+import { useMemberDetails } from 'hooks/useMembers';
 
-// ==============================|| MEMBER VIEW PAGE ||============================== //
+const InfoRow = ({ label, value }) => (
+  <Stack direction="row" spacing={1} sx={{ mb: 0.5 }}>
+    <Typography variant="subtitle2" sx={{ minWidth: 160 }}>
+      {label}:
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      {value ?? '-'}
+    </Typography>
+  </Stack>
+);
 
-export default function MemberView() {
+const MemberView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
-
-  const [member, setMember] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadMember = async () => {
-      try {
-        setLoading(true);
-        const response = await getMemberById(id);
-        const memberData = response.data?.data;
-        setMember(memberData);
-      } catch (error) {
-        console.error('Error loading member:', error);
-        enqueueSnackbar('Failed to load member', { variant: 'error' });
-        navigate('/tba/members');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMember();
-  }, [id, navigate, enqueueSnackbar]);
-
-  const handleEdit = () => {
-    navigate(`/tba/members/edit/${id}`);
-  };
-
-  const handleBack = () => {
-    navigate('/tba/members');
-  };
-
-  if (loading) {
-    return (
-      <MainCard title="Member Details">
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
-          <CircularProgress />
-        </Box>
-      </MainCard>
-    );
-  }
-
-  if (!member) {
-    return (
-      <MainCard title="Member Details">
-        <Typography>Member not found</Typography>
-      </MainCard>
-    );
-  }
+  const { member, loading, error } = useMemberDetails(id);
 
   return (
     <MainCard
-      title="Member Details"
+      title="تفاصيل المشترك"
       secondary={
-        <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-            Back
-          </Button>
-          <Button variant="contained" startIcon={<EditIcon />} onClick={handleEdit}>
-            Edit
-          </Button>
-        </Stack>
+        <Button size="small" variant="outlined" onClick={() => navigate('/tba/members')}>
+          رجوع إلى القائمة
+        </Button>
       }
     >
-      <Grid container spacing={3}>
-        {/* Personal Information */}
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Personal Information
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-        </Grid>
+      {loading && (
+        <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 200 }}>
+          <CircularProgress />
+        </Stack>
+      )}
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Full Name
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.fullName}
-          </Typography>
-        </Grid>
+      {!loading && error && <Typography color="error">حدث خطأ أثناء جلب بيانات المشترك.</Typography>}
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Civil ID
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.civilId}
-          </Typography>
-        </Grid>
+      {!loading && member && (
+        <Stack spacing={3}>
+          {/* بيانات أساسية */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              البيانات الأساسية
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <InfoRow label="الاسم (عربي)" value={member.fullNameArabic} />
+                <InfoRow label="الاسم (إنجليزي)" value={member.fullNameEnglish} />
+                <InfoRow label="الرقم الوطني" value={member.civilId} />
+                <InfoRow label="تاريخ الميلاد" value={member.birthDate} />
+                <InfoRow label="الجنس" value={member.gender} />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <InfoRow label="جهة العمل" value={member.employerName} />
+                <InfoRow label="رقم البطاقة" value={member.cardNumber} />
+                <InfoRow label="رقم البوليسة" value={member.policyNumber} />
+                <InfoRow label="رقم الموظف" value={member.employeeNumber} />
+                <InfoRow label="الحالة" value={member.status} />
+              </Grid>
+            </Grid>
+          </Box>
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Policy Number
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.policyNumber}
-          </Typography>
-        </Grid>
+          {/* بيانات الاتصال */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              بيانات الاتصال
+            </Typography>
+            <InfoRow label="رقم الهاتف" value={member.phone} />
+            <InfoRow label="البريد الإلكتروني" value={member.email} />
+            <InfoRow label="العنوان" value={member.address} />
+          </Box>
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Date of Birth
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.dateOfBirth || '-'}
-          </Typography>
-        </Grid>
+          {/* أفراد العائلة */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              أفراد العائلة ({member.familyMembersCount ?? 0})
+            </Typography>
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Gender
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.gender || '-'}
-          </Typography>
-        </Grid>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">#</TableCell>
+                  <TableCell>الاسم</TableCell>
+                  <TableCell>العلاقة</TableCell>
+                  <TableCell>الرقم الوطني</TableCell>
+                  <TableCell>تاريخ الميلاد</TableCell>
+                  <TableCell>الجنس</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(!member.familyMembers || member.familyMembers.length === 0) && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      لا توجد بيانات لعائلة هذا المشترك
+                    </TableCell>
+                  </TableRow>
+                )}
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Status
-          </Typography>
-          <Chip
-            label={member.active ? 'Active' : 'Inactive'}
-            color={member.active ? 'success' : 'default'}
-            size="small"
-          />
-        </Grid>
-
-        {/* Contact Information */}
-        <Grid item xs={12} sx={{ mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Contact Information
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Phone
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.phone || '-'}
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Email
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.email || '-'}
-          </Typography>
-        </Grid>
-
-        {/* Employer Information */}
-        <Grid item xs={12} sx={{ mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Employer Information
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Employer
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.employerName || '-'}
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Company ID
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.companyId}
-          </Typography>
-        </Grid>
-
-        {/* System Information */}
-        <Grid item xs={12} sx={{ mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            System Information
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Created At
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.createdAt ? new Date(member.createdAt).toLocaleString() : '-'}
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Typography variant="body2" color="text.secondary">
-            Last Updated
-          </Typography>
-          <Typography variant="body1" fontWeight={500}>
-            {member.updatedAt ? new Date(member.updatedAt).toLocaleString() : '-'}
-          </Typography>
-        </Grid>
-      </Grid>
+                {member.familyMembers &&
+                  member.familyMembers.map((fm, index) => (
+                    <TableRow key={fm.id ?? index}>
+                      <TableCell align="center">{index + 1}</TableCell>
+                      <TableCell>{fm.fullNameArabic || fm.fullNameEnglish}</TableCell>
+                      <TableCell>{fm.relationship}</TableCell>
+                      <TableCell>{fm.civilId}</TableCell>
+                      <TableCell>{fm.birthDate}</TableCell>
+                      <TableCell>{fm.gender}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </Stack>
+      )}
     </MainCard>
   );
-}
+};
+
+export default MemberView;

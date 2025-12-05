@@ -1,165 +1,30 @@
-import axiosServices from 'utils/axios';
+import axios from 'utils/axios';
 
-/**
- * Employers Service
- * Handles all employer-related API operations
- */
+const BASE_URL = '/api/employers';
 
-const BASE_URL = '/employers';
+const unwrap = (response) => response?.data?.data ?? response?.data;
 
-class EmployersService {
-  /**
-   * List all employers with pagination and filters
-   * @param {Object} params - { page, size, search, companyId, sortBy, sortDir }
-   * @returns {Promise}
-   */
-  async list(params = {}) {
-    try {
-      const response = await axiosServices.get(BASE_URL, { params });
-      return {
-        success: true,
-        data: response.data?.data || {},
-        message: response.data?.message
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to fetch employers',
-        data: null
-      };
-    }
-  }
+export const getEmployers = async (params = {}) => {
+  const response = await axios.get(BASE_URL, { params });
+  return unwrap(response);
+};
 
-  /**
-   * Get employer by ID
-   * @param {number} id - Employer ID
-   * @returns {Promise}
-   */
-  async get(id) {
-    try {
-      const response = await axiosServices.get(`${BASE_URL}/${id}`);
-      return {
-        success: true,
-        data: response.data?.data || null,
-        message: response.data?.message
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to fetch employer',
-        data: null
-      };
-    }
-  }
+export const getEmployerById = async (id) => {
+  const response = await axios.get(`${BASE_URL}/${id}`);
+  return unwrap(response);
+};
 
-  /**
-   * Create new employer
-   * @param {Object} data - Employer data
-   * @returns {Promise}
-   */
-  async create(data) {
-    try {
-      const response = await axiosServices.post(BASE_URL, data);
-      return {
-        success: true,
-        data: response.data?.data || null,
-        message: response.data?.message || 'Employer created successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to create employer',
-        data: null
-      };
-    }
-  }
+export const createEmployer = async (payload) => {
+  const response = await axios.post(BASE_URL, payload);
+  return unwrap(response);
+};
 
-  /**
-   * Update employer
-   * @param {number} id - Employer ID
-   * @param {Object} data - Updated employer data
-   * @returns {Promise}
-   */
-  async update(id, data) {
-    try {
-      const response = await axiosServices.put(`${BASE_URL}/${id}`, data);
-      return {
-        success: true,
-        data: response.data?.data || null,
-        message: response.data?.message || 'Employer updated successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to update employer',
-        data: null
-      };
-    }
-  }
+export const updateEmployer = async (id, payload) => {
+  const response = await axios.put(`${BASE_URL}/${id}`, payload);
+  return unwrap(response);
+};
 
-  /**
-   * Delete employer
-   * @param {number} id - Employer ID
-   * @returns {Promise}
-   */
-  async delete(id) {
-    try {
-      const response = await axiosServices.delete(`${BASE_URL}/${id}`);
-      return {
-        success: true,
-        data: null,
-        message: response.data?.message || 'Employer deleted successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to delete employer',
-        data: null
-      };
-    }
-  }
-
-  /**
-   * Get total count of employers
-   * @returns {Promise}
-   */
-  async count() {
-    try {
-      const response = await axiosServices.get(`${BASE_URL}/count`);
-      return {
-        success: true,
-        data: response.data?.data || 0,
-        message: response.data?.message
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to fetch count',
-        data: 0
-      };
-    }
-  }
-
-  /**
-   * Get all employers (no pagination)
-   * @returns {Promise}
-   */
-  async getAll() {
-    try {
-      const response = await axiosServices.get(`${BASE_URL}/all`);
-      return {
-        success: true,
-        data: response.data?.data || [],
-        message: response.data?.message
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Failed to fetch employers',
-        data: []
-      };
-    }
-  }
-}
-
-export default new EmployersService();
+export const deleteEmployer = async (id) => {
+  const response = await axios.delete(`${BASE_URL}/${id}`);
+  return unwrap(response);
+};

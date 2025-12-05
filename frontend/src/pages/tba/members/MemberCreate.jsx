@@ -1,288 +1,322 @@
-import { useState, useEffect } from 'react';
+// src/pages/tba/members/MemberCreate.jsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// material-ui
-import {
-  Box,
-  Button,
-  Grid,
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  FormControlLabel,
-  Checkbox,
-  Stack,
-  Typography
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-// project imports
+import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import MainCard from 'components/MainCard';
-import { createMember } from 'api/members';
-import { getEmployers } from 'api/employers';
-import useAuth from 'hooks/useAuth';
-import { useSnackbar } from 'notistack';
+import * as membersService from 'services/members.service';
 
-// ==============================|| MEMBER CREATE PAGE ||============================== //
+const emptyMember = {
+  employerId: '',
+  fullNameArabic: '',
+  fullNameEnglish: '',
+  civilId: '',
+  birthDate: '',
+  gender: 'MALE',
+  phone: '',
+  email: '',
+  cardNumber: '',
+  employeeNumber: '',
+  joinDate: '',
+  occupation: '',
+  familyMembers: []
+};
 
-export default function MemberCreate() {
+const genderOptions = [
+  { value: 'MALE', label: 'ذكر' },
+  { value: 'FEMALE', label: 'أنثى' }
+];
+
+const relationshipOptions = [
+  { value: 'WIFE', label: 'زوجة' },
+  { value: 'HUSBAND', label: 'زوج' },
+  { value: 'SON', label: 'ابن' },
+  { value: 'DAUGHTER', label: 'ابنة' },
+  { value: 'FATHER', label: 'أب' },
+  { value: 'MOTHER', label: 'أم' }
+];
+
+const MemberCreate = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { enqueueSnackbar } = useSnackbar();
-
-  const [formData, setFormData] = useState({
-    employerId: '',
-    companyId: user?.companyId || '',
-    fullName: '',
+  const [member, setMember] = useState(emptyMember);
+  const [saving, setSaving] = useState(false);
+  const [familyDraft, setFamilyDraft] = useState({
+    relationship: 'SON',
+    fullNameEnglish: '',
+    fullNameArabic: '',
     civilId: '',
-    policyNumber: '',
-    dateOfBirth: '',
-    gender: '',
-    phone: '',
-    email: '',
-    active: true
+    birthDate: '',
+    gender: 'MALE'
   });
 
-  const [employers, setEmployers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const handleChange = (field) => (event) => {
+    setMember((prev) => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
 
-  const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN');
+  const handleFamilyDraftChange = (field) => (event) => {
+    setFamilyDraft((prev) => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
 
-  // Load employers based on company
-  useEffect(() => {
-    const loadEmployers = async () => {
-      try {
-        const companyId = isSuperAdmin ? formData.companyId : user?.companyId;
-        if (companyId) {
-          const response = await getEmployers({ companyId });
-          const data = response.data?.data;
-          if (data?.items) {
-            setEmployers(data.items);
-          } else if (Array.isArray(data)) {
-            setEmployers(data);
-          } else {
-            setEmployers([]);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading employers:', error);
-        setEmployers([]);
-      }
-    };
-
-    loadEmployers();
-  }, [formData.companyId, isSuperAdmin, user?.companyId]);
-
-  const handleChange = (e) => {
-    const { name, value, checked, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
+  const addFamilyMember = () => {
+    if (!familyDraft.fullNameEnglish || !familyDraft.civilId || !familyDraft.birthDate) {
+      alert('يجب إدخال الاسم والرقم الوطني وتاريخ الميلاد لعنصر العائلة');
+      return;
+    }
+    setMember((prev) => ({
+      ...prev,
+      familyMembers: [...prev.familyMembers, { ...familyDraft }]
+    }));
+    setFamilyDraft({
+      relationship: 'SON',
+      fullNameEnglish: '',
+      fullNameArabic: '',
+      civilId: '',
+      birthDate: '',
+      gender: 'MALE'
     });
+  };
+
+  const removeFamilyMember = (index) => {
+    setMember((prev) => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    if (!member.employerId) {
+      alert('يجب اختيار جهة العمل (Employer ID)');
+      return;
+    }
+    if (!member.fullNameEnglish && !member.fullNameArabic) {
+      alert('يجب إدخال اسم المشترك على الأقل بلغة واحدة');
+      return;
+    }
     try {
-      setLoading(true);
-      
-      // Validate required fields
-      if (!formData.fullName || !formData.civilId || !formData.policyNumber || !formData.employerId || !formData.companyId) {
-        enqueueSnackbar('Please fill all required fields', { variant: 'warning' });
-        return;
-      }
-
-      await createMember(formData);
-      enqueueSnackbar('Member created successfully', { variant: 'success' });
+      setSaving(true);
+      const payload = {
+        ...member,
+        employerId: Number(member.employerId),
+        joinDate: member.joinDate || null,
+        birthDate: member.birthDate || null
+      };
+      await membersService.createMember(payload);
       navigate('/tba/members');
-    } catch (error) {
-      console.error('Error creating member:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to create member';
-      enqueueSnackbar(errorMsg, { variant: 'error' });
+    } catch (err) {
+      console.error('Failed to create member', err);
+      alert('حدث خطأ أثناء حفظ بيانات المشترك');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate('/tba/members');
-  };
-
   return (
-    <MainCard title="Create Member">
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
-          {/* Company Selection (Super Admin Only) */}
-          {isSuperAdmin && (
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Company</InputLabel>
-                <Select
-                  name="companyId"
-                  value={formData.companyId}
-                  onChange={handleChange}
-                  label="Company"
-                >
-                  <MenuItem value="1">Company 1</MenuItem>
-                  <MenuItem value="2">Company 2</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          )}
-
-          {/* Employer Selection */}
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
-              <InputLabel>Employer</InputLabel>
-              <Select
-                name="employerId"
-                value={formData.employerId}
-                onChange={handleChange}
-                label="Employer"
-                disabled={!formData.companyId}
-              >
-                {employers.map((employer) => (
-                  <MenuItem key={employer.id} value={employer.id}>
-                    {employer.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Full Name */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              required
-              label="Full Name"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          {/* Civil ID */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              required
-              label="Civil ID"
-              name="civilId"
-              value={formData.civilId}
-              onChange={handleChange}
-              helperText="Must be unique"
-            />
-          </Grid>
-
-          {/* Policy Number */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              required
-              label="Policy Number"
-              name="policyNumber"
-              value={formData.policyNumber}
-              onChange={handleChange}
-              helperText="Must be unique"
-            />
-          </Grid>
-
-          {/* Date of Birth */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Date of Birth"
-              name="dateOfBirth"
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-
-          {/* Gender */}
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Gender</InputLabel>
-              <Select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                label="Gender"
-              >
-                <MenuItem value="">Select Gender</MenuItem>
-                <MenuItem value="MALE">Male</MenuItem>
-                <MenuItem value="FEMALE">Female</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Phone */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="+966501234567"
-            />
-          </Grid>
-
-          {/* Email */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          {/* Active Status */}
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="active"
-                  checked={formData.active}
-                  onChange={handleChange}
+    <MainCard
+      title="إضافة مشترك جديد"
+      secondary={
+        <Button size="small" variant="outlined" onClick={() => navigate('/tba/members')}>
+          إلغاء والرجوع
+        </Button>
+      }
+    >
+      <Box component="form" onSubmit={handleSubmit}>
+        <Stack spacing={3}>
+          {/* القسم الأساسي */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              البيانات الأساسية
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="جهة العمل (Employer ID)"
+                  value={member.employerId}
+                  onChange={handleChange('employerId')}
+                  type="number"
+                  size="small"
                 />
-              }
-              label="Active"
-            />
-          </Grid>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="الاسم الكامل (عربي)"
+                  value={member.fullNameArabic}
+                  onChange={handleChange('fullNameArabic')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="الاسم الكامل (إنجليزي)"
+                  value={member.fullNameEnglish}
+                  onChange={handleChange('fullNameEnglish')}
+                  size="small"
+                />
+              </Grid>
 
-          {/* Action Buttons */}
-          <Grid item xs={12}>
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={handleCancel}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                startIcon={<SaveIcon />}
-                disabled={loading}
-              >
-                {loading ? 'Creating...' : 'Create Member'}
-              </Button>
-            </Stack>
-          </Grid>
-        </Grid>
-      </form>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth required label="الرقم الوطني" value={member.civilId} onChange={handleChange('civilId')} size="small" />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="تاريخ الميلاد"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={member.birthDate}
+                  onChange={handleChange('birthDate')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField select fullWidth label="الجنس" value={member.gender} onChange={handleChange('gender')} size="small">
+                  {genderOptions.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="رقم الهاتف" value={member.phone} onChange={handleChange('phone')} size="small" />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="البريد الإلكتروني" value={member.email} onChange={handleChange('email')} size="small" />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="رقم البطاقة" value={member.cardNumber} onChange={handleChange('cardNumber')} size="small" />
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* بيانات العمل */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              بيانات العمل
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="رقم الموظف"
+                  value={member.employeeNumber}
+                  onChange={handleChange('employeeNumber')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="تاريخ الالتحاق"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={member.joinDate}
+                  onChange={handleChange('joinDate')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="المسمى الوظيفي" value={member.occupation} onChange={handleChange('occupation')} size="small" />
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* أفراد العائلة - بسيط */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              أفراد العائلة
+            </Typography>
+
+            <Grid container spacing={2} sx={{ mb: 1 }}>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  select
+                  fullWidth
+                  label="العلاقة"
+                  value={familyDraft.relationship}
+                  onChange={handleFamilyDraftChange('relationship')}
+                  size="small"
+                >
+                  {relationshipOptions.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="الاسم (إنجليزي)"
+                  value={familyDraft.fullNameEnglish}
+                  onChange={handleFamilyDraftChange('fullNameEnglish')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="الرقم الوطني"
+                  value={familyDraft.civilId}
+                  onChange={handleFamilyDraftChange('civilId')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <TextField
+                  fullWidth
+                  label="تاريخ الميلاد"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={familyDraft.birthDate}
+                  onChange={handleFamilyDraftChange('birthDate')}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={1}>
+                <Button fullWidth variant="outlined" sx={{ height: '100%' }} onClick={addFamilyMember}>
+                  إضافة
+                </Button>
+              </Grid>
+            </Grid>
+
+            {member.familyMembers.length > 0 && (
+              <Stack spacing={0.5}>
+                {member.familyMembers.map((fm, index) => (
+                  <Stack key={index} direction="row" spacing={1} alignItems="center" sx={{ fontSize: 14 }}>
+                    <Typography sx={{ minWidth: 40 }}>{index + 1}.</Typography>
+                    <Typography sx={{ flexGrow: 1 }}>
+                      {fm.fullNameEnglish} ({fm.relationship}) - {fm.civilId}
+                    </Typography>
+                    <Button size="small" color="error" onClick={() => removeFamilyMember(index)}>
+                      حذف
+                    </Button>
+                  </Stack>
+                ))}
+              </Stack>
+            )}
+          </Box>
+
+          <Box>
+            <Button type="submit" variant="contained" color="primary" disabled={saving}>
+              {saving ? 'جارٍ الحفظ...' : 'حفظ المشترك'}
+            </Button>
+          </Box>
+        </Stack>
+      </Box>
     </MainCard>
   );
-}
+};
+
+export default MemberCreate;
