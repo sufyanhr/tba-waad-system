@@ -59,6 +59,12 @@ const PolicyCreate = Loadable(lazy(() => import('pages/tba/policies/PolicyCreate
 const PolicyEdit = Loadable(lazy(() => import('pages/tba/policies/PolicyEdit')));
 const PolicyView = Loadable(lazy(() => import('pages/tba/policies/PolicyView')));
 
+// render - Pre-Approvals module (Phase B9)
+const PreApprovalsList = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalsList')));
+const PreApprovalCreate = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalCreate')));
+const PreApprovalEdit = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalEdit')));
+const PreApprovalView = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalView')));
+
 // render - Administration pages
 const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));
 const AdminRoles = Loadable(lazy(() => import('pages/admin/roles')));
@@ -301,6 +307,38 @@ const MainRoutes = {
               element: (
                 <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_POLICIES']}>
                   <PolicyView />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'pre-approvals',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_PREAPPROVALS']}>
+                  <PreApprovalsList />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'pre-approvals/create',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_PREAPPROVALS']}>
+                  <PreApprovalCreate />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'pre-approvals/edit/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_PREAPPROVALS']}>
+                  <PreApprovalEdit />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'pre-approvals/view/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_PREAPPROVALS']}>
+                  <PreApprovalView />
                 </RoleGuard>
               )
             },
