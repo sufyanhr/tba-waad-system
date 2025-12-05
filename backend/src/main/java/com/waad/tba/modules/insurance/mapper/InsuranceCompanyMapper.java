@@ -1,10 +1,11 @@
 package com.waad.tba.modules.insurance.mapper;
 
-import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
-import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
-import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
-import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import org.springframework.stereotype.Component;
+
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
+import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 
 @Component
 public class InsuranceCompanyMapper {

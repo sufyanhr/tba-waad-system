@@ -40,12 +40,7 @@ import { EMPLOYERS, INSURANCE_COMPANY } from 'constants/companies';
 import { useSnackbar } from 'notistack';
 
 // third-party
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper
-} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, flexRender, createColumnHelper } from '@tanstack/react-table';
 
 // ==============================|| POLICIES LIST PAGE ||============================== //
 
@@ -84,19 +79,11 @@ export default function PoliciesList() {
       }),
       columnHelper.accessor('employerName', {
         header: 'Employer',
-        cell: (info) => (
-          <Typography variant="body2">
-            {info.getValue() || '-'}
-          </Typography>
-        )
+        cell: (info) => <Typography variant="body2">{info.getValue() || '-'}</Typography>
       }),
       columnHelper.accessor('insuranceCompanyName', {
         header: 'Insurance Company',
-        cell: (info) => (
-          <Typography variant="body2">
-            {info.getValue() || INSURANCE_COMPANY.name}
-          </Typography>
-        )
+        cell: (info) => <Typography variant="body2">{info.getValue() || INSURANCE_COMPANY.name}</Typography>
       }),
       columnHelper.accessor('startDate', {
         header: 'Start Date',
@@ -115,20 +102,12 @@ export default function PoliciesList() {
       columnHelper.accessor('active', {
         header: 'Status',
         cell: (info) => (
-          <Chip
-            label={info.getValue() ? 'Active' : 'Inactive'}
-            color={info.getValue() ? 'success' : 'default'}
-            size="small"
-          />
+          <Chip label={info.getValue() ? 'Active' : 'Inactive'} color={info.getValue() ? 'success' : 'default'} size="small" />
         )
       }),
       columnHelper.accessor('maxMembers', {
         header: 'Max Members',
-        cell: (info) => (
-          <Typography variant="body2">
-            {info.getValue() || '-'}
-          </Typography>
-        )
+        cell: (info) => <Typography variant="body2">{info.getValue() || '-'}</Typography>
       }),
       columnHelper.display({
         id: 'actions',
@@ -136,32 +115,20 @@ export default function PoliciesList() {
         cell: (info) => (
           <Stack direction="row" spacing={0.5} justifyContent="center">
             <Tooltip title="View">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={() => handleViewPolicy(info.row.original.id)}
-              >
+              <IconButton size="small" color="primary" onClick={() => handleViewPolicy(info.row.original.id)}>
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             <RBACGuard permission="POLICY_UPDATE">
               <Tooltip title="Edit">
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => handleEditPolicy(info.row.original.id)}
-                >
+                <IconButton size="small" color="primary" onClick={() => handleEditPolicy(info.row.original.id)}>
                   <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             </RBACGuard>
             <RBACGuard permission="POLICY_DELETE">
               <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDeleteClick(info.row.original)}
-                >
+                <IconButton size="small" color="error" onClick={() => handleDeleteClick(info.row.original)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -211,14 +178,10 @@ export default function PoliciesList() {
 
       // Status filter
       const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'active' && policy.active) ||
-        (statusFilter === 'inactive' && !policy.active);
+        statusFilter === 'all' || (statusFilter === 'active' && policy.active) || (statusFilter === 'inactive' && !policy.active);
 
       // Employer filter
-      const matchesEmployer =
-        employerFilter === 'all' ||
-        policy.employerId?.toString() === employerFilter;
+      const matchesEmployer = employerFilter === 'all' || policy.employerId?.toString() === employerFilter;
 
       return matchesSearch && matchesStatus && matchesEmployer;
     });
@@ -316,11 +279,7 @@ export default function PoliciesList() {
             {/* Status Filter */}
             <FormControl sx={{ minWidth: 150 }}>
               <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                label="Status"
-              >
+              <Select value={statusFilter} onChange={handleStatusFilterChange} label="Status">
                 {STATUS_OPTIONS.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
@@ -332,11 +291,7 @@ export default function PoliciesList() {
             {/* Employer Filter */}
             <FormControl sx={{ minWidth: 200 }}>
               <InputLabel>Employer</InputLabel>
-              <Select
-                value={employerFilter}
-                onChange={handleEmployerFilterChange}
-                label="Employer"
-              >
+              <Select value={employerFilter} onChange={handleEmployerFilterChange} label="Employer">
                 <MenuItem value="all">All Employers</MenuItem>
                 {EMPLOYERS.map((employer) => (
                   <MenuItem key={employer.id} value={employer.id.toString()}>
@@ -348,9 +303,7 @@ export default function PoliciesList() {
           </Stack>
 
           {/* Error State */}
-          {error && !loading && (
-            <ErrorFallback error={error} onRetry={handleRetry} />
-          )}
+          {error && !loading && <ErrorFallback error={error} onRetry={handleRetry} />}
 
           {/* Loading State */}
           {loading && <TableSkeleton rows={10} columns={8} />}
@@ -387,9 +340,7 @@ export default function PoliciesList() {
                             color: '#666'
                           }}
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
+                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                         </th>
                       ))}
                     </tr>
@@ -424,8 +375,7 @@ export default function PoliciesList() {
           <DialogTitle>Confirm Delete</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete policy "<strong>{policyToDelete?.policyNumber}</strong>"? This action cannot
-              be undone.
+              Are you sure you want to delete policy "<strong>{policyToDelete?.policyNumber}</strong>"? This action cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

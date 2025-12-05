@@ -53,6 +53,12 @@ const InsuranceCompanyCreate = Loadable(lazy(() => import('pages/tba/insurance-c
 const InsuranceCompanyEdit = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyEdit')));
 const InsuranceCompanyView = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyView')));
 
+// render - Policies module (Phase B8)
+const PoliciesList = Loadable(lazy(() => import('pages/tba/policies/PoliciesList')));
+const PolicyCreate = Loadable(lazy(() => import('pages/tba/policies/PolicyCreate')));
+const PolicyEdit = Loadable(lazy(() => import('pages/tba/policies/PolicyEdit')));
+const PolicyView = Loadable(lazy(() => import('pages/tba/policies/PolicyView')));
+
 // render - Administration pages
 const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));
 const AdminRoles = Loadable(lazy(() => import('pages/admin/roles')));
@@ -269,8 +275,32 @@ const MainRoutes = {
             {
               path: 'policies',
               element: (
-                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
-                  <TbaPolicies />
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_POLICIES']}>
+                  <PoliciesList />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'policies/create',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_POLICIES']}>
+                  <PolicyCreate />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'policies/edit/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_POLICIES']}>
+                  <PolicyEdit />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'policies/view/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_POLICIES']}>
+                  <PolicyView />
                 </RoleGuard>
               )
             },
