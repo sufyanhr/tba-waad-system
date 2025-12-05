@@ -2,6 +2,7 @@ package com.waad.tba.modules.insurance.service;
 
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
 import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import com.waad.tba.modules.insurance.mapper.InsuranceCompanyMapper;
@@ -61,7 +62,7 @@ public class InsuranceCompanyService {
     }
 
     @Transactional
-    public InsuranceCompanyResponseDto update(Long id, InsuranceCompanyCreateDto dto) {
+    public InsuranceCompanyResponseDto update(Long id, InsuranceCompanyUpdateDto dto) {
         log.info("Updating insurance company with ID: {}", id);
         InsuranceCompany entity = findEntityById(id);
         insuranceCompanyMapper.updateEntityFromDto(dto, entity);
@@ -71,9 +72,10 @@ public class InsuranceCompanyService {
 
     @Transactional
     public void delete(Long id) {
-        log.info("Deleting insurance company with ID: {}", id);
+        log.info("Soft deleting insurance company with ID: {}", id);
         InsuranceCompany entity = findEntityById(id);
-        insuranceCompanyRepository.delete(entity);
+        entity.setActive(false);
+        insuranceCompanyRepository.save(entity);
     }
 
     @Transactional(readOnly = true)

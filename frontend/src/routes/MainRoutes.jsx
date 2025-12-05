@@ -47,6 +47,12 @@ const EmployerCreate = Loadable(lazy(() => import('pages/tba/employers/EmployerC
 const EmployerEdit = Loadable(lazy(() => import('pages/tba/employers/EmployerEdit')));
 const EmployerView = Loadable(lazy(() => import('pages/tba/employers/EmployerView')));
 
+// render - Insurance Companies module
+const InsuranceCompaniesList = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompaniesList')));
+const InsuranceCompanyCreate = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyCreate')));
+const InsuranceCompanyEdit = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyEdit')));
+const InsuranceCompanyView = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyView')));
+
 // render - Administration pages
 const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));
 const AdminRoles = Loadable(lazy(() => import('pages/admin/roles')));
@@ -209,6 +215,38 @@ const MainRoutes = {
               element: (
                 <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_EMPLOYERS']}>
                   <EmployerView />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'insurance-companies',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_INSURANCE']}>
+                  <InsuranceCompaniesList />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'insurance-companies/create',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_INSURANCE']}>
+                  <InsuranceCompanyCreate />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'insurance-companies/edit/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_INSURANCE']}>
+                  <InsuranceCompanyEdit />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'insurance-companies/view/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_INSURANCE']}>
+                  <InsuranceCompanyView />
                 </RoleGuard>
               )
             },

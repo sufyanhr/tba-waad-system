@@ -3,6 +3,7 @@ package com.waad.tba.modules.insurance.controller;
 import com.waad.tba.common.dto.ApiResponse;
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
 import com.waad.tba.modules.insurance.service.InsuranceCompanyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -129,7 +130,7 @@ public class InsuranceCompanyController {
             @Parameter(name = "id", description = "Insurance company ID", required = true)
             @PathVariable Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Insurance company update payload")
-            @Valid @RequestBody InsuranceCompanyCreateDto dto) {
+            @Valid @RequestBody InsuranceCompanyUpdateDto dto) {
         InsuranceCompanyResponseDto updated = insuranceCompanyService.update(id, dto);
         return ResponseEntity.ok(ApiResponse.success("Insurance company updated successfully", updated));
     }

@@ -1,6 +1,7 @@
 package com.waad.tba.modules.insurance.mapper;
 
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
 import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import org.springframework.stereotype.Component;
@@ -35,18 +36,19 @@ public class InsuranceCompanyMapper {
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
                 .contactPerson(dto.getContactPerson())
-                .active(true)
+                .active(Boolean.TRUE.equals(dto.getActive()))
                 .build();
     }
 
-    public void updateEntityFromDto(InsuranceCompanyCreateDto dto, InsuranceCompany entity) {
+    public void updateEntityFromDto(InsuranceCompanyUpdateDto dto, InsuranceCompany entity) {
         if (dto == null) return;
         
-        entity.setName(dto.getName());
-        entity.setCode(dto.getCode());
-        entity.setAddress(dto.getAddress());
-        entity.setPhone(dto.getPhone());
-        entity.setEmail(dto.getEmail());
-        entity.setContactPerson(dto.getContactPerson());
+        if (dto.getName() != null) entity.setName(dto.getName());
+        if (dto.getCode() != null) entity.setCode(dto.getCode());
+        if (dto.getAddress() != null) entity.setAddress(dto.getAddress());
+        if (dto.getPhone() != null) entity.setPhone(dto.getPhone());
+        if (dto.getEmail() != null) entity.setEmail(dto.getEmail());
+        if (dto.getContactPerson() != null) entity.setContactPerson(dto.getContactPerson());
+        if (dto.getActive() != null) entity.setActive(dto.getActive());
     }
 }
