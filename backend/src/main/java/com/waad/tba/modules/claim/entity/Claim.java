@@ -1,218 +1,197 @@
 package com.waad.tba.modules.claim.entity;
 
+import com.waad.tba.modules.member.entity.Member;
+import com.waad.tba.modules.insurance.entity.InsuranceCompany;
+import com.waad.tba.modules.insurancepolicy.entity.InsurancePolicy;
+import com.waad.tba.modules.insurancepolicy.entity.PolicyBenefitPackage;
+import com.waad.tba.modules.preapproval.entity.PreApproval;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.waad.tba.modules.member.entity.Member;
-import com.waad.tba.modules.rbac.entity.User;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Entity
-@Table(name = "claims", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "claimNumber", name = "uk_claim_number")
-})
+@Table(name = "claims")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@Builder
 public class Claim {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Claim number is required")
-    @Column(unique = true, nullable = false, length = 100)
-    private String claimNumber;
-
-    // Member and Provider Information
-    @NotNull(message = "Member is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @NotNull(message = "Provider ID is required")
-    @Column(nullable = false)
-    private Long providerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "insurance_company_id", nullable = false)
+    private InsuranceCompany insuranceCompany;
 
-    @Column(length = 200)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "insurance_policy_id")
+    private InsurancePolicy insurancePolicy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "benefit_package_id")
+    private PolicyBenefitPackage benefitPackage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pre_approval_id")
+    private PreApproval preApproval;
+
+    @OneToMany(mappedBy = "claim", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ClaimLine> lines = new ArrayList<>();
+
+    @OneToMany(mappedBy = "claim", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ClaimAttachment> attachments = new ArrayList<>();
+
+    @Column(name = "provider_name", length = 255)
     private String providerName;
 
-    // Claim Type and Dates
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Claim type is required")
-    @Column(nullable = false, length = 20)
-    private ClaimType claimType;
+    @Column(name = "doctor_name", length = 255)
+    private String doctorName;
 
-    @NotNull(message = "Service date is required")
-    @Column(nullable = false)
-    private LocalDate serviceDate;
+    @Column(name = "diagnosis", columnDefinition = "TEXT")
+    private String diagnosis;
 
-    @Column(nullable = false)
-    private LocalDate submissionDate;
+    @Column(name = "visit_date")
+    private LocalDate visitDate;
 
-    // Financial Information
-    @Column(nullable = false)
-    @Builder.Default
-    private BigDecimal totalClaimed = BigDecimal.ZERO;
-    
-    @Column()
-    @Builder.Default
-    private BigDecimal totalApproved = BigDecimal.ZERO;
+    @Column(name = "requested_amount", precision = 15, scale = 2, nullable = false)
+    private BigDecimal requestedAmount;
 
-    @Column()
-    @Builder.Default
-    private BigDecimal totalRejected = BigDecimal.ZERO;
+    @Column(name = "approved_amount", precision = 15, scale = 2)
+    private BigDecimal approvedAmount;
 
-    @Column()
-    @Builder.Default
-    private BigDecimal memberCoPayment = BigDecimal.ZERO;
-
-    @Column()
-    @Builder.Default
-    private BigDecimal netPayable = BigDecimal.ZERO;
-
-    // Status
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    @Column(nullable = false, length = 20)
-    private ClaimStatus status = ClaimStatus.PENDING;
-
-    // Medical Review
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medical_reviewer_id")
-    private User medicalReviewer;
-
-    private LocalDateTime medicalReviewedAt;
+    @Column(name = "difference_amount", precision = 15, scale = 2)
+    private BigDecimal differenceAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private ReviewStatus medicalReviewStatus;
-
-    @Column(length = 2000)
-    private String medicalReviewNotes;
-
-    // Financial Review
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "financial_reviewer_id")
-    private User financialReviewer;
-
-    private LocalDateTime financialReviewedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private ReviewStatus financialReviewStatus;
-
-    @Column(length = 2000)
-    private String financialReviewNotes;
-
-    // Created By - Track who created the claim (for Provider filtering)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_user_id")
-    private User createdBy;
-
-    // Additional Information
-    @Column(length = 50)
-    private String preAuthNumber;
-
-    @Column(length = 20)
-    private String diagnosisCode;
-
-    @Column(length = 500)
-    private String diagnosisDescription;
-
-    private String rejectionReason;
-    
-    @Column(length = 3000)
-    private String notes;
-
-    @Column(length = 2000)
-    private String attachments;
-
-    // Claim Lines (services)
-    @OneToMany(mappedBy = "claim", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Column(name = "status", length = 30, nullable = false)
     @Builder.Default
-    private List<ClaimLine> claimLines = new ArrayList<>();
+    private ClaimStatus status = ClaimStatus.PENDING_REVIEW;
 
+    @Column(name = "reviewer_comment", columnDefinition = "TEXT")
+    private String reviewerComment;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+
+    @Column(name = "service_count")
+    private Integer serviceCount;
+
+    @Column(name = "attachments_count")
+    private Integer attachmentsCount;
+
+    @Column(name = "active", nullable = false)
     @Builder.Default
-    @Column(nullable = false)
     private Boolean active = true;
 
-    @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public enum ClaimStatus {
-        PENDING,
-        UNDER_MEDICAL_REVIEW,
-        UNDER_FINANCIAL_REVIEW,
-        APPROVED,
-        PARTIALLY_APPROVED,
-        REJECTED,
-        RESUBMITTED
+    @Column(name = "created_by", length = 255)
+    private String createdBy;
+
+    @Column(name = "updated_by", length = 255)
+    private String updatedBy;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        validateBusinessRules();
+        calculateFields();
     }
 
-    public enum ClaimType {
-        OUTPATIENT,
-        INPATIENT,
-        PHARMACY,
-        LABORATORY,
-        RADIOLOGY,
-        DENTAL,
-        OPTICAL,
-        MATERNITY,
-        EMERGENCY,
-        CHRONIC_DISEASE,
-        OTHER
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        validateBusinessRules();
+        calculateFields();
     }
 
-    public enum ReviewStatus {
-        PENDING,
-        APPROVED,
-        REJECTED,
-        MORE_INFO_REQUIRED
+    private void validateBusinessRules() {
+        if (requestedAmount == null || requestedAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("Requested amount must be greater than zero");
+        }
+
+        if (approvedAmount != null && approvedAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalStateException("Approved amount cannot be negative");
+        }
+
+        if (status == ClaimStatus.APPROVED) {
+            if (approvedAmount == null || approvedAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("Approved status requires approved amount greater than zero");
+            }
+        }
+
+        if (status == ClaimStatus.PARTIALLY_APPROVED) {
+            if (approvedAmount == null || approvedAmount.compareTo(requestedAmount) >= 0) {
+                throw new IllegalStateException("Partially approved status requires approved amount less than requested amount");
+            }
+        }
+
+        if (status == ClaimStatus.REJECTED) {
+            if (reviewerComment == null || reviewerComment.trim().isEmpty()) {
+                throw new IllegalStateException("Rejected status requires reviewer comment");
+            }
+        }
+
+        // Auto-set reviewedAt when status is not PENDING_REVIEW
+        if (status != null && status != ClaimStatus.PENDING_REVIEW && reviewedAt == null) {
+            reviewedAt = LocalDateTime.now();
+        }
     }
 
-    // Helper methods for managing claim lines
-    public void addClaimLine(ClaimLine claimLine) {
-        claimLines.add(claimLine);
-        claimLine.setClaim(this);
+    private void calculateFields() {
+        // Calculate difference amount
+        if (requestedAmount != null && approvedAmount != null) {
+            differenceAmount = requestedAmount.subtract(approvedAmount);
+        } else {
+            differenceAmount = null;
+        }
+
+        // Calculate service count
+        serviceCount = (lines != null) ? lines.size() : 0;
+
+        // Calculate attachments count
+        attachmentsCount = (attachments != null) ? attachments.size() : 0;
     }
 
-    public void removeClaimLine(ClaimLine claimLine) {
-        claimLines.remove(claimLine);
-        claimLine.setClaim(null);
+    // Helper methods for bidirectional relationships
+    public void addLine(ClaimLine line) {
+        lines.add(line);
+        line.setClaim(this);
+    }
+
+    public void removeLine(ClaimLine line) {
+        lines.remove(line);
+        line.setClaim(null);
+    }
+
+    public void addAttachment(ClaimAttachment attachment) {
+        attachments.add(attachment);
+        attachment.setClaim(this);
+    }
+
+    public void removeAttachment(ClaimAttachment attachment) {
+        attachments.remove(attachment);
+        attachment.setClaim(null);
     }
 }

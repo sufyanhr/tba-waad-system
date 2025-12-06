@@ -14,7 +14,6 @@ const TbaMedicalCategories = Loadable(lazy(() => import('pages/tba/medical-categ
 const TbaProviders = Loadable(lazy(() => import('pages/tba/providers')));
 const TbaMembers = Loadable(lazy(() => import('pages/tba/members')));
 const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
-const TbaClaims = Loadable(lazy(() => import('pages/tba/claims')));
 const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
 const TbaPolicies = Loadable(lazy(() => import('pages/tba/policies')));
 const TbaBenefitPackages = Loadable(lazy(() => import('pages/tba/benefit-packages')));
@@ -64,6 +63,12 @@ const PreApprovalsList = Loadable(lazy(() => import('pages/tba/pre-approvals/Pre
 const PreApprovalCreate = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalCreate')));
 const PreApprovalEdit = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalEdit')));
 const PreApprovalView = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalView')));
+
+// render - Claims module (Phase B10)
+const ClaimsList = Loadable(lazy(() => import('pages/tba/claims/ClaimsList')));
+const ClaimCreate = Loadable(lazy(() => import('pages/tba/claims/ClaimCreate')));
+const ClaimEdit = Loadable(lazy(() => import('pages/tba/claims/ClaimEdit')));
+const ClaimView = Loadable(lazy(() => import('pages/tba/claims/ClaimView')));
 
 // render - Administration pages
 const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));
@@ -263,14 +268,6 @@ const MainRoutes = {
               )
             },
             {
-              path: 'claims',
-              element: (
-                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER']} featureToggle="canViewClaims">
-                  <TbaClaims />
-                </RoleGuard>
-              )
-            },
-            {
               path: 'visits',
               element: (
                 <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER']} featureToggle="canViewVisits">
@@ -339,6 +336,38 @@ const MainRoutes = {
               element: (
                 <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_PREAPPROVALS']}>
                   <PreApprovalView />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'claims',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_CLAIMS']}>
+                  <ClaimsList />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'claims/create',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_CLAIMS']}>
+                  <ClaimCreate />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'claims/edit/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['MANAGE_CLAIMS']}>
+                  <ClaimEdit />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'claims/view/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_CLAIMS']}>
+                  <ClaimView />
                 </RoleGuard>
               )
             },

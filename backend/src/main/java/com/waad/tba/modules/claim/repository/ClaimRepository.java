@@ -1,8 +1,6 @@
 package com.waad.tba.modules.claim.repository;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,97 +13,38 @@ import com.waad.tba.modules.claim.entity.Claim;
 
 @Repository
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
-    
-    // Basic finders
-    Optional<Claim> findByClaimNumber(String claimNumber);
-    Boolean existsByClaimNumber(String claimNumber);
-    
-    // Find by relations
-    List<Claim> findByMemberId(Long memberId);
-    List<Claim> findByProviderId(Long providerId);
-    
-    // Data-level filtering methods for Phase 8.1
-    @Query("SELECT c FROM Claim c WHERE c.member.employer.id = :employerId")
-    List<Claim> findByMemberEmployerId(@Param("employerId") Long employerId);
-    
-    // Insurance Company filtering (for INSURANCE_ADMIN) - Phase 8.2
-    @Query("SELECT c FROM Claim c WHERE c.member.insuranceCompany.id = :companyId")
-    List<Claim> findByMemberInsuranceCompanyId(@Param("companyId") Long companyId);
-    
-    List<Claim> findByCreatedById(Long userId);
-    
-    // Find by status
-    List<Claim> findByStatus(Claim.ClaimStatus status);
-    Long countByStatus(Claim.ClaimStatus status);
-    
-    // Find by claim type
-    List<Claim> findByClaimType(Claim.ClaimType claimType);
-    
-    // Date range queries
-    List<Claim> findByServiceDateBetween(LocalDate startDate, LocalDate endDate);
-    List<Claim> findBySubmissionDateBetween(LocalDate startDate, LocalDate endDate);
-    
-    // Combined queries
-    @Query("SELECT c FROM Claim c WHERE c.member.id = :memberId AND c.status = :status")
-    List<Claim> findByMemberIdAndStatus(@Param("memberId") Long memberId, 
-                                        @Param("status") Claim.ClaimStatus status);
-    
-    @Query("SELECT c FROM Claim c WHERE c.providerId = :providerId AND c.status = :status")
-    List<Claim> findByProviderIdAndStatus(@Param("providerId") Long providerId, 
-                                          @Param("status") Claim.ClaimStatus status);
-    
-    // Search queries
-    @Query("SELECT c FROM Claim c WHERE " +
-           "LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(c.notes) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(c.providerName) LIKE LOWER(CONCAT('%', :query, '%'))")
-    List<Claim> search(@Param("query") String query);
 
-    @Query("SELECT c FROM Claim c WHERE " +
-           "LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(c.notes) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(c.providerName) LIKE LOWER(CONCAT('%', :q, '%'))")
-    Page<Claim> searchPaged(@Param("q") String q, Pageable pageable);
+    @Query("SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.member m " +
+           "LEFT JOIN FETCH c.insuranceCompany ic " +
+           "LEFT JOIN FETCH c.insurancePolicy ip " +
+           "LEFT JOIN FETCH c.benefitPackage bp " +
+           "LEFT JOIN FETCH c.preApproval pa " +
+           "WHERE c.active = true " +
+           "AND (LOWER(c.providerName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(c.diagnosis) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(m.fullNameArabic) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(m.civilId) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Claim> searchPaged(@Param("keyword") String keyword, Pageable pageable);
 
-    // Statistics queries
-    @Query("SELECT FUNCTION('MONTH', c.serviceDate) as month, " +
-           "FUNCTION('YEAR', c.serviceDate) as year, " +
-           "COUNT(c), SUM(c.totalClaimed), SUM(c.totalApproved) " +
-           "FROM Claim c " +
-           "WHERE c.serviceDate BETWEEN :startDate AND :endDate " +
-           "GROUP BY FUNCTION('YEAR', c.serviceDate), FUNCTION('MONTH', c.serviceDate) " +
-           "ORDER BY year, month")
-    List<Object[]> getMonthlyStatistics(@Param("startDate") LocalDate startDate, 
-                                        @Param("endDate") LocalDate endDate);
-    
-    @Query("SELECT c.serviceDate, COUNT(c), SUM(c.totalClaimed) " +
-           "FROM Claim c " +
-           "WHERE c.serviceDate BETWEEN :startDate AND :endDate " +
-           "GROUP BY c.serviceDate " +
-           "ORDER BY c.serviceDate")
-    List<Object[]> getDailyStatistics(@Param("startDate") LocalDate startDate, 
-                                      @Param("endDate") LocalDate endDate);
-    
-    // Employer-filtered queries
-    @Query("SELECT COUNT(c) FROM Claim c WHERE c.member.employer.id = :employerId")
-    Long countByMember_Employer_Id(@Param("employerId") Long employerId);
-    
-    @Query("SELECT COUNT(c) FROM Claim c WHERE c.member.employer.id = :employerId AND c.status = :status")
-    Long countByMember_Employer_IdAndStatus(@Param("employerId") Long employerId, @Param("status") Claim.ClaimStatus status);
-    
-    @Query("SELECT c.serviceDate, COUNT(c) " +
-           "FROM Claim c " +
-           "WHERE c.member.employer.id = :employerId " +
-           "AND c.serviceDate BETWEEN :startDate AND :endDate " +
-           "GROUP BY c.serviceDate " +
-           "ORDER BY c.serviceDate")
-    List<Object[]> getDailyStatisticsByEmployer(@Param("employerId") Long employerId,
-                                                @Param("startDate") LocalDate startDate, 
-                                                @Param("endDate") LocalDate endDate);
-    
-    // Financial summary
-    @Query("SELECT SUM(c.totalClaimed), SUM(c.totalApproved) " +
-           "FROM Claim c " +
-           "WHERE c.status = :status")
-    Object[] getFinancialSummaryByStatus(@Param("status") Claim.ClaimStatus status);
+    @Query("SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.member " +
+           "LEFT JOIN FETCH c.insuranceCompany " +
+           "LEFT JOIN FETCH c.insurancePolicy " +
+           "LEFT JOIN FETCH c.benefitPackage " +
+           "LEFT JOIN FETCH c.preApproval " +
+           "WHERE c.member.id = :memberId AND c.active = true")
+    List<Claim> findByMemberId(@Param("memberId") Long memberId);
+
+    @Query("SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.member " +
+           "LEFT JOIN FETCH c.insuranceCompany " +
+           "LEFT JOIN FETCH c.insurancePolicy " +
+           "LEFT JOIN FETCH c.benefitPackage " +
+           "LEFT JOIN FETCH c.preApproval " +
+           "WHERE c.preApproval.id = :preApprovalId AND c.active = true")
+    List<Claim> findByPreApprovalId(@Param("preApprovalId") Long preApprovalId);
+
+    @Query("SELECT COUNT(c) FROM Claim c WHERE c.active = true")
+    long countActive();
 }

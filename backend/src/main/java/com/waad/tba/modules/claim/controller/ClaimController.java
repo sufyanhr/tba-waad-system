@@ -1,258 +1,104 @@
 package com.waad.tba.modules.claim.controller;
 
-import com.waad.tba.common.dto.ApiResponse;
-import com.waad.tba.common.dto.PaginationResponse;
-import com.waad.tba.modules.claim.dto.ClaimCreateDto;
-import com.waad.tba.modules.claim.dto.ClaimResponseDto;
-import com.waad.tba.modules.claim.entity.Claim;
-import com.waad.tba.modules.claim.service.ClaimService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import com.waad.tba.common.dto.ApiResponse;
+import com.waad.tba.common.dto.PaginationResponse;
+import com.waad.tba.modules.claim.dto.ClaimCreateDto;
+import com.waad.tba.modules.claim.dto.ClaimUpdateDto;
+import com.waad.tba.modules.claim.dto.ClaimViewDto;
+import com.waad.tba.modules.claim.service.ClaimService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/claims")
 @RequiredArgsConstructor
-@Tag(name = "Claims Management", description = "APIs for handling medical claims workflow")
 public class ClaimController {
 
-    private final ClaimService service;
-
-    /**
-     * @deprecated Use GET /api/claims?page=&size=&search= instead (paginated search)
-     */
-    @Deprecated
-    @GetMapping("/all")
-    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    @Operation(summary = "List all claims", description = "Returns a list of all claims.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bad Request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class), examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\n  \"status\": \"error\",\n  \"code\": \"VALIDATION_ERROR\",\n  \"message\": \"Page parameter must be >= 0\",\n  \"timestamp\": \"2025-01-01T10:00:00Z\",\n  \"path\": \"/api/claims/all\"\n}"))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<List<ClaimResponseDto>>> getAll() {
-        List<ClaimResponseDto> list = service.findAll();
-        return ResponseEntity.ok(ApiResponse.success(list));
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    @Operation(summary = "Get claim by ID", description = "Returns detailed claim information including status and amounts.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Claim not found"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<ClaimResponseDto>> getById(
-            @Parameter(name = "id", description = "Claim ID", required = true)
-            @PathVariable Long id) {
-        ClaimResponseDto dto = service.findById(id);
-        return ResponseEntity.ok(ApiResponse.success(dto));
-    }
+    private final ClaimService claimService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
-    @Operation(
-        summary = "Create claim", 
-        description = "Creates a new claim with initial details. Provider must have an active contract with the member's company."
-    )
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Claim created successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request payload or provider has no active contract", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<ClaimResponseDto>> create(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Claim creation payload")
-            @Valid @RequestBody ClaimCreateDto dto) {
-        ClaimResponseDto created = service.create(dto);
+    public ResponseEntity<ApiResponse<ClaimViewDto>> createClaim(@RequestBody ClaimCreateDto dto) {
+        ClaimViewDto claim = claimService.createClaim(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Claim created successfully", created));
+                .body(ApiResponse.success("Claim created successfully", claim));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
-    @Operation(
-        summary = "Update claim", 
-        description = "Updates claim details by ID. Provider must have an active contract with the member's company."
-    )
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim updated successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Claim not found"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request payload or provider has no active contract", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<ClaimResponseDto>> update(
-            @Parameter(name = "id", description = "Claim ID", required = true)
+    public ResponseEntity<ApiResponse<ClaimViewDto>> updateClaim(
             @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Claim update payload")
-            @Valid @RequestBody ClaimCreateDto dto) {
-        ClaimResponseDto updated = service.update(id, dto);
-        return ResponseEntity.ok(ApiResponse.success("Claim updated successfully", updated));
+            @RequestBody ClaimUpdateDto dto) {
+        ClaimViewDto claim = claimService.updateClaim(id, dto);
+        return ResponseEntity.ok(ApiResponse.success("Claim updated successfully", claim));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
-    @Operation(summary = "Delete claim", description = "Deletes a claim by ID.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim deleted successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Claim not found"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<Void>> delete(
-            @Parameter(name = "id", description = "Claim ID", required = true)
-            @PathVariable Long id) {
-        service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Claim deleted successfully", null));
-    }
-
-    /**
-     * @deprecated Use GET /api/claims?page=&size=&search= instead (paginated search)
-     */
-    @Deprecated
-    @GetMapping("/search")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    @Operation(summary = "Search claims", description = "Search claims by query string.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<List<ClaimResponseDto>>> search(
-            @Parameter(name = "query", description = "Search query", required = true)
-            @RequestParam String query) {
-        List<ClaimResponseDto> list = service.search(query);
-        return ResponseEntity.ok(ApiResponse.success(list));
+    public ResponseEntity<ApiResponse<ClaimViewDto>> getClaim(@PathVariable Long id) {
+        ClaimViewDto claim = claimService.getClaim(id);
+        return ResponseEntity.ok(ApiResponse.success("Claim retrieved successfully", claim));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    @Operation(summary = "Paginate claims", description = "Returns a page of claims with pagination parameters")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims page retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ApiResponse<PaginationResponse<ClaimResponseDto>>> paginate(
-            @Parameter(name = "page", description = "Page number (1-based)") @RequestParam(defaultValue = "1") int page,
-            @Parameter(name = "size", description = "Page size") @RequestParam(defaultValue = "10") int size,
-            @Parameter(name = "search", description = "Search query") @RequestParam(required = false) String search,
-            @Parameter(name = "sortBy", description = "Sort by field") @RequestParam(defaultValue = "serviceDate") String sortBy,
-            @Parameter(name = "sortDir", description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDir) {
-        org.springframework.data.domain.Pageable pageable = PageRequest.of(Math.max(0, page - 1), size,
-                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.fromString(sortDir), sortBy));
-        Page<ClaimResponseDto> pageResult = service.findAllPaginated(pageable, search);
-        PaginationResponse<ClaimResponseDto> response = PaginationResponse.<ClaimResponseDto>builder()
-                .items(pageResult.getContent())
-                .total(pageResult.getTotalElements())
+    public ResponseEntity<PaginationResponse<ClaimViewDto>> listClaims(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search) {
+        Page<ClaimViewDto> claimsPage = claimService.listClaims(page, size, search);
+        
+        PaginationResponse<ClaimViewDto> response = PaginationResponse.<ClaimViewDto>builder()
+                .items(claimsPage.getContent())
+                .total(claimsPage.getTotalElements())
                 .page(page)
                 .size(size)
                 .build();
-        return ResponseEntity.ok(ApiResponse.success(response));
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
+    public ResponseEntity<ApiResponse<Void>> deleteClaim(@PathVariable Long id) {
+        claimService.deleteClaim(id);
+        return ResponseEntity.ok(ApiResponse.success("Claim deleted successfully", null));
     }
 
     @GetMapping("/count")
     @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    @Operation(summary = "Count claims", description = "Returns total number of claims")
-    public ResponseEntity<ApiResponse<Long>> count() {
-        long total = service.count();
-        return ResponseEntity.ok(ApiResponse.success(total));
+    public ResponseEntity<ApiResponse<Long>> countClaims() {
+        long count = claimService.countClaims();
+        return ResponseEntity.ok(ApiResponse.success("Claims counted successfully", count));
     }
 
-    @GetMapping("/status/{status}")
+    @GetMapping("/member/{memberId}")
     @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    @Operation(summary = "Get claims by status", description = "Returns a list of claims filtered by status.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claims retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status value", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<List<ClaimResponseDto>>> getByStatus(
-            @Parameter(name = "status", description = "Claim status", required = true)
-            @PathVariable Claim.ClaimStatus status) {
-        List<ClaimResponseDto> list = service.getByStatus(status);
-        return ResponseEntity.ok(ApiResponse.success(list));
+    public ResponseEntity<ApiResponse<List<ClaimViewDto>>> getClaimsByMember(@PathVariable Long memberId) {
+        List<ClaimViewDto> claims = claimService.getClaimsByMember(memberId);
+        return ResponseEntity.ok(ApiResponse.success("Member claims retrieved successfully", claims));
     }
 
-    @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAuthority('APPROVE_CLAIMS')")
-    @Operation(summary = "Approve claim", description = "Approves a claim and sets the approved amount.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim approved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Approved amount is required", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Claim not found", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<ClaimResponseDto>> approveClaim(
-            @Parameter(name = "id", description = "Claim ID", required = true)
-            @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body containing reviewerId and approvedAmount")
-            @RequestBody Map<String, Object> request) {
-        
-        Long reviewerId = request.get("reviewerId") != null ? 
-            ((Number) request.get("reviewerId")).longValue() : 1L;
-        
-        BigDecimal approvedAmount = request.get("approvedAmount") != null ? 
-            new BigDecimal(request.get("approvedAmount").toString()) : null;
-        
-        if (approvedAmount == null) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Approved amount is required"));
-        }
-        
-        ClaimResponseDto approved = service.approveClaim(id, reviewerId, approvedAmount);
-        return ResponseEntity.ok(ApiResponse.success("Claim approved successfully", approved));
-    }
-
-    @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAuthority('REJECT_CLAIMS')")
-    @Operation(summary = "Reject claim", description = "Rejects a claim and records the rejection reason.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Claim rejected successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Rejection reason is required", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Claim not found", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized request", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.waad.tba.common.error.ApiError.class)))
-    })
-    public ResponseEntity<ApiResponse<ClaimResponseDto>> rejectClaim(
-            @Parameter(name = "id", description = "Claim ID", required = true)
-            @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body containing reviewerId and rejectionReason")
-            @RequestBody Map<String, Object> request) {
-        
-        Long reviewerId = request.get("reviewerId") != null ? 
-            ((Number) request.get("reviewerId")).longValue() : 1L;
-        
-        String rejectionReason = request.get("rejectionReason") != null ?
-            request.get("rejectionReason").toString() : null;
-        
-        if (rejectionReason == null || rejectionReason.isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Rejection reason is required"));
-        }
-        
-        ClaimResponseDto rejected = service.rejectClaim(id, reviewerId, rejectionReason);
-        return ResponseEntity.ok(ApiResponse.success("Claim rejected successfully", rejected));
+    @GetMapping("/pre-approval/{preApprovalId}")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
+    public ResponseEntity<ApiResponse<List<ClaimViewDto>>> getClaimsByPreApproval(@PathVariable Long preApprovalId) {
+        List<ClaimViewDto> claims = claimService.getClaimsByPreApproval(preApprovalId);
+        return ResponseEntity.ok(ApiResponse.success("Pre-approval claims retrieved successfully", claims));
     }
 }

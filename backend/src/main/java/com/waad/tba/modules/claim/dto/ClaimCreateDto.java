@@ -1,8 +1,6 @@
 package com.waad.tba.modules.claim.dto;
 
-import com.waad.tba.modules.claim.entity.Claim;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.waad.tba.modules.claim.entity.ClaimStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,45 +8,25 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClaimCreateDto {
-    
-    @NotNull(message = "Member ID is required")
     private Long memberId;
-    
-    @NotNull(message = "Provider ID is required")
-    private Long providerId;
+    private Long insuranceCompanyId;
+    private Long insurancePolicyId;
+    private Long benefitPackageId;
+    private Long preApprovalId;
     
     private String providerName;
+    private String doctorName;
+    private String diagnosis;
+    private LocalDate visitDate;
+    private BigDecimal requestedAmount;
     
-    private String claimNumber;
-    
-    @NotNull(message = "Claim type is required")
-    private String claimType;
-    
-    @NotNull(message = "Service date is required")
-    private LocalDate serviceDate;
-    
-    private LocalDate submissionDate;
-    
-    @NotNull(message = "Total claimed amount is required")
-    private BigDecimal totalClaimed;
-    
-    private BigDecimal totalApproved;
-    
-    private Claim.ClaimStatus status;
-    
-    private String diagnosisCode;
-    
-    private String diagnosisDescription;
-    
-    private String preAuthNumber;
-    
-    private String rejectionReason;
-    
-    private String notes;
+    private List<ClaimLineDto> lines;
+    private List<ClaimAttachmentDto> attachments;
 }

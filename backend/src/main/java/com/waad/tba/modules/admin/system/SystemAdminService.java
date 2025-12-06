@@ -162,15 +162,13 @@ public class SystemAdminService {
 
         // Claim referencing Member
         Claim claim = Claim.builder()
-                .claimNumber("CLM-001")
                 .member(member)
-                .claimType(Claim.ClaimType.OUTPATIENT)
-                .serviceDate(LocalDate.now())
-                .submissionDate(LocalDate.now())
-                .totalClaimed(new java.math.BigDecimal("2500.00"))
-                .totalApproved(null)
-                .status(Claim.ClaimStatus.PENDING)
-                .notes("Initial dental surgery claim")
+                .insuranceCompany(insuranceCompany)
+                .providerName("مركز الأسنان الطبي")
+                .diagnosis("علاج الأسنان")
+                .visitDate(LocalDate.now())
+                .requestedAmount(new java.math.BigDecimal("2500.00"))
+                .status(com.waad.tba.modules.claim.entity.ClaimStatus.PENDING_REVIEW)
                 .active(true)
                 .build();
         claimRepository.save(claim);
