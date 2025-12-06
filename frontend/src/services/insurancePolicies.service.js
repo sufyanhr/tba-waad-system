@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = '/api/policies';
+const BASE_URL = '/api/insurance-policies';
 
 // Utility to unwrap nested API response
 const unwrap = (response) => response?.data?.data ?? response?.data;
