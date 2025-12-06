@@ -8,7 +8,7 @@ import com.waad.tba.modules.member.repository.MemberRepository;
 import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
 import com.waad.tba.modules.insurancepolicy.repository.InsurancePolicyRepository;
 import com.waad.tba.modules.insurancepolicy.repository.PolicyBenefitPackageRepository;
-import com.waad.tba.modules.preapproval.repository.PreApprovalRepository;
+import com.waad.tba.modules.preauth.repository.PreApprovalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

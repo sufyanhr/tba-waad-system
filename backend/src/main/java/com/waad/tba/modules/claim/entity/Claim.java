@@ -4,7 +4,7 @@ import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import com.waad.tba.modules.insurancepolicy.entity.InsurancePolicy;
 import com.waad.tba.modules.insurancepolicy.entity.PolicyBenefitPackage;
-import com.waad.tba.modules.preapproval.entity.PreApproval;
+import com.waad.tba.modules.preauth.entity.PreApproval;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
