@@ -70,6 +70,12 @@ const ClaimCreate = Loadable(lazy(() => import('pages/tba/claims/ClaimCreate')))
 const ClaimEdit = Loadable(lazy(() => import('pages/tba/claims/ClaimEdit')));
 const ClaimView = Loadable(lazy(() => import('pages/tba/claims/ClaimView')));
 
+// render - Providers module (Phase B12)
+const ProvidersList = Loadable(lazy(() => import('pages/tba/providers/ProvidersList')));
+const ProviderCreate = Loadable(lazy(() => import('pages/tba/providers/ProviderCreate')));
+const ProviderEdit = Loadable(lazy(() => import('pages/tba/providers/ProviderEdit')));
+const ProviderView = Loadable(lazy(() => import('pages/tba/providers/ProviderView')));
+
 // render - Administration pages
 const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));
 const AdminRoles = Loadable(lazy(() => import('pages/admin/roles')));
@@ -150,8 +156,32 @@ const MainRoutes = {
             {
               path: 'providers',
               element: (
-                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
-                  <TbaProviders />
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_PROVIDERS']}>
+                  <ProvidersList />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'providers/create',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN']} permissions={['MANAGE_PROVIDERS']}>
+                  <ProviderCreate />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'providers/edit/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN']} permissions={['MANAGE_PROVIDERS']}>
+                  <ProviderEdit />
+                </RoleGuard>
+              )
+            },
+            {
+              path: 'providers/view/:id',
+              element: (
+                <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']} permissions={['VIEW_PROVIDERS']}>
+                  <ProviderView />
                 </RoleGuard>
               )
             },

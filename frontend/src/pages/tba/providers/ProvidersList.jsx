@@ -22,29 +22,18 @@ import {
   Select,
   MenuItem
 } from '@mui/material';
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-  EyeOutlined
-} from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons';
 
 // project imports
 import MainCard from 'components/MainCard';
 import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
-import providersService from 'services/providers.service';
+import { getProviders, deleteProvider } from 'services/providers.service';
 import { useSnackbar } from 'notistack';
 
 // third-party
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper
-} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, flexRender, createColumnHelper } from '@tanstack/react-table';
 
 // ==============================|| PROVIDERS LIST PAGE ||============================== //
 
@@ -97,13 +86,7 @@ export default function ProvidersList() {
             PHARMACY: 'success',
             LABORATORY: 'warning'
           };
-          return (
-            <Chip
-              label={type || 'N/A'}
-              color={colorMap[type] || 'default'}
-              size="small"
-            />
-          );
+          return <Chip label={type || 'N/A'} color={colorMap[type] || 'default'} size="small" />;
         }
       }),
       columnHelper.accessor('licenseNumber', {
@@ -129,11 +112,7 @@ export default function ProvidersList() {
       columnHelper.accessor('active', {
         header: 'Status',
         cell: (info) => (
-          <Chip
-            label={info.getValue() ? 'Active' : 'Inactive'}
-            color={info.getValue() ? 'success' : 'default'}
-            size="small"
-          />
+          <Chip label={info.getValue() ? 'Active' : 'Inactive'} color={info.getValue() ? 'success' : 'default'} size="small" />
         )
       }),
       columnHelper.accessor('id', {
@@ -141,32 +120,20 @@ export default function ProvidersList() {
         cell: (info) => (
           <Stack direction="row" spacing={0.5}>
             <Tooltip title="View">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={() => handleView(info.getValue())}
-              >
+              <IconButton size="small" color="primary" onClick={() => handleView(info.getValue())}>
                 <EyeOutlined />
               </IconButton>
             </Tooltip>
             <RBACGuard requiredPermission="PROVIDER_UPDATE">
               <Tooltip title="Edit">
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => handleEdit(info.getValue())}
-                >
+                <IconButton size="small" color="primary" onClick={() => handleEdit(info.getValue())}>
                   <EditOutlined />
                 </IconButton>
               </Tooltip>
             </RBACGuard>
             <RBACGuard requiredPermission="PROVIDER_DELETE">
               <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => openDeleteDialog(info.row.original)}
-                >
+                <IconButton size="small" color="error" onClick={() => openDeleteDialog(info.row.original)}>
                   <DeleteOutlined />
                 </IconButton>
               </Tooltip>
@@ -184,30 +151,22 @@ export default function ProvidersList() {
     setError(null);
 
     try {
-      const result = await providersService.list({
+      const result = await getProviders({
         page,
         size: rowsPerPage,
-        search: searchTerm,
-        type: typeFilter || undefined,
-        status: statusFilter || undefined
+        search: searchTerm
       });
 
-      if (result.success) {
-        const responseData = result.data;
-        setProviders(responseData.items || []);
-        setTotalElements(responseData.total || 0);
-      } else {
-        setError(result.error);
-        enqueueSnackbar(result.error, { variant: 'error' });
-      }
+      setProviders(result.items || []);
+      setTotalElements(result.total || 0);
     } catch (err) {
-      const errorMessage = err.message || 'Failed to load providers';
+      const errorMessage = err.message || 'فشل تحميل المزودين';
       setError(errorMessage);
       enqueueSnackbar(errorMessage, { variant: 'error' });
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, searchTerm, typeFilter, statusFilter, enqueueSnackbar]);
+  }, [page, rowsPerPage, searchTerm, enqueueSnackbar]);
 
   useEffect(() => {
     loadProviders();
@@ -243,15 +202,15 @@ export default function ProvidersList() {
   };
 
   const handleCreate = () => {
-    navigate('/tpa/providers/create');
+    navigate('/tba/providers/create');
   };
 
   const handleView = (id) => {
-    navigate(`/tpa/providers/view/${id}`);
+    navigate(`/tba/providers/view/${id}`);
   };
 
   const handleEdit = (id) => {
-    navigate(`/tpa/providers/edit/${id}`);
+    navigate(`/tba/providers/edit/${id}`);
   };
 
   const openDeleteDialog = (provider) => {
@@ -263,18 +222,13 @@ export default function ProvidersList() {
     if (!selectedProvider) return;
 
     try {
-      const result = await providersService.delete(selectedProvider.id);
-      
-      if (result.success) {
-        enqueueSnackbar(result.message || 'Provider deleted successfully', { variant: 'success' });
-        setDeleteDialogOpen(false);
-        setSelectedProvider(null);
-        loadProviders();
-      } else {
-        enqueueSnackbar(result.error, { variant: 'error' });
-      }
+      await deleteProvider(selectedProvider.id);
+      enqueueSnackbar('تم حذف المزود بنجاح', { variant: 'success' });
+      setDeleteDialogOpen(false);
+      setSelectedProvider(null);
+      loadProviders();
     } catch (err) {
-      enqueueSnackbar(err.message || 'Failed to delete provider', { variant: 'error' });
+      enqueueSnackbar(err.message || 'فشل حذف المزود', { variant: 'error' });
     }
   };
 
@@ -292,11 +246,7 @@ export default function ProvidersList() {
         content={false}
         secondary={
           <RBACGuard requiredPermission="PROVIDER_CREATE">
-            <Button
-              variant="contained"
-              startIcon={<PlusOutlined />}
-              onClick={handleCreate}
-            >
+            <Button variant="contained" startIcon={<PlusOutlined />} onClick={handleCreate}>
               Add Provider
             </Button>
           </RBACGuard>
@@ -316,11 +266,7 @@ export default function ProvidersList() {
             />
             <FormControl sx={{ minWidth: 180 }}>
               <InputLabel>Provider Type</InputLabel>
-              <Select
-                value={typeFilter}
-                onChange={handleTypeChange}
-                label="Provider Type"
-              >
+              <Select value={typeFilter} onChange={handleTypeChange} label="Provider Type">
                 {PROVIDER_TYPES.map((type) => (
                   <MenuItem key={type.value} value={type.value}>
                     {type.label}
@@ -330,11 +276,7 @@ export default function ProvidersList() {
             </FormControl>
             <FormControl sx={{ minWidth: 150 }}>
               <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={handleStatusChange}
-                label="Status"
-              >
+              <Select value={statusFilter} onChange={handleStatusChange} label="Status">
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="true">Active</MenuItem>
                 <MenuItem value="false">Inactive</MenuItem>
@@ -347,9 +289,7 @@ export default function ProvidersList() {
         {loading && <TableSkeleton rows={rowsPerPage} columns={7} />}
 
         {/* Error State */}
-        {!loading && error && (
-          <ErrorFallback error={error} onRetry={handleRetry} />
-        )}
+        {!loading && error && <ErrorFallback error={error} onRetry={handleRetry} />}
 
         {/* Empty State */}
         {!loading && !error && providers.length === 0 && (
@@ -384,10 +324,7 @@ export default function ProvidersList() {
                             backgroundColor: '#fafafa'
                           }}
                         >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          {flexRender(header.column.columnDef.header, header.getContext())}
                         </th>
                       ))}
                     </tr>
@@ -415,10 +352,7 @@ export default function ProvidersList() {
                             padding: '16px'
                           }}
                         >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
                     </tr>
@@ -449,9 +383,7 @@ export default function ProvidersList() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
+            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleDelete} color="error" variant="contained">
               Delete
             </Button>
