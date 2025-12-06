@@ -3,6 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+/bin/
+### maven ###
 
 ### STS ###
 .apt_generated
@@ -42,3 +44,4 @@ logs/
 ### Environment ###
 .env
 .env.local
+/bin/
