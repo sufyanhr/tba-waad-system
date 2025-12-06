@@ -14,7 +14,6 @@ import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.audit.service.AuditTrailService;
 import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.repository.MemberRepository;
-import com.waad.tba.modules.providercontract.service.ProviderCompanyContractService;
 import com.waad.tba.modules.rbac.entity.User;
 import com.waad.tba.modules.visit.dto.VisitCreateDto;
 import com.waad.tba.modules.visit.dto.VisitResponseDto;
@@ -34,7 +33,6 @@ public class VisitService {
     private final VisitRepository repository;
     private final MemberRepository memberRepository;
     private final VisitMapper mapper;
-    private final ProviderCompanyContractService providerContractService;
     private final AuthorizationService authorizationService;
     private final AuditTrailService auditTrailService;
 
@@ -148,12 +146,6 @@ public class VisitService {
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
 
-        // Validate provider contract if providerId is provided
-        if (dto.getProviderId() != null) {
-            Long companyId = member.getEmployer().getCompany().getId();
-            providerContractService.validateActiveContract(companyId, dto.getProviderId());
-        }
-
         Visit entity = mapper.toEntity(dto, member);
         Visit saved = repository.save(entity);
         
@@ -170,12 +162,6 @@ public class VisitService {
 
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.getMemberId()));
-
-        // Validate provider contract if providerId is provided
-        if (dto.getProviderId() != null) {
-            Long companyId = member.getEmployer().getCompany().getId();
-            providerContractService.validateActiveContract(companyId, dto.getProviderId());
-        }
 
         mapper.updateEntityFromDto(entity, dto, member);
         Visit updated = repository.save(entity);

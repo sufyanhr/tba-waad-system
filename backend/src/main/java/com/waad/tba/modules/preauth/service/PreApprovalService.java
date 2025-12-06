@@ -6,7 +6,6 @@ import com.waad.tba.modules.preauth.entity.*;
 import com.waad.tba.modules.preauth.repository.*;
 import com.waad.tba.modules.provider.entity.Provider;
 import com.waad.tba.modules.provider.repository.ProviderRepository;
-import com.waad.tba.modules.providercontract.service.ProviderCompanyContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class PreApprovalService {
     private final ChronicConditionRepository chronicConditionRepository;
     private final MemberRepository memberRepository;
     private final ProviderRepository providerRepository;
-    private final ProviderCompanyContractService providerContractService;
 
     /**
      * Check if pre-approval is required for a service
@@ -58,13 +56,12 @@ public class PreApprovalService {
         Provider provider = providerRepository.findById(providerId)
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
 
-        // Check if provider has active contract with member's company
-        Long companyId = member.getEmployer().getCompany().getId();
-        if (!providerContractService.hasActiveContract(companyId, providerId)) {
+        // Check if provider is active
+        if (!provider.getActive()) {
             PreApprovalRequirement requirement = new PreApprovalRequirement();
             requirement.setRequired(true);
             requirement.setAllowed(false);
-            requirement.setReason("Provider does not have an active contract with this company");
+            requirement.setReason("Provider is not active");
             requirement.setMemberId(memberId);
             requirement.setServiceCode(serviceCode);
             requirement.setProviderId(providerId);
@@ -79,7 +76,7 @@ public class PreApprovalService {
 
         // Get matching rules
         List<PreApprovalRule> rules = ruleRepository.findMatchingRules(
-            serviceCode, provider.getType());
+            serviceCode, provider.getProviderType());
 
         PreApprovalRequirement requirement = new PreApprovalRequirement();
         requirement.setRequired(false);
@@ -90,7 +87,7 @@ public class PreApprovalService {
 
         // Check rules
         for (PreApprovalRule rule : rules) {
-            if (rule.matchesCriteria(serviceCode, provider.getType(), amount, hasChronic)) {
+            if (rule.matchesCriteria(serviceCode, provider.getProviderType(), amount, hasChronic)) {
                 requirement.setRequired(true);
                 requirement.setReason("Matches rule: " + rule.getRuleName());
                 requirement.setRequiredLevel(rule.getRequiredApprovalLevel());
@@ -153,7 +150,7 @@ public class PreApprovalService {
                 .type(request.getType())
                 .member(member)
                 .providerId(request.getProviderId())
-                .providerName(provider.getNameEn())
+                .providerName(provider.getNameEnglish())
                 .serviceCode(request.getServiceCode())
                 .serviceDescription(request.getServiceDescription())
                 .diagnosisCode(request.getDiagnosisCode())
