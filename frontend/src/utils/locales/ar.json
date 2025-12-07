@@ -120,5 +120,15 @@
   "email-invalid": "البريد الإلكتروني غير صالح",
   "save-changes": "حفظ التعديلات",
   "saving": "جار الحفظ...",
-  "employers": "جهات العمل"
+  "employers": "جهات العمل",
+  "basic-information": "المعلومات الأساسية",
+  "contact-information": "معلومات الاتصال",
+  "audit-information": "معلومات التدقيق",
+  "id": "رقم التعريف",
+  "status": "الحالة",
+  "inactive": "غير نشط",
+  "created-at": "تاريخ الإنشاء",
+  "updated-at": "تاريخ آخر تحديث",
+  "back-to-list": "رجوع إلى القائمة",
+  "edit": "تعديل"
 }
