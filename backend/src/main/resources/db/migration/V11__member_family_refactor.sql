@@ -4,8 +4,10 @@
 -- ===================================
 
 -- ========================================
--- 1. Add New Columns to `members` Table
+-- 1. Ensure Required Columns Exist (ADD IF NOT EXISTS)
 -- ========================================
+-- Note: These columns should already exist from initial schema
+-- Using ADD COLUMN IF NOT EXISTS for safety
 
 ALTER TABLE members 
 ADD COLUMN IF NOT EXISTS full_name_arabic VARCHAR(200),
@@ -22,26 +24,10 @@ ADD COLUMN IF NOT EXISTS created_by VARCHAR(100),
 ADD COLUMN IF NOT EXISTS updated_by VARCHAR(100);
 
 -- ================================================
--- 2. Migrate Existing Data from Old to New Fields
+-- 2. Set Default Values for Existing Records
 -- ================================================
 
--- Migrate first_name + last_name → full_name_english
-UPDATE members 
-SET full_name_english = TRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, ''))
-WHERE full_name_english IS NULL 
-  AND (first_name IS NOT NULL OR last_name IS NOT NULL);
-
--- Migrate date_of_birth → birth_date
-UPDATE members 
-SET birth_date = date_of_birth
-WHERE birth_date IS NULL AND date_of_birth IS NOT NULL;
-
--- Migrate start_date → join_date
-UPDATE members 
-SET join_date = start_date
-WHERE join_date IS NULL AND start_date IS NOT NULL;
-
--- Set default card_status based on existing active status
+-- Set default card_status for records where it's NULL
 UPDATE members 
 SET card_status = CASE 
     WHEN active = true THEN 'ACTIVE'
@@ -127,10 +113,10 @@ COMMENT ON TABLE family_members IS 'Stores family member information (spouse, ch
 COMMENT ON COLUMN family_members.relationship IS 'Type of relationship: WIFE, HUSBAND, SON, DAUGHTER, FATHER, MOTHER';
 COMMENT ON COLUMN family_members.status IS 'Status: ACTIVE, INACTIVE, DEPENDENT, EXCLUDED';
 COMMENT ON COLUMN members.card_status IS 'Card status: ACTIVE, INACTIVE, BLOCKED, EXPIRED';
-COMMENT ON COLUMN members.full_name_arabic IS 'Member full name in Arabic';
-COMMENT ON COLUMN members.full_name_english IS 'Member full name in English';
-COMMENT ON COLUMN members.birth_date IS 'Date of birth (replaces date_of_birth)';
-COMMENT ON COLUMN members.join_date IS 'Date member joined employer (replaces start_date)';
+COMMENT ON COLUMN members.full_name_arabic IS 'Member full name in Arabic (already exists in Entity)';
+COMMENT ON COLUMN members.full_name_english IS 'Member full name in English (already exists in Entity)';
+COMMENT ON COLUMN members.birth_date IS 'Date of birth (already exists in Entity)';
+COMMENT ON COLUMN members.join_date IS 'Date member joined employer (already exists in Entity)';
 
 -- ========================================
 -- 6. Migration Safety Check Trigger
