@@ -2,7 +2,7 @@
 -- Creates unified providers and provider_contracts tables
 
 -- Table 1: providers
-CREATE TABLE providers (
+CREATE TABLE IF NOT EXISTS providers (
     id BIGSERIAL PRIMARY KEY,
     name_arabic VARCHAR(200) NOT NULL,
     name_english VARCHAR(200) NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE providers (
 );
 
 -- Table 2: provider_contracts
-CREATE TABLE provider_contracts (
+CREATE TABLE IF NOT EXISTS provider_contracts (
     id BIGSERIAL PRIMARY KEY,
     provider_id BIGINT NOT NULL,
     contract_number VARCHAR(100) NOT NULL UNIQUE,
@@ -67,6 +67,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_providers_updated_at ON providers;
 CREATE TRIGGER trigger_update_providers_updated_at
 BEFORE UPDATE ON providers
 FOR EACH ROW
@@ -81,6 +82,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_provider_contracts_updated_at ON provider_contracts;
 CREATE TRIGGER trigger_update_provider_contracts_updated_at
 BEFORE UPDATE ON provider_contracts
 FOR EACH ROW

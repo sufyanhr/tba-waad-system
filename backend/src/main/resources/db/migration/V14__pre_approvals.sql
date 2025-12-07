@@ -2,7 +2,7 @@
 -- Description: Creates pre_approvals table for managing medical pre-approval requests
 
 -- Create pre_approvals table
-CREATE TABLE pre_approvals (
+CREATE TABLE IF NOT EXISTS pre_approvals (
     id BIGSERIAL PRIMARY KEY,
     
     -- Foreign Keys
@@ -94,6 +94,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_pre_approvals_updated_at ON pre_approvals;
 CREATE TRIGGER trigger_update_pre_approvals_updated_at
     BEFORE UPDATE ON pre_approvals
     FOR EACH ROW

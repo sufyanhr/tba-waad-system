@@ -65,6 +65,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_company_settings_updated_at ON company_settings;
 CREATE TRIGGER trigger_update_company_settings_updated_at
     BEFORE UPDATE ON company_settings
     FOR EACH ROW

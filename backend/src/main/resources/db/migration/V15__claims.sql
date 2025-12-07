@@ -1,7 +1,7 @@
 -- V15: Claims Module Migration
 
 -- Create claims table
-CREATE TABLE claims (
+CREATE TABLE IF NOT EXISTS claims (
     id BIGSERIAL PRIMARY KEY,
     member_id BIGINT NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
     insurance_company_id BIGINT NOT NULL REFERENCES insurance_companies(id) ON DELETE RESTRICT,
@@ -33,7 +33,7 @@ CREATE TABLE claims (
 );
 
 -- Create claim_lines table
-CREATE TABLE claim_lines (
+CREATE TABLE IF NOT EXISTS claim_lines (
     id BIGSERIAL PRIMARY KEY,
     claim_id BIGINT NOT NULL REFERENCES claims(id) ON DELETE CASCADE,
     
@@ -45,7 +45,7 @@ CREATE TABLE claim_lines (
 );
 
 -- Create claim_attachments table
-CREATE TABLE claim_attachments (
+CREATE TABLE IF NOT EXISTS claim_attachments (
     id BIGSERIAL PRIMARY KEY,
     claim_id BIGINT NOT NULL REFERENCES claims(id) ON DELETE CASCADE,
     
@@ -83,6 +83,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_claims_updated_at ON claims;
 CREATE TRIGGER trigger_update_claims_updated_at
     BEFORE UPDATE ON claims
     FOR EACH ROW

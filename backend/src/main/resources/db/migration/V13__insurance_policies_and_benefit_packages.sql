@@ -62,6 +62,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_insurance_policies_updated_at ON insurance_policies;
 CREATE TRIGGER trigger_update_insurance_policies_updated_at
     BEFORE UPDATE ON insurance_policies
     FOR EACH ROW
@@ -76,6 +77,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_policy_benefit_packages_updated_at ON policy_benefit_packages;
 CREATE TRIGGER trigger_update_policy_benefit_packages_updated_at
     BEFORE UPDATE ON policy_benefit_packages
     FOR EACH ROW
