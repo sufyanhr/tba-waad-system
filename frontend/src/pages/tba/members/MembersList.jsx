@@ -1,43 +1,61 @@
 // src/pages/tba/members/MembersList.jsx
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  CircularProgress,
+  Chip,
   IconButton,
   Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
   Typography,
-  TablePagination
+  TablePagination,
+  InputAdornment,
+  Tooltip
 } from '@mui/material';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
 
 import MainCard from 'components/MainCard';
+import TableSkeleton from 'components/tba/LoadingSkeleton';
 import { useMembersList } from 'hooks/useMembers';
 import * as membersService from 'services/members.service';
 
 const MembersList = () => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState('');
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDir, setSortDir] = useState('DESC');
 
   const { data, loading, error, params, setParams, refresh } = useMembersList({
     page: 0,
     size: 10,
-    sortBy: 'id',
-    sortDir: 'DESC'
+    sortBy: sortBy,
+    sortDir: sortDir
   });
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setParams((prev) => ({ ...prev, page: 0, search: searchInput.trim() }));
+  };
+
+  const handleSort = (column) => {
+    const isAsc = sortBy === column && sortDir === 'ASC';
+    const newDir = isAsc ? 'DESC' : 'ASC';
+    setSortDir(newDir);
+    setSortBy(column);
+    setParams((prev) => ({ ...prev, sortBy: column, sortDir: newDir }));
   };
 
   const handleChangePage = (_, newPage) => {
@@ -63,106 +81,187 @@ const MembersList = () => {
     }
   };
 
+  const getStatusChip = (status) => {
+    const statusColors = {
+      ACTIVE: 'success',
+      INACTIVE: 'default',
+      SUSPENDED: 'warning',
+      TERMINATED: 'error'
+    };
+    return (
+      <Chip 
+        label={status || 'N/A'} 
+        color={statusColors[status] || 'default'} 
+        size="small" 
+        variant="outlined"
+      />
+    );
+  };
+
   return (
-    <MainCard title="الأعضاء (المؤمن عليهم)">
-      <Stack spacing={2}>
-        {/* شريط الأكشن العلوي */}
+    <MainCard 
+      title="الأعضاء (المؤمن عليهم)"
+      content={false}
+    >
+      <Box sx={{ p: 3 }}>
+        {/* Toolbar */}
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           justifyContent="space-between"
           alignItems={{ xs: 'stretch', sm: 'center' }}
           spacing={2}
+          sx={{ mb: 3 }}
         >
           <Typography variant="body2" color="text.secondary">
-            عرض قائمة المؤمن عليهم مع إمكانية البحث والفرز.
+            عرض قائمة المؤمن عليهم مع إمكانية البحث والفرز
           </Typography>
 
-          <Stack direction="row" spacing={1}>
-            <form onSubmit={handleSearchSubmit}>
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  size="small"
-                  placeholder="بحث بالاسم أو الرقم الوطني..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <Button type="submit" variant="outlined">
-                  بحث
-                </Button>
-              </Stack>
-            </form>
-
-            <Button variant="contained" color="primary" onClick={() => navigate('/tba/members/create')}>
-              إضافة مشترك جديد
+          <Stack direction="row" spacing={2}>
+            <TextField
+              size="small"
+              placeholder="بحث بالاسم أو الرقم الوطني..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ minWidth: 250 }}
+            />
+            <Button 
+              variant="contained" 
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/members/create')}
+            >
+              إضافة مشترك
             </Button>
           </Stack>
         </Stack>
 
         {/* جدول البيانات */}
-        <Box sx={{ position: 'relative', minHeight: 200 }}>
-          {loading && (
-            <Stack
-              alignItems="center"
-              justifyContent="center"
-              sx={{ position: 'absolute', inset: 0, zIndex: 1, bgcolor: 'rgba(255,255,255,0.5)' }}
-            >
-              <CircularProgress />
-            </Stack>
-          )}
-
-          {error && (
-            <Typography color="error" sx={{ mb: 2 }}>
-              حدث خطأ أثناء جلب البيانات.
-            </Typography>
-          )}
-
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell align="center">#</TableCell>
-                <TableCell>اسم المشترك (عربي)</TableCell>
-                <TableCell>اسم المشترك (إنجليزي)</TableCell>
-                <TableCell>الرقم الوطني</TableCell>
-                <TableCell>جهة العمل</TableCell>
-                <TableCell>الحالة</TableCell>
-                <TableCell align="center">إجراءات</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.items.length === 0 && !loading && (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    لا توجد بيانات حالياً
+        {loading ? (
+          <TableSkeleton rows={10} columns={7} />
+        ) : error ? (
+          <Typography color="error" align="center" sx={{ py: 3 }}>
+            حدث خطأ أثناء جلب البيانات
+          </Typography>
+        ) : (
+          <TableContainer>
+            <Table sx={{ '& .MuiTableCell-root': { py: 1.5 } }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600 }}>#</TableCell>
+                  <TableCell 
+                    sx={{ fontWeight: 600, cursor: 'pointer' }}
+                    onClick={() => handleSort('fullNameArabic')}
+                  >
+                    اسم المشترك (عربي)
                   </TableCell>
-                </TableRow>
-              )}
-
-              {data.items.map((member, index) => (
-                <TableRow key={member.id} hover>
-                  <TableCell align="center">{data.page * data.size + index + 1}</TableCell>
-                  <TableCell>{member.fullNameArabic || '-'}</TableCell>
-                  <TableCell>{member.fullNameEnglish || '-'}</TableCell>
-                  <TableCell>{member.civilId || '-'}</TableCell>
-                  <TableCell>{member.employerName || '-'}</TableCell>
-                  <TableCell>{member.status || '-'}</TableCell>
-                  <TableCell align="center">
-                    <Stack direction="row" spacing={0.5} justifyContent="center">
-                      <IconButton size="small" onClick={() => navigate(`/tba/members/view/${member.id}`)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" onClick={() => navigate(`/tba/members/edit/${member.id}`)}>
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(member.id)}>
-                        <DeleteOutlineOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
+                  <TableCell 
+                    sx={{ fontWeight: 600, cursor: 'pointer' }}
+                    onClick={() => handleSort('fullNameEnglish')}
+                  >
+                    اسم المشترك (إنجليزي)
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>الرقم الوطني</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>جهة العمل</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }} align="center">الحالة</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600 }}>إجراءات</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {data.items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
+                      <Typography variant="subtitle1" color="text.secondary">
+                        لا توجد بيانات حالياً
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  data.items.map((member, index) => (
+                    <TableRow 
+                      key={member.id} 
+                      hover
+                      sx={{ 
+                        '&:hover': { 
+                          bgcolor: 'action.hover',
+                          cursor: 'pointer'
+                        }
+                      }}
+                    >
+                      <TableCell align="center">
+                        <Typography variant="subtitle2">
+                          {data.page * data.size + index + 1}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {member.fullNameArabic || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {member.fullNameEnglish || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" fontFamily="monospace">
+                          {member.civilId || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {member.employerName || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {getStatusChip(member.status)}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Stack direction="row" spacing={0.5} justifyContent="center">
+                          <Tooltip title="عرض التفاصيل">
+                            <IconButton 
+                              size="small" 
+                              color="primary"
+                              onClick={() => navigate(`/members/view/${member.id}`)}
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="تعديل">
+                            <IconButton 
+                              size="small" 
+                              color="info"
+                              onClick={() => navigate(`/members/edit/${member.id}`)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="حذف">
+                            <IconButton 
+                              size="small" 
+                              color="error" 
+                              onClick={() => handleDelete(member.id)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
 
+        {!loading && !error && (
           <TablePagination
             component="div"
             count={data.total}
@@ -170,11 +269,14 @@ const MembersList = () => {
             onPageChange={handleChangePage}
             rowsPerPage={params.size}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[10, 25, 50]}
+            rowsPerPageOptions={[10, 25, 50, 100]}
             labelRowsPerPage="عدد الصفوف في الصفحة"
+            labelDisplayedRows={({ from, to, count }) => 
+              `${from}–${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
+            }
           />
-        </Box>
-      </Stack>
+        )}
+      </Box>
     </MainCard>
   );
 };

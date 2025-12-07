@@ -4,23 +4,31 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   IconButton,
   Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
   Typography,
-  TablePagination
+  TablePagination,
+  InputAdornment,
+  Tooltip
 } from '@mui/material';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Business as BusinessIcon
+} from '@mui/icons-material';
 
 import MainCard from 'components/MainCard';
+import TableSkeleton from 'components/tba/LoadingSkeleton';
 import { useEmployersList } from 'hooks/useEmployers';
 import * as employersService from 'services/employers.service';
 
@@ -64,108 +72,151 @@ const EmployersList = () => {
   };
 
   return (
-    <MainCard title="جهات العمل (Employers)">
-      <Stack spacing={2}>
+    <MainCard title="جهات العمل (Employers)" content={false}>
+      <Box sx={{ p: 3 }}>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           justifyContent="space-between"
           alignItems={{ xs: 'stretch', sm: 'center' }}
           spacing={2}
+          sx={{ mb: 3 }}
         >
           <Typography variant="body2" color="text.secondary">
-            عرض قائمة جهات العمل مع إمكانية البحث والفرز.
+            عرض قائمة جهات العمل مع إمكانية البحث والفرز
           </Typography>
 
-          <Stack direction="row" spacing={1}>
-            <form onSubmit={handleSearchSubmit}>
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  size="small"
-                  placeholder="بحث بالاسم أو الكود..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <Button type="submit" variant="outlined">
-                  بحث
-                </Button>
-              </Stack>
-            </form>
-
-            <Button variant="contained" color="primary" onClick={() => navigate('/tba/employers/create')}>
-              إضافة جهة عمل جديدة
+          <Stack direction="row" spacing={2}>
+            <TextField
+              size="small"
+              placeholder="بحث بالاسم أو الكود..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ minWidth: 250 }}
+            />
+            <Button 
+              variant="contained" 
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/employers/create')}
+            >
+              إضافة جهة عمل
             </Button>
           </Stack>
         </Stack>
 
-        <Box sx={{ position: 'relative', minHeight: 200 }}>
-          {loading && (
-            <Stack
-              alignItems="center"
-              justifyContent="center"
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: 1,
-                bgcolor: 'rgba(255,255,255,0.5)'
-              }}
-            >
-              <CircularProgress />
-            </Stack>
-          )}
-
-          {error && (
-            <Typography color="error" sx={{ mb: 2 }}>
-              حدث خطأ أثناء جلب البيانات.
-            </Typography>
-          )}
-
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell align="center">#</TableCell>
-                <TableCell>اسم جهة العمل</TableCell>
-                <TableCell>كود الشركة</TableCell>
-                <TableCell>رقم الهاتف</TableCell>
-                <TableCell align="center">الحالة</TableCell>
-                <TableCell align="center">إجراءات</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.items.length === 0 && !loading && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    لا توجد بيانات حالياً
-                  </TableCell>
+        {loading ? (
+          <TableSkeleton rows={10} columns={6} />
+        ) : error ? (
+          <Typography color="error" align="center" sx={{ py: 3 }}>
+            حدث خطأ أثناء جلب البيانات
+          </Typography>
+        ) : (
+          <TableContainer>
+            <Table sx={{ '& .MuiTableCell-root': { py: 1.5 } }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600 }}>#</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>اسم جهة العمل</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>كود الشركة</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>رقم الهاتف</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600 }}>الحالة</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600 }}>إجراءات</TableCell>
                 </TableRow>
-              )}
+              </TableHead>
+              <TableBody>
+                {data.items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
+                      <Typography variant="subtitle1" color="text.secondary">
+                        لا توجد بيانات حالياً
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  data.items.map((employer, index) => (
+                    <TableRow 
+                      key={employer.id} 
+                      hover
+                      sx={{ '&:hover': { bgcolor: 'action.hover', cursor: 'pointer' } }}
+                    >
+                      <TableCell align="center">
+                        <Typography variant="subtitle2">
+                          {data.page * data.size + index + 1}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <BusinessIcon fontSize="small" color="action" />
+                          <Typography variant="body2">
+                            {employer.name || '-'}
+                          </Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" fontFamily="monospace">
+                          {employer.companyCode || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {employer.phone || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip 
+                          label={employer.active ? 'نشط' : 'غير نشط'} 
+                          color={employer.active ? 'success' : 'default'} 
+                          size="small"
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Stack direction="row" spacing={0.5} justifyContent="center">
+                          <Tooltip title="عرض التفاصيل">
+                            <IconButton 
+                              size="small" 
+                              color="primary"
+                              onClick={() => navigate(`/employers/view/${employer.id}`)}
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="تعديل">
+                            <IconButton 
+                              size="small" 
+                              color="info"
+                              onClick={() => navigate(`/employers/edit/${employer.id}`)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="حذف">
+                            <IconButton 
+                              size="small" 
+                              color="error" 
+                              onClick={() => handleDelete(employer.id)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
 
-              {data.items.map((employer, index) => (
-                <TableRow key={employer.id} hover>
-                  <TableCell align="center">{data.page * data.size + index + 1}</TableCell>
-                  <TableCell>{employer.name || '-'}</TableCell>
-                  <TableCell>{employer.companyCode || '-'}</TableCell>
-                  <TableCell>{employer.phone || '-'}</TableCell>
-                  <TableCell align="center">
-                    <Chip label={employer.active ? 'نشط' : 'غير نشط'} color={employer.active ? 'success' : 'default'} size="small" />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Stack direction="row" spacing={0.5} justifyContent="center">
-                      <IconButton size="small" onClick={() => navigate(`/tba/employers/view/${employer.id}`)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" onClick={() => navigate(`/tba/employers/edit/${employer.id}`)}>
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(employer.id)}>
-                        <DeleteOutlineOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
+        {!loading && !error && (
           <TablePagination
             component="div"
             count={data.total}
@@ -173,11 +224,14 @@ const EmployersList = () => {
             onPageChange={handleChangePage}
             rowsPerPage={params.size}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[10, 25, 50]}
+            rowsPerPageOptions={[10, 25, 50, 100]}
             labelRowsPerPage="عدد الصفوف في الصفحة"
+            labelDisplayedRows={({ from, to, count }) => 
+              `${from}–${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
+            }
           />
-        </Box>
-      </Stack>
+        )}
+      </Box>
     </MainCard>
   );
 };

@@ -4,11 +4,17 @@ import { useState } from 'react';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticsDataCard from 'components/cards/statistics/AnalyticsDataCard';
+
+// Charts
+import ClaimsTrendChart from 'components/charts/ClaimsTrendChart';
+import MembersGrowthChart from 'components/charts/MembersGrowthChart';
+import ClaimsByStatusChart from 'components/charts/ClaimsByStatusChart';
+import VisitsOverTimeChart from 'components/charts/VisitsOverTimeChart';
+import MembersByEmployerChart from 'components/charts/MembersByEmployerChart';
 
 // assets
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
@@ -24,7 +30,7 @@ import axios from 'utils/axios';
 
 export default function TbaDashboard() {
   // Fetch dashboard stats from backend
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: async () => {
       const response = await axios.get('/dashboard/statistics');
@@ -103,54 +109,75 @@ export default function TbaDashboard() {
         </AnalyticsDataCard>
       </Grid>
 
-      {/* Row 2: Charts Placeholder */}
-      <Grid item xs={12} md={7} lg={8}>
+      {/* Row 2: Charts */}
+      <Grid item xs={12} lg={8}>
         <MainCard>
-          <Stack spacing={1.5}>
-            <Typography variant="h6">Monthly Trends</Typography>
-            <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                Chart component will be added in Phase 2
-              </Typography>
-            </Box>
-          </Stack>
+          <ClaimsTrendChart height={320} />
         </MainCard>
       </Grid>
 
-      <Grid item xs={12} md={5} lg={4}>
+      <Grid item xs={12} lg={4}>
         <MainCard>
-          <Stack spacing={1.5}>
-            <Typography variant="h6">Quick Stats</Typography>
-            <Stack spacing={2}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Total Employers</Typography>
-                <Typography variant="h6">{stats?.totalEmployers || 0}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Total Policies</Typography>
-                <Typography variant="h6">{stats?.totalPolicies || 0}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Pre-Authorizations</Typography>
-                <Typography variant="h6">{stats?.totalPreAuths || 0}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Active Contracts</Typography>
-                <Typography variant="h6">{stats?.activeContracts || 0}</Typography>
-              </Box>
-            </Stack>
-          </Stack>
+          <ClaimsByStatusChart height={320} />
         </MainCard>
       </Grid>
 
-      {/* Row 3: Recent Activity Placeholder */}
+      {/* Row 3: More Charts */}
+      <Grid item xs={12} md={6} lg={4}>
+        <MainCard>
+          <MembersGrowthChart height={280} />
+        </MainCard>
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={4}>
+        <MainCard>
+          <VisitsOverTimeChart height={280} />
+        </MainCard>
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={4}>
+        <MainCard>
+          <MembersByEmployerChart height={280} />
+        </MainCard>
+      </Grid>
+
+      {/* Row 4: Quick Stats */}
       <Grid item xs={12}>
-        <MainCard title="Recent Activity">
-          <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Activity timeline will be added in Phase 2
-            </Typography>
-          </Box>
+        <MainCard title="Quick Statistics">
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Stack spacing={1}>
+                <Typography variant="caption" color="text.secondary">
+                  Total Employers
+                </Typography>
+                <Typography variant="h4">{stats?.totalEmployers || 0}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Stack spacing={1}>
+                <Typography variant="caption" color="text.secondary">
+                  Total Policies
+                </Typography>
+                <Typography variant="h4">{stats?.totalPolicies || 0}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Stack spacing={1}>
+                <Typography variant="caption" color="text.secondary">
+                  Pre-Authorizations
+                </Typography>
+                <Typography variant="h4">{stats?.totalPreAuths || 0}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Stack spacing={1}>
+                <Typography variant="caption" color="text.secondary">
+                  Active Contracts
+                </Typography>
+                <Typography variant="h4">{stats?.activeContracts || 0}</Typography>
+              </Stack>
+            </Grid>
+          </Grid>
         </MainCard>
       </Grid>
     </Grid>
