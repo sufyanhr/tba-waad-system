@@ -33,8 +33,8 @@ ON members(status);
 -- Claims Table Indexes
 -- ----------------------------------------------------------------------------
 -- Optimize provider filtering (createdBy field for PROVIDER access)
-CREATE INDEX IF NOT EXISTS idx_claims_created_by_user_id 
-ON claims(created_by_user_id);
+CREATE INDEX IF NOT EXISTS idx_claims_created_by 
+ON claims(created_by);
 
 -- Optimize member-based claim lookups
 CREATE INDEX IF NOT EXISTS idx_claims_member_id 
@@ -44,13 +44,9 @@ ON claims(member_id);
 CREATE INDEX IF NOT EXISTS idx_claims_status 
 ON claims(status);
 
--- Optimize claim number lookups
-CREATE INDEX IF NOT EXISTS idx_claims_claim_number 
-ON claims(claim_number);
-
--- Optimize service date range queries
-CREATE INDEX IF NOT EXISTS idx_claims_service_date 
-ON claims(service_date);
+-- Optimize visit date queries
+CREATE INDEX IF NOT EXISTS idx_claims_visit_date 
+ON claims(visit_date);
 
 -- Visits Table Indexes
 -- ----------------------------------------------------------------------------
@@ -99,9 +95,9 @@ ON members(employer_id, status);
 CREATE INDEX IF NOT EXISTS idx_claims_member_status 
 ON claims(member_id, status);
 
--- Optimize date range queries for claims
-CREATE INDEX IF NOT EXISTS idx_claims_service_submission 
-ON claims(service_date, submission_date);
+-- Optimize date queries for claims
+CREATE INDEX IF NOT EXISTS idx_claims_visit_date_status 
+ON claims(visit_date, status);
 
 -- ============================================================================
 -- Verification Queries
@@ -145,7 +141,7 @@ ON claims(service_date, submission_date);
 
 -- Test provider filtering performance
 -- EXPLAIN ANALYZE 
--- SELECT * FROM claims WHERE created_by_user_id = 5;
+-- SELECT * FROM claims WHERE created_by = 'username';
 
 -- Test audit log queries
 -- EXPLAIN ANALYZE 

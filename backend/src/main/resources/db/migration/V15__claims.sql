@@ -75,10 +75,18 @@ CREATE INDEX idx_claim_lines_service_code ON claim_lines(service_code);
 CREATE INDEX idx_claim_attachments_claim_id ON claim_attachments(claim_id);
 
 -- Create trigger for updated_at on claims
-CREATE TRIGGER update_claims_updated_at
+CREATE OR REPLACE FUNCTION update_claims_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_claims_updated_at
     BEFORE UPDATE ON claims
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE FUNCTION update_claims_updated_at();
 
 -- Add comments
 COMMENT ON TABLE claims IS 'Medical claims submitted for reimbursement';
