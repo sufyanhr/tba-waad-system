@@ -42,21 +42,21 @@ CREATE TABLE IF NOT EXISTS provider_contracts (
 );
 
 -- Indexes for providers table
-CREATE INDEX idx_providers_name_arabic ON providers(name_arabic);
-CREATE INDEX idx_providers_name_english ON providers(name_english);
-CREATE INDEX idx_providers_license_number ON providers(license_number);
-CREATE INDEX idx_providers_city ON providers(city);
-CREATE INDEX idx_providers_provider_type ON providers(provider_type);
-CREATE INDEX idx_providers_active ON providers(active);
-CREATE INDEX idx_providers_created_at ON providers(created_at);
+CREATE INDEX IF NOT EXISTS idx_providers_name_arabic ON providers(name_arabic);
+CREATE INDEX IF NOT EXISTS idx_providers_name_english ON providers(name_english);
+CREATE INDEX IF NOT EXISTS idx_providers_license_number ON providers(license_number);
+CREATE INDEX IF NOT EXISTS idx_providers_city ON providers(city);
+CREATE INDEX IF NOT EXISTS idx_providers_provider_type ON providers(provider_type);
+CREATE INDEX IF NOT EXISTS idx_providers_active ON providers(active);
+CREATE INDEX IF NOT EXISTS idx_providers_created_at ON providers(created_at);
 
 -- Indexes for provider_contracts table
-CREATE INDEX idx_contracts_provider_id ON provider_contracts(provider_id);
-CREATE INDEX idx_contracts_contract_number ON provider_contracts(contract_number);
-CREATE INDEX idx_contracts_active ON provider_contracts(active);
-CREATE INDEX idx_contracts_created_at ON provider_contracts(created_at);
-CREATE INDEX idx_contracts_start_date ON provider_contracts(start_date);
-CREATE INDEX idx_contracts_end_date ON provider_contracts(end_date);
+CREATE INDEX IF NOT EXISTS idx_contracts_provider_id ON provider_contracts(provider_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_contract_number ON provider_contracts(contract_number);
+CREATE INDEX IF NOT EXISTS idx_contracts_active ON provider_contracts(active);
+CREATE INDEX IF NOT EXISTS idx_contracts_created_at ON provider_contracts(created_at);
+CREATE INDEX IF NOT EXISTS idx_contracts_start_date ON provider_contracts(start_date);
+CREATE INDEX IF NOT EXISTS idx_contracts_end_date ON provider_contracts(end_date);
 
 -- Trigger for providers updated_at
 CREATE OR REPLACE FUNCTION update_providers_updated_at()

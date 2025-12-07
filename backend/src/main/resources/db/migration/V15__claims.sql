@@ -56,23 +56,23 @@ CREATE TABLE IF NOT EXISTS claim_attachments (
 );
 
 -- Create indexes for claims table
-CREATE INDEX idx_claims_member_id ON claims(member_id);
-CREATE INDEX idx_claims_insurance_company_id ON claims(insurance_company_id);
-CREATE INDEX idx_claims_insurance_policy_id ON claims(insurance_policy_id);
-CREATE INDEX idx_claims_benefit_package_id ON claims(benefit_package_id);
-CREATE INDEX idx_claims_pre_approval_id ON claims(pre_approval_id);
-CREATE INDEX idx_claims_status ON claims(status);
-CREATE INDEX idx_claims_active ON claims(active);
-CREATE INDEX idx_claims_created_at ON claims(created_at);
-CREATE INDEX idx_claims_visit_date ON claims(visit_date);
-CREATE INDEX idx_claims_provider_name ON claims(provider_name);
+CREATE INDEX IF NOT EXISTS idx_claims_member_id ON claims(member_id);
+CREATE INDEX IF NOT EXISTS idx_claims_insurance_company_id ON claims(insurance_company_id);
+CREATE INDEX IF NOT EXISTS idx_claims_insurance_policy_id ON claims(insurance_policy_id);
+CREATE INDEX IF NOT EXISTS idx_claims_benefit_package_id ON claims(benefit_package_id);
+CREATE INDEX IF NOT EXISTS idx_claims_pre_approval_id ON claims(pre_approval_id);
+CREATE INDEX IF NOT EXISTS idx_claims_status ON claims(status);
+CREATE INDEX IF NOT EXISTS idx_claims_active ON claims(active);
+CREATE INDEX IF NOT EXISTS idx_claims_created_at ON claims(created_at);
+CREATE INDEX IF NOT EXISTS idx_claims_visit_date ON claims(visit_date);
+CREATE INDEX IF NOT EXISTS idx_claims_provider_name ON claims(provider_name);
 
 -- Create indexes for claim_lines table
-CREATE INDEX idx_claim_lines_claim_id ON claim_lines(claim_id);
-CREATE INDEX idx_claim_lines_service_code ON claim_lines(service_code);
+CREATE INDEX IF NOT EXISTS idx_claim_lines_claim_id ON claim_lines(claim_id);
+CREATE INDEX IF NOT EXISTS idx_claim_lines_service_code ON claim_lines(service_code);
 
 -- Create indexes for claim_attachments table
-CREATE INDEX idx_claim_attachments_claim_id ON claim_attachments(claim_id);
+CREATE INDEX IF NOT EXISTS idx_claim_attachments_claim_id ON claim_attachments(claim_id);
 
 -- Create trigger for updated_at on claims
 CREATE OR REPLACE FUNCTION update_claims_updated_at()
