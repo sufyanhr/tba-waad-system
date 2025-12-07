@@ -1,4 +1,4 @@
-// src/pages/tba/members/MemberView.jsx
+// src/pages/members/MemberView.jsx
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Button, CircularProgress, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import MainCard from 'components/MainCard';

@@ -9,72 +9,72 @@ import ProtectedRoute from 'components/ProtectedRoute';
 import RoleGuard from 'utils/route-guard/RoleGuard';
 
 // render - TBA pages
-const TbaMedicalServices = Loadable(lazy(() => import('pages/tba/medical-services')));
-const TbaMedicalCategories = Loadable(lazy(() => import('pages/tba/medical-categories')));
-const TbaProviders = Loadable(lazy(() => import('pages/tba/providers')));
-const TbaMembers = Loadable(lazy(() => import('pages/tba/members')));
-const TbaEmployers = Loadable(lazy(() => import('pages/tba/employers')));
-const TbaVisits = Loadable(lazy(() => import('pages/tba/visits')));
-const TbaPolicies = Loadable(lazy(() => import('pages/tba/policies')));
-const TbaBenefitPackages = Loadable(lazy(() => import('pages/tba/benefit-packages')));
-const TbaPreAuthorizations = Loadable(lazy(() => import('pages/tba/pre-authorizations')));
-const TbaInvoices = Loadable(lazy(() => import('pages/tba/invoices')));
-const TbaProviderContracts = Loadable(lazy(() => import('pages/tba/provider-contracts')));
-const TbaReviewerCompanies = Loadable(lazy(() => import('pages/tba/reviewer-companies')));
-const TbaMedicalPackages = Loadable(lazy(() => import('pages/tba/medical-packages')));
-const TbaInsuranceCompanies = Loadable(lazy(() => import('pages/tba/insurance-companies')));
+const TbaMedicalServices = Loadable(lazy(() => import('pages/medical-services')));
+const TbaMedicalCategories = Loadable(lazy(() => import('pages/medical-categories')));
+const TbaProviders = Loadable(lazy(() => import('pages/providers')));
+const TbaMembers = Loadable(lazy(() => import('pages/members')));
+const TbaEmployers = Loadable(lazy(() => import('pages/employers')));
+const TbaVisits = Loadable(lazy(() => import('pages/visits')));
+const TbaPolicies = Loadable(lazy(() => import('pages/policies')));
+const TbaBenefitPackages = Loadable(lazy(() => import('pages/benefit-packages')));
+const TbaPreAuthorizations = Loadable(lazy(() => import('pages/pre-authorizations')));
+const TbaInvoices = Loadable(lazy(() => import('pages/invoices')));
+const TbaProviderContracts = Loadable(lazy(() => import('pages/provider-contracts')));
+const TbaReviewerCompanies = Loadable(lazy(() => import('pages/reviewer-companies')));
+const TbaMedicalPackages = Loadable(lazy(() => import('pages/medical-packages')));
+const TbaInsuranceCompanies = Loadable(lazy(() => import('pages/insurance-companies')));
 
 // render - TBA New Pages (Phase B1)
-const TbaSettings = Loadable(lazy(() => import('pages/tba/settings')));
-const TbaRBAC = Loadable(lazy(() => import('pages/tba/rbac')));
-const TbaAudit = Loadable(lazy(() => import('pages/tba/audit')));
-const TbaCompanies = Loadable(lazy(() => import('pages/tba/companies')));
+const TbaSettings = Loadable(lazy(() => import('pages/settings')));
+const TbaRBAC = Loadable(lazy(() => import('pages/rbac')));
+const TbaAudit = Loadable(lazy(() => import('pages/audit')));
+const TbaCompanies = Loadable(lazy(() => import('pages/companies')));
 const TbaDashboard = Loadable(lazy(() => import('pages/dashboard')));
 
 // render - Error pages (Phase B2)
-const Forbidden403 = Loadable(lazy(() => import('pages/tba/errors/Forbidden403')));
+const Forbidden403 = Loadable(lazy(() => import('pages/errors/Forbidden403')));
 
 // render - Members module
-const MembersList = Loadable(lazy(() => import('pages/tba/members/MembersList')));
-const MemberCreate = Loadable(lazy(() => import('pages/tba/members/MemberCreate')));
-const MemberEdit = Loadable(lazy(() => import('pages/tba/members/MemberEdit')));
-const MemberView = Loadable(lazy(() => import('pages/tba/members/MemberView')));
+const MembersList = Loadable(lazy(() => import('pages/members/MembersList')));
+const MemberCreate = Loadable(lazy(() => import('pages/members/MemberCreate')));
+const MemberEdit = Loadable(lazy(() => import('pages/members/MemberEdit')));
+const MemberView = Loadable(lazy(() => import('pages/members/MemberView')));
 
 // render - Employers module
-const EmployersList = Loadable(lazy(() => import('pages/tba/employers/EmployersList')));
-const EmployerCreate = Loadable(lazy(() => import('pages/tba/employers/EmployerCreate')));
-const EmployerEdit = Loadable(lazy(() => import('pages/tba/employers/EmployerEdit')));
-const EmployerView = Loadable(lazy(() => import('pages/tba/employers/EmployerView')));
+const EmployersList = Loadable(lazy(() => import('pages/employers/EmployersList')));
+const EmployerCreate = Loadable(lazy(() => import('pages/employers/EmployerCreate')));
+const EmployerEdit = Loadable(lazy(() => import('pages/employers/EmployerEdit')));
+const EmployerView = Loadable(lazy(() => import('pages/employers/EmployerView')));
 
 // render - Insurance Companies module
-const InsuranceCompaniesList = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompaniesList')));
-const InsuranceCompanyCreate = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyCreate')));
-const InsuranceCompanyEdit = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyEdit')));
-const InsuranceCompanyView = Loadable(lazy(() => import('pages/tba/insurance-companies/InsuranceCompanyView')));
+const InsuranceCompaniesList = Loadable(lazy(() => import('pages/insurance-companies/InsuranceCompaniesList')));
+const InsuranceCompanyCreate = Loadable(lazy(() => import('pages/insurance-companies/InsuranceCompanyCreate')));
+const InsuranceCompanyEdit = Loadable(lazy(() => import('pages/insurance-companies/InsuranceCompanyEdit')));
+const InsuranceCompanyView = Loadable(lazy(() => import('pages/insurance-companies/InsuranceCompanyView')));
 
 // render - Policies module (Phase B8)
-const PoliciesList = Loadable(lazy(() => import('pages/tba/policies/PoliciesList')));
-const PolicyCreate = Loadable(lazy(() => import('pages/tba/policies/PolicyCreate')));
-const PolicyEdit = Loadable(lazy(() => import('pages/tba/policies/PolicyEdit')));
-const PolicyView = Loadable(lazy(() => import('pages/tba/policies/PolicyView')));
+const PoliciesList = Loadable(lazy(() => import('pages/policies/PoliciesList')));
+const PolicyCreate = Loadable(lazy(() => import('pages/policies/PolicyCreate')));
+const PolicyEdit = Loadable(lazy(() => import('pages/policies/PolicyEdit')));
+const PolicyView = Loadable(lazy(() => import('pages/policies/PolicyView')));
 
 // render - Pre-Approvals module (Phase B9)
-const PreApprovalsList = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalsList')));
-const PreApprovalCreate = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalCreate')));
-const PreApprovalEdit = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalEdit')));
-const PreApprovalView = Loadable(lazy(() => import('pages/tba/pre-approvals/PreApprovalView')));
+const PreApprovalsList = Loadable(lazy(() => import('pages/pre-approvals/PreApprovalsList')));
+const PreApprovalCreate = Loadable(lazy(() => import('pages/pre-approvals/PreApprovalCreate')));
+const PreApprovalEdit = Loadable(lazy(() => import('pages/pre-approvals/PreApprovalEdit')));
+const PreApprovalView = Loadable(lazy(() => import('pages/pre-approvals/PreApprovalView')));
 
 // render - Claims module (Phase B10)
-const ClaimsList = Loadable(lazy(() => import('pages/tba/claims/ClaimsList')));
-const ClaimCreate = Loadable(lazy(() => import('pages/tba/claims/ClaimCreate')));
-const ClaimEdit = Loadable(lazy(() => import('pages/tba/claims/ClaimEdit')));
-const ClaimView = Loadable(lazy(() => import('pages/tba/claims/ClaimView')));
+const ClaimsList = Loadable(lazy(() => import('pages/claims/ClaimsList')));
+const ClaimCreate = Loadable(lazy(() => import('pages/claims/ClaimCreate')));
+const ClaimEdit = Loadable(lazy(() => import('pages/claims/ClaimEdit')));
+const ClaimView = Loadable(lazy(() => import('pages/claims/ClaimView')));
 
 // render - Providers module (Phase B12)
-const ProvidersList = Loadable(lazy(() => import('pages/tba/providers/ProvidersList')));
-const ProviderCreate = Loadable(lazy(() => import('pages/tba/providers/ProviderCreate')));
-const ProviderEdit = Loadable(lazy(() => import('pages/tba/providers/ProviderEdit')));
-const ProviderView = Loadable(lazy(() => import('pages/tba/providers/ProviderView')));
+const ProvidersList = Loadable(lazy(() => import('pages/providers/ProvidersList')));
+const ProviderCreate = Loadable(lazy(() => import('pages/providers/ProviderCreate')));
+const ProviderEdit = Loadable(lazy(() => import('pages/providers/ProviderEdit')));
+const ProviderView = Loadable(lazy(() => import('pages/providers/ProviderView')));
 
 // render - Administration pages
 const AdminUsers = Loadable(lazy(() => import('pages/admin/users')));

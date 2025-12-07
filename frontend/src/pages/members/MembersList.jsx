@@ -1,4 +1,4 @@
-// src/pages/tba/members/MembersList.jsx
+// src/pages/members/MembersList.jsx
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
