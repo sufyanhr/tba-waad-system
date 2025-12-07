@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 import {
   Box,
   Button,
@@ -16,25 +17,34 @@ import {
   Typography,
   TablePagination,
   InputAdornment,
-  Tooltip
+  Tooltip,
+  Paper,
+  TableSortLabel,
+  Alert
 } from '@mui/material';
 import {
+  Add as AddIcon,
+  Search as SearchIcon,
   Visibility as VisibilityIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Search as SearchIcon,
-  Add as AddIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 
 import MainCard from 'components/MainCard';
+import ModernPageHeader from 'components/tba/ModernPageHeader';
+import ModernEmptyState from 'components/tba/ModernEmptyState';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import { useEmployersList } from 'hooks/useEmployers';
 import * as employersService from 'services/employers.service';
 
 const EmployersList = () => {
   const navigate = useNavigate();
+  const intl = useIntl();
   const [searchInput, setSearchInput] = useState('');
+  const [orderBy, setOrderBy] = useState('id');
+  const [order, setOrder] = useState('desc');
 
   const { data, loading, error, params, setParams, refresh } = useEmployersList({
     page: 0,
@@ -46,6 +56,18 @@ const EmployersList = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setParams((prev) => ({ ...prev, page: 0, search: searchInput.trim() }));
+  };
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    const newOrder = isAsc ? 'desc' : 'asc';
+    setOrder(newOrder);
+    setOrderBy(property);
+    setParams((prev) => ({
+      ...prev,
+      sortBy: property,
+      sortDir: newOrder.toUpperCase()
+    }));
   };
 
   const handleChangePage = (_, newPage) => {
@@ -61,34 +83,152 @@ const EmployersList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('هل أنت متأكد من حذف جهة العمل؟')) return;
+    if (!window.confirm(intl.formatMessage({ id: 'delete-employer-confirm' }))) return;
     try {
       await employersService.deleteEmployer(id);
       refresh();
     } catch (err) {
       console.error('Failed to delete employer', err);
-      alert('حدث خطأ أثناء الحذف');
+      alert(intl.formatMessage({ id: 'error' }));
     }
   };
 
-  return (
-    <MainCard title="جهات العمل (Employers)" content={false}>
-      <Box sx={{ p: 3 }}>
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent="space-between"
-          alignItems={{ xs: 'stretch', sm: 'center' }}
-          spacing={2}
-          sx={{ mb: 3 }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            عرض قائمة جهات العمل مع إمكانية البحث والفرز
-          </Typography>
+  const handleRefresh = () => {
+    setSearchInput('');
+    setParams({ page: 0, size: 10, sortBy: 'id', sortDir: 'DESC', search: '' });
+    refresh();
+  };
 
+  const headCells = [
+    { id: 'name', label: intl.formatMessage({ id: 'employer-name-ar' }), sortable: true },
+    { id: 'companyCode', label: intl.formatMessage({ id: 'employer-code' }), sortable: true },
+    { id: 'phone', label: intl.formatMessage({ id: 'Phone' }), sortable: false },
+    { id: 'email', label: intl.formatMessage({ id: 'Email' }), sortable: false },
+    { id: 'active', label: intl.formatMessage({ id: 'Status' }), sortable: true },
+    { id: 'actions', label: intl.formatMessage({ id: 'Actions' }), sortable: false, align: 'center' }
+  ];
+
+  const tableContent = useMemo(() => {
+    if (loading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={headCells.length}>
+            <TableSkeleton />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (error) {
+      return (
+        <TableRow>
+          <TableCell colSpan={headCells.length}>
+            <Alert severity="error" sx={{ my: 2 }}>
+              {intl.formatMessage({ id: 'error' })}: {error.message || 'Failed to load employers'}
+            </Alert>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (!data?.items || data.items.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={headCells.length}>
+            <ModernEmptyState
+              icon={BusinessIcon}
+              title={intl.formatMessage({ id: 'no-employers-found' })}
+              description={intl.formatMessage({ id: 'no-employers-desc' })}
+              action={
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/employers/create')}
+                >
+                  {intl.formatMessage({ id: 'add-employer' })}
+                </Button>
+              }
+            />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return data.items.map((employer) => (
+      <TableRow hover key={employer.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+        <TableCell>
+          <Typography variant="body2" fontWeight={500}>
+            {employer.name || '-'}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Chip label={employer.companyCode || '-'} size="small" variant="outlined" />
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2">{employer.phone || '-'}</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2">{employer.email || '-'}</Typography>
+        </TableCell>
+        <TableCell>
+          <Chip
+            label={employer.active ? intl.formatMessage({ id: 'Active' }) : intl.formatMessage({ id: 'Inactive' })}
+            size="small"
+            color={employer.active ? 'success' : 'error'}
+          />
+        </TableCell>
+        <TableCell align="center">
+          <Stack direction="row" spacing={0.5} justifyContent="center">
+            <Tooltip title={intl.formatMessage({ id: 'view' })}>
+              <IconButton size="small" color="primary" onClick={() => navigate(`/employers/view/${employer.id}`)}>
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={intl.formatMessage({ id: 'Edit' })}>
+              <IconButton size="small" color="info" onClick={() => navigate(`/employers/edit/${employer.id}`)}>
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={intl.formatMessage({ id: 'Delete' })}>
+              <IconButton size="small" color="error" onClick={() => handleDelete(employer.id)}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </TableCell>
+      </TableRow>
+    ));
+  }, [data, loading, error, headCells.length, intl, navigate]);
+
+  return (
+    <>
+      <ModernPageHeader
+        title={intl.formatMessage({ id: 'employers-list' })}
+        subtitle={intl.formatMessage({ id: 'employers-list-desc' })}
+        icon={BusinessIcon}
+        breadcrumbs={[{ label: intl.formatMessage({ id: 'employers-list' }), path: '/employers' }]}
+        actions={
           <Stack direction="row" spacing={2}>
+            <Tooltip title={intl.formatMessage({ id: 'refresh' })}>
+              <IconButton onClick={handleRefresh} color="primary">
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/employers/create')}>
+              {intl.formatMessage({ id: 'add-employer' })}
+            </Button>
+          </Stack>
+        }
+      />
+
+      <MainCard content={false}>
+        {/* Toolbar */}
+        <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
+              fullWidth
               size="small"
-              placeholder="بحث بالاسم أو الكود..."
+              placeholder={intl.formatMessage({ id: 'search-employers' })}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
@@ -99,140 +239,55 @@ const EmployersList = () => {
                   </InputAdornment>
                 )
               }}
-              sx={{ minWidth: 250 }}
+              sx={{ maxWidth: { sm: 400 } }}
             />
-            <Button 
-              variant="contained" 
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/employers/create')}
-            >
-              إضافة جهة عمل
+            <Button variant="outlined" onClick={handleSearchSubmit} sx={{ minWidth: 100 }}>
+              {intl.formatMessage({ id: 'Search' })}
             </Button>
           </Stack>
-        </Stack>
+        </Box>
 
-        {loading ? (
-          <TableSkeleton rows={10} columns={6} />
-        ) : error ? (
-          <Typography color="error" align="center" sx={{ py: 3 }}>
-            حدث خطأ أثناء جلب البيانات
-          </Typography>
-        ) : (
-          <TableContainer>
-            <Table sx={{ '& .MuiTableCell-root': { py: 1.5 } }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>#</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>اسم جهة العمل</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>كود الشركة</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>رقم الهاتف</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>الحالة</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>إجراءات</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.items.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
-                      <Typography variant="subtitle1" color="text.secondary">
-                        لا توجد بيانات حالياً
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  data.items.map((employer, index) => (
-                    <TableRow 
-                      key={employer.id} 
-                      hover
-                      sx={{ '&:hover': { bgcolor: 'action.hover', cursor: 'pointer' } }}
-                    >
-                      <TableCell align="center">
-                        <Typography variant="subtitle2">
-                          {data.page * data.size + index + 1}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <BusinessIcon fontSize="small" color="action" />
-                          <Typography variant="body2">
-                            {employer.name || '-'}
-                          </Typography>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
-                          {employer.companyCode || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {employer.phone || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip 
-                          label={employer.active ? 'نشط' : 'غير نشط'} 
-                          color={employer.active ? 'success' : 'default'} 
-                          size="small"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Stack direction="row" spacing={0.5} justifyContent="center">
-                          <Tooltip title="عرض التفاصيل">
-                            <IconButton 
-                              size="small" 
-                              color="primary"
-                              onClick={() => navigate(`/employers/view/${employer.id}`)}
-                            >
-                              <VisibilityIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="تعديل">
-                            <IconButton 
-                              size="small" 
-                              color="info"
-                              onClick={() => navigate(`/employers/edit/${employer.id}`)}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="حذف">
-                            <IconButton 
-                              size="small" 
-                              color="error" 
-                              onClick={() => handleDelete(employer.id)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+        {/* Table */}
+        <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
+          <Table sx={{ minWidth: 750 }} size="medium">
+            <TableHead>
+              <TableRow>
+                {headCells.map((headCell) => (
+                  <TableCell key={headCell.id} align={headCell.align || 'left'} sx={{ fontWeight: 600 }}>
+                    {headCell.sortable ? (
+                      <TableSortLabel
+                        active={orderBy === headCell.id}
+                        direction={orderBy === headCell.id ? order : 'asc'}
+                        onClick={() => handleRequestSort(headCell.id)}
+                      >
+                        {headCell.label}
+                      </TableSortLabel>
+                    ) : (
+                      headCell.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableContent}</TableBody>
+          </Table>
+        </TableContainer>
 
-        {!loading && !error && (
+        {/* Pagination */}
+        {!loading && !error && data?.items && data.items.length > 0 && (
           <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={data.total}
+            count={data.total || 0}
+            rowsPerPage={params.size}
             page={params.page}
             onPageChange={handleChangePage}
-            rowsPerPage={params.size}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[10, 25, 50, 100]}
-            labelRowsPerPage="عدد الصفوف في الصفحة"
-            labelDisplayedRows={({ from, to, count }) => 
-              `${from}–${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
-            }
+            labelRowsPerPage={intl.formatMessage({ id: 'rows-per-page' })}
           />
         )}
-      </Box>
-    </MainCard>
+      </MainCard>
+    </>
   );
 };
 
