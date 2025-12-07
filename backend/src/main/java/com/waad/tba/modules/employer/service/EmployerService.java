@@ -2,8 +2,6 @@ package com.waad.tba.modules.employer.service;
 
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.common.exception.ResourceNotFoundException;
-import com.waad.tba.modules.company.entity.Company;
-import com.waad.tba.modules.company.repository.CompanyRepository;
 import com.waad.tba.modules.employer.dto.EmployerCreateDto;
 import com.waad.tba.modules.employer.dto.EmployerResponseDto;
 import com.waad.tba.modules.employer.dto.EmployerSelectorDto;
@@ -26,7 +24,6 @@ public class EmployerService {
 
     private final EmployerRepository repository;
     private final EmployerMapper mapper;
-    private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
     public List<EmployerResponseDto> findAll() {
@@ -49,19 +46,10 @@ public class EmployerService {
             throw new IllegalArgumentException("Employer code already exists: " + dto.getCode());
         }
         
-        // Validate company exists
-        Company company = companyRepository.findById(dto.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", dto.getCompanyId()));
-        
-        if (!company.getActive()) {
-            throw new IllegalArgumentException("Cannot create employer under inactive company: " + company.getName());
-        }
-        
         Employer entity = mapper.toEntity(dto);
-        entity.setCompany(company);
         Employer saved = repository.save(entity);
-        log.info("Created employer: {} with code: {} under company: {}", 
-                saved.getName(), saved.getCode(), company.getName());
+        log.info("Created employer: {} (AR) / {} (EN) with code: {}", 
+                saved.getNameAr(), saved.getNameEn(), saved.getCode());
         return mapper.toResponseDto(saved);
     }
 
@@ -74,16 +62,11 @@ public class EmployerService {
         if (repository.existsByCodeAndIdNot(dto.getCode(), id)) {
             throw new IllegalArgumentException("Employer code already exists: " + dto.getCode());
         }
-        
-        // Prevent company change
-        if (!entity.getCompany().getId().equals(dto.getCompanyId())) {
-            throw new IllegalArgumentException("Cannot change employer's company. Current company: " + 
-                    entity.getCompany().getName());
-        }
 
         mapper.updateEntityFromDto(entity, dto);
         Employer updated = repository.save(entity);
-        log.info("Updated employer: {} with code: {}", updated.getName(), updated.getCode());
+        log.info("Updated employer: {} (AR) / {} (EN) with code: {}", 
+                updated.getNameAr(), updated.getNameEn(), updated.getCode());
         return mapper.toResponseDto(updated);
     }
 
@@ -104,25 +87,14 @@ public class EmployerService {
     }
 
     @Transactional(readOnly = true)
-    public PaginationResponse<EmployerResponseDto> findAllPaginated(Pageable pageable, String search, Long companyId) {
+    public PaginationResponse<EmployerResponseDto> findAllPaginated(Pageable pageable, String search) {
         Page<Employer> page;
 
-        if (companyId != null) {
-            // Filter by companyId
-            if (search != null && !search.isEmpty()) {
-                String q = search.toLowerCase();
-                page = repository.searchPagedByCompany(companyId, q, pageable);
-            } else {
-                page = repository.findByCompanyId(companyId, pageable);
-            }
+        if (search != null && !search.isEmpty()) {
+            String q = search.toLowerCase();
+            page = repository.searchPaged(q, pageable);
         } else {
-            // No company filter (SUPER_ADMIN)
-            if (search != null && !search.isEmpty()) {
-                String q = search.toLowerCase();
-                page = repository.searchPaged(q, pageable);
-            } else {
-                page = repository.findAll(pageable);
-            }
+            page = repository.findAll(pageable);
         }
 
         List<EmployerResponseDto> items = page.getContent()
@@ -152,7 +124,7 @@ public class EmployerService {
         List<Employer> employers = repository.findActiveEmployersForSelector();
         
         return employers.stream()
-                .map(e -> new EmployerSelectorDto(e.getId(), e.getName(), e.getCode()))
+                .map(e -> new EmployerSelectorDto(e.getId(), e.getNameAr(), e.getCode()))
                 .toList();
     }
 }

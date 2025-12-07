@@ -160,7 +160,7 @@ public class PreApprovalService {
                 .requestDate(LocalDate.now())
                 .expectedServiceDate(request.getExpectedServiceDate())
                 .requestReason(request.getRequestReason())
-                .companyId(member.getEmployer().getCompany().getId())
+                .companyId(null) // Employer no longer has company relation
                 .status(PreApproval.ApprovalStatus.PENDING)
                 .build();
 

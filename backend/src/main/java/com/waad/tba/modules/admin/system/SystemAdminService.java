@@ -106,11 +106,13 @@ public class SystemAdminService {
         log.info("Seeding sample data...");
         // Employer
         Employer employer = Employer.builder()
-                .name("Libya Oil Services")
-                .contactName("Ahmed Saleh")
-                .contactEmail("contact@libyaoil.ly")
-                .contactPhone("+218912345678")
+                .code("LOS-001")
+                .nameAr("شركة ليبيا للخدمات النفطية")
+                .nameEn("Libya Oil Services")
+                .email("contact@libyaoil.ly")
+                .phone("+218912345678")
                 .address("Tripoli Business Park")
+                .active(true)
                 .build();
         employerRepository.save(employer);
 

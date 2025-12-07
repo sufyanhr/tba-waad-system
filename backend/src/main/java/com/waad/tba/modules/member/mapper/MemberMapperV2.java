@@ -139,7 +139,7 @@ public class MemberMapperV2 {
         // Employer info
         if (entity.getEmployer() != null) {
             dto.setEmployerId(entity.getEmployer().getId());
-            dto.setEmployerName(entity.getEmployer().getName());
+            dto.setEmployerName(entity.getEmployer().getNameAr());
         }
 
         // Insurance Company info

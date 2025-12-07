@@ -161,23 +161,22 @@ public class EmployerController {
             @RequestParam(defaultValue = "0") int page,
             @Parameter(name = "size", description = "Page size")
             @RequestParam(defaultValue = "10") int size) {
-        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(PageRequest.of(page, size), null, null);
+        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(PageRequest.of(page, size), null);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('MANAGE_EMPLOYERS')")
-    @Operation(summary = "List employers", description = "Returns a paginated list of employers with optional search and company filter.")
+    @Operation(summary = "List employers", description = "Returns a paginated list of employers with optional search.")
     public ResponseEntity<ApiResponse<com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto>>> list(
             @Parameter(name = "page", description = "Page number (1-based)") @RequestParam(defaultValue = "1") int page,
             @Parameter(name = "size", description = "Page size") @RequestParam(defaultValue = "10") int size,
             @Parameter(name = "search", description = "Search query") @RequestParam(required = false) String search,
-            @Parameter(name = "companyId", description = "Company ID filter") @RequestParam(required = false) Long companyId,
             @Parameter(name = "sortBy", description = "Sort by field") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(name = "sortDir", description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDir) {
         org.springframework.data.domain.Pageable pageable = PageRequest.of(Math.max(0, page - 1), size,
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.fromString(sortDir), sortBy));
-        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(pageable, search, companyId);
+        com.waad.tba.common.dto.PaginationResponse<EmployerResponseDto> response = service.findAllPaginated(pageable, search);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

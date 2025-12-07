@@ -13,18 +13,13 @@ public class EmployerMapper {
         
         return EmployerResponseDto.builder()
                 .id(entity.getId())
-                .name(entity.getName())
                 .code(entity.getCode())
-                .companyId(entity.getCompany() != null ? entity.getCompany().getId() : null)
-                .companyName(entity.getCompany() != null ? entity.getCompany().getName() : null)
-                .companyCode(entity.getCompany() != null ? entity.getCompany().getCode() : null)
-                .contactName(entity.getContactName())
-                .contactPhone(entity.getContactPhone())
-                .contactEmail(entity.getContactEmail())
-                .address(entity.getAddress())
+                .nameAr(entity.getNameAr())
+                .nameEn(entity.getNameEn())
                 .phone(entity.getPhone())
                 .email(entity.getEmail())
                 .active(entity.getActive())
+                .address(entity.getAddress())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -34,31 +29,25 @@ public class EmployerMapper {
         if (dto == null) return null;
         
         return Employer.builder()
-                .name(dto.getName())
                 .code(dto.getCode())
-                // Company will be set in service layer
-                .contactName(dto.getContactName())
-                .contactPhone(dto.getContactPhone())
-                .contactEmail(dto.getContactEmail())
-                .address(dto.getAddress())
+                .nameAr(dto.getNameAr())
+                .nameEn(dto.getNameEn())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
-                .active(dto.getActive() != null ? dto.getActive() : true)
+                .address(dto.getAddress())
+                .active(Boolean.TRUE.equals(dto.getActive()) ? dto.getActive() : true)
                 .build();
     }
 
     public void updateEntityFromDto(Employer entity, EmployerCreateDto dto) {
         if (dto == null) return;
         
-        entity.setName(dto.getName());
         entity.setCode(dto.getCode());
-        // Company cannot be changed after creation
-        entity.setContactName(dto.getContactName());
-        entity.setContactPhone(dto.getContactPhone());
-        entity.setContactEmail(dto.getContactEmail());
-        entity.setAddress(dto.getAddress());
+        entity.setNameAr(dto.getNameAr());
+        entity.setNameEn(dto.getNameEn());
         entity.setPhone(dto.getPhone());
         entity.setEmail(dto.getEmail());
+        entity.setAddress(dto.getAddress());
         if (dto.getActive() != null) {
             entity.setActive(dto.getActive());
         }

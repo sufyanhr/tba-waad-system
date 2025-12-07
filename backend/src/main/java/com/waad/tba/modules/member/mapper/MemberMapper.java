@@ -14,7 +14,7 @@ public class MemberMapper {
         return MemberResponseDto.builder()
                 .id(entity.getId())
                 .employerId(entity.getEmployer() != null ? entity.getEmployer().getId() : null)
-                .employerName(entity.getEmployer() != null ? entity.getEmployer().getName() : null)
+                .employerName(entity.getEmployer() != null ? entity.getEmployer().getNameAr() : null)
                 .fullName(entity.getFullName()) // يستخدم getFullName() من الـ Entity
                 .civilId(entity.getCivilId())
                 .policyNumber(entity.getPolicyNumber())

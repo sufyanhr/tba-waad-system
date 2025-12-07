@@ -13,18 +13,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class EmployerResponseDto {
     private Long id;
-    private String name;
     private String code;
-    private Long companyId;
-    private String companyName;
-    private String companyCode;
-    private String contactName;
-    private String contactPhone;
-    private String contactEmail;
-    private String address;
+    private String nameAr;
+    private String nameEn;
     private String phone;
     private String email;
     private Boolean active;
+    private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

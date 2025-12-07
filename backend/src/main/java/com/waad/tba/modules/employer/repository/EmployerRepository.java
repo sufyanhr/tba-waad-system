@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface EmployerRepository extends JpaRepository<Employer, Long> {
@@ -18,39 +18,26 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
     
     // Check if code exists for other employers (exclude current one during update)
     boolean existsByCodeAndIdNot(String code, Long id);
-    
-    // Find by company
-    Page<Employer> findByCompanyId(Long companyId, Pageable pageable);
 
-    // OLD search (deprecated)
+    // Search employers (deprecated - for backward compatibility)
     @Query("""
            SELECT e FROM Employer e
-           WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :query, '%'))
-              OR LOWER(e.contactName) LIKE LOWER(CONCAT('%', :query, '%'))
+           WHERE LOWER(e.nameAr) LIKE LOWER(CONCAT('%', :query, '%'))
+              OR LOWER(e.nameEn) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(e.code) LIKE LOWER(CONCAT('%', :query, '%'))
            """)
-    java.util.List<Employer> search(String query);
+    List<Employer> search(String query);
 
-    // ✅ NEW paginated search
+    // Paginated search
     @Query("""
            SELECT e FROM Employer e
-           WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :q, '%'))
-              OR LOWER(e.contactName) LIKE LOWER(CONCAT('%', :q, '%'))
+           WHERE LOWER(e.nameAr) LIKE LOWER(CONCAT('%', :q, '%'))
+              OR LOWER(e.nameEn) LIKE LOWER(CONCAT('%', :q, '%'))
               OR LOWER(e.code) LIKE LOWER(CONCAT('%', :q, '%'))
            """)
     Page<Employer> searchPaged(@Param("q") String q, Pageable pageable);
     
-    // ✅ NEW paginated search with companyId filter
-    @Query("""
-           SELECT e FROM Employer e
-           WHERE e.company.id = :companyId
-           AND (LOWER(e.name) LIKE LOWER(CONCAT('%', :q, '%'))
-              OR LOWER(e.contactName) LIKE LOWER(CONCAT('%', :q, '%'))
-              OR LOWER(e.code) LIKE LOWER(CONCAT('%', :q, '%')))
-           """)
-    Page<Employer> searchPagedByCompany(@Param("companyId") Long companyId, @Param("q") String q, Pageable pageable);
-    
-    // ✅ Find active employers for selector (multi-employer filter)
-    @Query("SELECT e FROM Employer e WHERE e.active = true ORDER BY e.name ASC")
-    java.util.List<Employer> findActiveEmployersForSelector();
+    // Find active employers for selector (multi-employer filter)
+    @Query("SELECT e FROM Employer e WHERE e.active = true ORDER BY e.nameAr ASC")
+    List<Employer> findActiveEmployersForSelector();
 }

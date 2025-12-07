@@ -159,7 +159,7 @@ public class PolicyService {
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .employerId(entity.getEmployer().getId())
-                .employerName(entity.getEmployer().getName())
+                .employerName(entity.getEmployer().getNameAr())
                 .insuranceCompanyId(entity.getInsuranceCompany().getId())
                 .insuranceCompanyName(entity.getInsuranceCompany().getName())
                 .benefitPackageId(entity.getBenefitPackage().getId())

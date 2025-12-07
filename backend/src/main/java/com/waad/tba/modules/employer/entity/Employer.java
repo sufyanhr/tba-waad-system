@@ -1,10 +1,8 @@
 package com.waad.tba.modules.employer.entity;
 
-import com.waad.tba.modules.company.entity.Company;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,25 +28,17 @@ public class Employer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Employer name is required")
-    @Column(nullable = false)
-    private String name;
-
     @NotBlank(message = "Employer code is required")
     @Column(nullable = false, unique = true)
     private String code;
 
-    @NotNull(message = "Company is required")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+    @NotBlank(message = "Employer name (Arabic) is required")
+    @Column(nullable = false, name = "name_ar")
+    private String nameAr;
 
-    private String contactName;
-    
-    private String contactPhone;
-    
-    @Email(message = "Contact email must be valid")
-    private String contactEmail;
+    @NotBlank(message = "Employer name (English) is required")
+    @Column(nullable = false, name = "name_en")
+    private String nameEn;
     
     private String address;
 
