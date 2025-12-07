@@ -31,14 +31,14 @@ export default function CompanySwitcher() {
     const fetchEmployers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/employers/selector');
-        const employersList = response.data.data || response.data || [];
+        const response = await axios.get('/employers', {
+          params: { page: 0, size: 100 }
+        });
+        const employersList = response.data.data?.items || response.data.items || response.data || [];
         setEmployers(employersList);
 
-        // If no employer selected and we have employers, select first one
-        if (!selectedEmployerId && employersList.length > 0) {
-          setCompany(employersList[0].id, employersList[0].name);
-        }
+        // Default: no employer selected (set to null)
+        // Users can manually select an employer if needed
       } catch (error) {
         console.error('Error fetching employers:', error);
         setEmployers([]);

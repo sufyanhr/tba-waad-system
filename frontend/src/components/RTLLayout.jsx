@@ -22,11 +22,19 @@ const ltrCache = createCache({
 });
 
 export default function RTLLayout({ children }) {
-  const { state } = useConfig();
+  const { state, setField } = useConfig();
 
   useEffect(() => {
     document.dir = state.themeDirection;
   }, [state.themeDirection]);
+
+  // Sync direction with language changes
+  useEffect(() => {
+    const expectedDirection = state.i18n === 'ar' ? ThemeDirection.RTL : ThemeDirection.LTR;
+    if (state.themeDirection !== expectedDirection) {
+      setField('themeDirection', expectedDirection);
+    }
+  }, [state.i18n, state.themeDirection, setField]);
 
   return <CacheProvider value={state.themeDirection === ThemeDirection.RTL ? rtlCache : ltrCache}>{children}</CacheProvider>;
 }

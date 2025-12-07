@@ -43,7 +43,10 @@ export default function Localization() {
   };
 
   const handleListItemClick = (lang) => {
+    // Update language
     setField('i18n', lang);
+    // Update direction based on language (Arabic -> RTL, English -> LTR)
+    setField('themeDirection', lang === 'ar' ? 'rtl' : 'ltr');
     setOpen(false);
   };
 
