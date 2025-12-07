@@ -4,7 +4,7 @@ export const twitterColor = '#1DA1F2';
 export const facebookColor = '#3b5998';
 export const linkedInColor = '#0e76a8';
 
-export const APP_DEFAULT_PATH = '/dashboard/default';
+export const APP_DEFAULT_PATH = '/dashboard';
 export const HORIZONTAL_MAX_ITEM = 7;
 export const DRAWER_WIDTH = 260;
 export const MINI_DRAWER_WIDTH = 60;
@@ -75,6 +75,19 @@ export let AuthProvider;
 export const APP_AUTH = AuthProvider.JWT;
 export const DEFAULT_THEME_MODE = ThemeMode.SYSTEM;
 
+// ==============================|| THEME CONFIG ||============================== //
+
+const config = {
+  fontFamily: `'Public Sans', sans-serif`,
+  i18n: 'en',
+  menuOrientation: MenuOrientation.VERTICAL,
+  container: true,
+  presetColor: 'default',
+  themeDirection: ThemeDirection.LTR
+};
+
+export default config;
+
 // ==============================|| PROJECT SETTINGS - TBA SYSTEM ||============================== //
 
 export const projectSettings = {
@@ -97,16 +110,3 @@ export const projectSettings = {
   // TBA modules are always visible
   showTBAManagement: true
 };
-
-// ==============================|| THEME CONFIG ||============================== //
-
-const config = {
-  fontFamily: `'Public Sans', sans-serif`,
-  i18n: 'en',
-  menuOrientation: MenuOrientation.VERTICAL,
-  container: true,
-  presetColor: 'default',
-  themeDirection: ThemeDirection.LTR
-};
-
-export default config;

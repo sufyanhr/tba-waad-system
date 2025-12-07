@@ -11,7 +11,7 @@ const router = createBrowserRouter(
   [
     {
       path: '/',
-      element: <Navigate to="/tba/dashboard" replace />
+      element: <Navigate to="/dashboard" replace />
     },
     LoginRoutes,
     MainRoutes

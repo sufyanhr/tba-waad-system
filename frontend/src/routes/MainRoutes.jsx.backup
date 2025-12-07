@@ -29,7 +29,7 @@ const TbaSettings = Loadable(lazy(() => import('pages/tba/settings')));
 const TbaRBAC = Loadable(lazy(() => import('pages/tba/rbac')));
 const TbaAudit = Loadable(lazy(() => import('pages/tba/audit')));
 const TbaCompanies = Loadable(lazy(() => import('pages/tba/companies')));
-const TbaDashboard = Loadable(lazy(() => import('pages/dashboard')));
+const TbaModernDashboard = Loadable(lazy(() => import('pages/tba/dashboard/ModernDashboard')));
 
 // render - Error pages (Phase B2)
 const Forbidden403 = Loadable(lazy(() => import('pages/tba/errors/Forbidden403')));
@@ -119,13 +119,13 @@ const MainRoutes = {
       element: <DashboardLayout />,
       children: [
         {
-          path: '',
+          path: 'tba',
           children: [
             {
               path: 'dashboard',
               element: (
                 <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
-                  <TbaDashboard />
+                  <TbaModernDashboard />
                 </RoleGuard>
               )
             },
