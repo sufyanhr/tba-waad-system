@@ -137,14 +137,14 @@ const PolicyEdit = () => {
       };
 
       await update(id, payload);
-      navigate('/tba/policies');
+      navigate('/policies');
     } catch (err) {
       console.error('Update error:', err);
     }
   };
 
   const handleCancel = () => {
-    navigate('/tba/policies');
+    navigate('/policies');
   };
 
   if (loadingPolicy) {

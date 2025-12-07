@@ -16,7 +16,7 @@ export default function Forbidden403() {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate('/tba/dashboard');
+    navigate('/dashboard');
   };
 
   return (

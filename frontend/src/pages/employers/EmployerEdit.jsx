@@ -53,7 +53,7 @@ const EmployerEdit = () => {
       setSaving(true);
       await employersService.updateEmployer(id, employer);
       alert('تم تحديث جهة العمل بنجاح');
-      navigate('/tba/employers');
+      navigate('/employers');
     } catch (err) {
       console.error('Failed to update employer', err);
       alert('حدث خطأ أثناء تحديث جهة العمل');
@@ -84,7 +84,7 @@ const EmployerEdit = () => {
     <MainCard
       title="تعديل جهة عمل"
       secondary={
-        <Button size="small" variant="outlined" onClick={() => navigate('/tba/employers')}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/employers')}>
           رجوع إلى القائمة
         </Button>
       }
@@ -157,7 +157,7 @@ const EmployerEdit = () => {
 
           <Grid item xs={12}>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button variant="outlined" onClick={() => navigate('/tba/employers')}>
+              <Button variant="outlined" onClick={() => navigate('/employers')}>
                 إلغاء
               </Button>
               <Button type="submit" variant="contained" color="primary" disabled={saving}>

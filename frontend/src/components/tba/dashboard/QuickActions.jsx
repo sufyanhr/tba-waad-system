@@ -27,21 +27,21 @@ export default function QuickActions() {
       description: 'تسجيل عضو جديد في النظام',
       icon: UserAddOutlined,
       color: 'primary',
-      link: '/tba/members/create'
+      link: '/members/create'
     },
     {
       title: 'إضافة زيارة طبية',
       description: 'تسجيل زيارة طبية جديدة',
       icon: MedicineBoxOutlined,
       color: 'success',
-      link: '/tba/visits/create'
+      link: '/visits/create'
     },
     {
       title: 'إضافة مطالبة',
       description: 'تقديم مطالبة تأمينية جديدة',
       icon: FileTextOutlined,
       color: 'warning',
-      link: '/tba/claims/create'
+      link: '/claims/create'
     }
   ];
 

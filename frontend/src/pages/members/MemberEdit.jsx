@@ -126,7 +126,7 @@ const MemberEdit = () => {
         familyMembers: member.familyMembers
       };
       await membersService.updateMember(id, payload);
-      navigate('/tba/members');
+      navigate('/members');
     } catch (err) {
       console.error('Failed to update member', err);
       alert('حدث خطأ أثناء تحديث بيانات المشترك');
@@ -149,7 +149,7 @@ const MemberEdit = () => {
     <MainCard
       title={`تعديل بيانات المشترك #${id}`}
       secondary={
-        <Button size="small" variant="outlined" onClick={() => navigate('/tba/members')}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/members')}>
           إلغاء والرجوع
         </Button>
       }

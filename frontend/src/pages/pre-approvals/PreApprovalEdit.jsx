@@ -221,14 +221,14 @@ const PreApprovalEdit = () => {
       };
 
       await update(id, payload);
-      navigate('/tba/pre-approvals');
+      navigate('/pre-approvals');
     } catch (err) {
       console.error('Update error:', err);
     }
   };
 
   const handleCancel = () => {
-    navigate('/tba/pre-approvals');
+    navigate('/pre-approvals');
   };
 
   if (loading) {

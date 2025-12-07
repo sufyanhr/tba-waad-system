@@ -120,14 +120,14 @@ const PolicyCreate = () => {
       };
 
       await create(payload);
-      navigate('/tba/policies');
+      navigate('/policies');
     } catch (err) {
       console.error('Create error:', err);
     }
   };
 
   const handleCancel = () => {
-    navigate('/tba/policies');
+    navigate('/policies');
   };
 
   return (

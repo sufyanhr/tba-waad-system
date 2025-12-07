@@ -58,11 +58,11 @@ const PolicyView = () => {
   const [packageFormErrors, setPackageFormErrors] = useState({});
 
   const handleBack = () => {
-    navigate('/tba/policies');
+    navigate('/policies');
   };
 
   const handleEdit = () => {
-    navigate(`/tba/policies/edit/${id}`);
+    navigate(`/policies/edit/${id}`);
   };
 
   const handleAddPackage = () => {

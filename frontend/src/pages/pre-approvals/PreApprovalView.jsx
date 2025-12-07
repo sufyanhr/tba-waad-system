@@ -22,11 +22,11 @@ const PreApprovalView = () => {
   const { preApproval, loading, error } = usePreApprovalDetails(id);
 
   const handleEdit = () => {
-    navigate(`/tba/pre-approvals/edit/${id}`);
+    navigate(`/pre-approvals/edit/${id}`);
   };
 
   const handleBack = () => {
-    navigate('/tba/pre-approvals');
+    navigate('/pre-approvals');
   };
 
   if (loading) {

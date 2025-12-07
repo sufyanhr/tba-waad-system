@@ -90,7 +90,7 @@ const ProviderEdit = () => {
 
     if (result.success) {
       enqueueSnackbar('تم تحديث المزود بنجاح', { variant: 'success' });
-      navigate('/tba/providers');
+      navigate('/providers');
     } else {
       enqueueSnackbar(result.error || 'فشل تحديث المزود', { variant: 'error' });
     }
@@ -110,7 +110,7 @@ const ProviderEdit = () => {
     <MainCard
       title="تعديل بيانات المزود"
       secondary={
-        <Button startIcon={<ArrowBack />} onClick={() => navigate('/tba/providers')} disabled={updating}>
+        <Button startIcon={<ArrowBack />} onClick={() => navigate('/providers')} disabled={updating}>
           عودة
         </Button>
       }
@@ -270,7 +270,7 @@ const ProviderEdit = () => {
           {/* Actions */}
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <Button variant="outlined" onClick={() => navigate('/tba/providers')} disabled={updating}>
+              <Button variant="outlined" onClick={() => navigate('/providers')} disabled={updating}>
                 إلغاء
               </Button>
               <Button type="submit" variant="contained" startIcon={<Save />} disabled={updating}>

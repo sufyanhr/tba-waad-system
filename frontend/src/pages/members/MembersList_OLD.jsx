@@ -169,11 +169,11 @@ export default function MembersList() {
   };
 
   const handleViewMember = (id) => {
-    navigate(`/tba/members/${id}`);
+    navigate(`/members/${id}`);
   };
 
   const handleEditMember = (id) => {
-    navigate(`/tba/members/edit/${id}`);
+    navigate(`/members/edit/${id}`);
   };
 
   const handleDeleteClick = (member) => {
@@ -199,7 +199,7 @@ export default function MembersList() {
   };
 
   const handleCreateMember = () => {
-    navigate('/tba/members/create');
+    navigate('/members/create');
   };
 
   const handleRetry = () => {

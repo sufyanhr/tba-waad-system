@@ -171,14 +171,14 @@ const PreApprovalCreate = () => {
       };
 
       await create(payload);
-      navigate('/tba/pre-approvals');
+      navigate('/pre-approvals');
     } catch (err) {
       console.error('Create error:', err);
     }
   };
 
   const handleCancel = () => {
-    navigate('/tba/pre-approvals');
+    navigate('/pre-approvals');
   };
 
   return (

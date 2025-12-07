@@ -61,11 +61,11 @@ const PreApprovalsList = () => {
   };
 
   const handleView = (id) => {
-    navigate(`/tba/pre-approvals/view/${id}`);
+    navigate(`/pre-approvals/view/${id}`);
   };
 
   const handleEdit = (id) => {
-    navigate(`/tba/pre-approvals/edit/${id}`);
+    navigate(`/pre-approvals/edit/${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -80,7 +80,7 @@ const PreApprovalsList = () => {
   };
 
   const handleCreate = () => {
-    navigate('/tba/pre-approvals/create');
+    navigate('/pre-approvals/create');
   };
 
   return (

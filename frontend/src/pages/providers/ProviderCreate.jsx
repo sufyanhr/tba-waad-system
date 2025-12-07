@@ -67,7 +67,7 @@ const ProviderCreate = () => {
 
     if (result.success) {
       enqueueSnackbar('تم إنشاء المزود بنجاح', { variant: 'success' });
-      navigate('/tba/providers');
+      navigate('/providers');
     } else {
       enqueueSnackbar(result.error || 'فشل إنشاء المزود', { variant: 'error' });
     }
@@ -77,7 +77,7 @@ const ProviderCreate = () => {
     <MainCard
       title="إضافة مزود جديد"
       secondary={
-        <Button startIcon={<ArrowBack />} onClick={() => navigate('/tba/providers')} disabled={creating}>
+        <Button startIcon={<ArrowBack />} onClick={() => navigate('/providers')} disabled={creating}>
           عودة
         </Button>
       }
@@ -223,7 +223,7 @@ const ProviderCreate = () => {
           {/* Actions */}
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <Button variant="outlined" onClick={() => navigate('/tba/providers')} disabled={creating}>
+              <Button variant="outlined" onClick={() => navigate('/providers')} disabled={creating}>
                 إلغاء
               </Button>
               <Button type="submit" variant="contained" startIcon={<Save />} disabled={creating}>

@@ -24,7 +24,7 @@ const MemberView = () => {
     <MainCard
       title="تفاصيل المشترك"
       secondary={
-        <Button size="small" variant="outlined" onClick={() => navigate('/tba/members')}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/members')}>
           رجوع إلى القائمة
         </Button>
       }

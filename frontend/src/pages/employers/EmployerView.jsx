@@ -36,7 +36,7 @@ const EmployerView = () => {
     <MainCard
       title="تفاصيل جهة العمل"
       secondary={
-        <Button size="small" variant="outlined" onClick={() => navigate('/tba/employers')}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/employers')}>
           رجوع إلى القائمة
         </Button>
       }
@@ -92,10 +92,10 @@ const EmployerView = () => {
 
           <Grid item xs={12}>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button variant="outlined" onClick={() => navigate('/tba/employers')}>
+              <Button variant="outlined" onClick={() => navigate('/employers')}>
                 رجوع
               </Button>
-              <Button variant="contained" onClick={() => navigate(`/tba/employers/edit/${employer.id}`)}>
+              <Button variant="contained" onClick={() => navigate(`/employers/edit/${employer.id}`)}>
                 تعديل
               </Button>
             </Stack>

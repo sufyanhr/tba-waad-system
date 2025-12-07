@@ -44,7 +44,7 @@ const EmployerCreate = () => {
       setSaving(true);
       await employersService.createEmployer(employer);
       alert('تم إنشاء جهة العمل بنجاح');
-      navigate('/tba/employers');
+      navigate('/employers');
     } catch (err) {
       console.error('Failed to create employer', err);
       alert('حدث خطأ أثناء إنشاء جهة العمل');
@@ -57,7 +57,7 @@ const EmployerCreate = () => {
     <MainCard
       title="إنشاء جهة عمل جديدة"
       secondary={
-        <Button size="small" variant="outlined" onClick={() => navigate('/tba/employers')}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/employers')}>
           رجوع إلى القائمة
         </Button>
       }
@@ -130,7 +130,7 @@ const EmployerCreate = () => {
 
           <Grid item xs={12}>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button variant="outlined" onClick={() => navigate('/tba/employers')}>
+              <Button variant="outlined" onClick={() => navigate('/employers')}>
                 إلغاء
               </Button>
               <Button type="submit" variant="contained" color="primary" disabled={saving}>

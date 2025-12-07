@@ -84,10 +84,10 @@ const ProviderView = () => {
       title="تفاصيل المزود"
       secondary={
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="contained" startIcon={<Edit />} onClick={() => navigate(`/tba/providers/edit/${id}`)}>
+          <Button variant="contained" startIcon={<Edit />} onClick={() => navigate(`/providers/edit/${id}`)}>
             تعديل
           </Button>
-          <Button startIcon={<ArrowBack />} onClick={() => navigate('/tba/providers')}>
+          <Button startIcon={<ArrowBack />} onClick={() => navigate('/providers')}>
             عودة
           </Button>
         </Box>

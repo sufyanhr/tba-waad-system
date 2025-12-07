@@ -201,11 +201,11 @@ export default function PoliciesList() {
   };
 
   const handleViewPolicy = (id) => {
-    navigate(`/tba/policies/${id}`);
+    navigate(`/policies/${id}`);
   };
 
   const handleEditPolicy = (id) => {
-    navigate(`/tba/policies/edit/${id}`);
+    navigate(`/policies/edit/${id}`);
   };
 
   const handleDeleteClick = (policy) => {
@@ -236,7 +236,7 @@ export default function PoliciesList() {
   };
 
   const handleCreatePolicy = () => {
-    navigate('/tba/policies/create');
+    navigate('/policies/create');
   };
 
   const handleRetry = () => {

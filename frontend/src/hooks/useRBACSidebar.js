@@ -79,7 +79,7 @@ const useRBACSidebar = () => {
         id: 'dashboard',
         label: 'لوحة التحكم',
         icon: Dashboard,
-        path: '/tba/dashboard',
+        path: '/dashboard',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: []
       },
@@ -87,7 +87,7 @@ const useRBACSidebar = () => {
         id: 'members',
         label: 'الأعضاء',
         icon: People,
-        path: '/tba/members',
+        path: '/members',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN'],
         permissions: ['MANAGE_MEMBERS', 'VIEW_MEMBERS']
       },
@@ -95,7 +95,7 @@ const useRBACSidebar = () => {
         id: 'employers',
         label: 'أصحاب العمل',
         icon: Business,
-        path: '/tba/employers',
+        path: '/employers',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: ['MANAGE_EMPLOYERS', 'VIEW_EMPLOYERS']
       },
@@ -103,7 +103,7 @@ const useRBACSidebar = () => {
         id: 'claims',
         label: 'المطالبات',
         icon: Receipt,
-        path: '/tba/claims',
+        path: '/claims',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER'],
         permissions: ['VIEW_CLAIMS', 'MANAGE_CLAIMS'],
         featureToggle: 'canViewClaims' // For EMPLOYER_ADMIN only
@@ -112,7 +112,7 @@ const useRBACSidebar = () => {
         id: 'visits',
         label: 'الزيارات',
         icon: LocalHospital,
-        path: '/tba/visits',
+        path: '/visits',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER'],
         permissions: ['VIEW_VISITS', 'MANAGE_VISITS'],
         featureToggle: 'canViewVisits' // For EMPLOYER_ADMIN only
@@ -121,7 +121,7 @@ const useRBACSidebar = () => {
         id: 'medical-services',
         label: 'الخدمات الطبية',
         icon: MedicalServices,
-        path: '/tba/medical-services',
+        path: '/medical-services',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: ['MANAGE_MEDICAL_SERVICES']
       },
@@ -129,7 +129,7 @@ const useRBACSidebar = () => {
         id: 'medical-categories',
         label: 'التصنيفات الطبية',
         icon: Category,
-        path: '/tba/medical-categories',
+        path: '/medical-categories',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: ['MANAGE_MEDICAL_CATEGORIES']
       },
@@ -137,7 +137,7 @@ const useRBACSidebar = () => {
         id: 'medical-packages',
         label: 'الباقات الطبية',
         icon: LocalOffer,
-        path: '/tba/medical-packages',
+        path: '/medical-packages',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: ['MANAGE_MEDICAL_PACKAGES']
       },
@@ -145,7 +145,7 @@ const useRBACSidebar = () => {
         id: 'providers',
         label: 'مقدمو الخدمة',
         icon: AssignmentInd,
-        path: '/tba/providers',
+        path: '/providers',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: ['MANAGE_PROVIDERS', 'VIEW_PROVIDERS']
       },
@@ -153,7 +153,7 @@ const useRBACSidebar = () => {
         id: 'policies',
         label: 'البوليصات',
         icon: Description,
-        path: '/tba/policies',
+        path: '/policies',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: ['MANAGE_POLICIES']
       },
@@ -161,7 +161,7 @@ const useRBACSidebar = () => {
         id: 'companies',
         label: 'شركات التأمين',
         icon: Business,
-        path: '/tba/insurance-companies',
+        path: '/insurance-companies',
         roles: ['SUPER_ADMIN'],
         permissions: []
       },
@@ -169,7 +169,7 @@ const useRBACSidebar = () => {
         id: 'rbac',
         label: 'إدارة الصلاحيات',
         icon: Security,
-        path: '/tba/rbac',
+        path: '/rbac',
         roles: ['SUPER_ADMIN'],
         permissions: []
       },
@@ -177,7 +177,7 @@ const useRBACSidebar = () => {
         id: 'settings',
         label: 'الإعدادات',
         icon: Settings,
-        path: '/tba/settings',
+        path: '/settings',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: []
       },
@@ -185,7 +185,7 @@ const useRBACSidebar = () => {
         id: 'audit',
         label: 'سجل التدقيق',
         icon: Timeline,
-        path: '/tba/audit',
+        path: '/audit',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: []
       }

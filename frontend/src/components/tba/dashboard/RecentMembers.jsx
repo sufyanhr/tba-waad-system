@@ -88,7 +88,7 @@ export default function RecentMembers() {
           </Typography>
         }
         action={
-          <Link to="/tba/members" style={{ textDecoration: 'none' }}>
+          <Link to="/members" style={{ textDecoration: 'none' }}>
             <Typography variant="body2" color="primary" sx={{ cursor: 'pointer' }}>
               عرض الكل
             </Typography>
@@ -178,7 +178,7 @@ export default function RecentMembers() {
                     <TableCell align="center">
                       <IconButton
                         component={Link}
-                        to={`/tba/members/view/${member.id}`}
+                        to={`/members/view/${member.id}`}
                         size="small"
                         color="primary"
                       >

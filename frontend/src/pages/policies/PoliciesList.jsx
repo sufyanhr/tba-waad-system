@@ -49,11 +49,11 @@ const PoliciesList = () => {
   };
 
   const handleView = (id) => {
-    navigate(`/tba/policies/view/${id}`);
+    navigate(`/policies/view/${id}`);
   };
 
   const handleEdit = (id) => {
-    navigate(`/tba/policies/edit/${id}`);
+    navigate(`/policies/edit/${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -68,7 +68,7 @@ const PoliciesList = () => {
   };
 
   const handleCreate = () => {
-    navigate('/tba/policies/create');
+    navigate('/policies/create');
   };
 
   return (

@@ -132,16 +132,16 @@ export const JWTProvider = ({ children }) => {
    * @returns {string} - Redirect path
    */
   const getRedirectPath = useCallback((roles) => {
-    if (!roles || roles.length === 0) return '/tba/profile';
+    if (!roles || roles.length === 0) return '/profile';
 
     // Priority order for roles
-    if (roles.includes('SUPER_ADMIN')) return '/tba/dashboard';
-    if (roles.includes('INSURANCE_ADMIN')) return '/tba/dashboard';
-    if (roles.includes('EMPLOYER_ADMIN')) return '/tba/members';
-    if (roles.includes('PROVIDER')) return '/tba/claims';
+    if (roles.includes('SUPER_ADMIN')) return '/dashboard';
+    if (roles.includes('INSURANCE_ADMIN')) return '/dashboard';
+    if (roles.includes('EMPLOYER_ADMIN')) return '/members';
+    if (roles.includes('PROVIDER')) return '/claims';
     
     // Default fallback
-    return '/tba/profile';
+    return '/profile';
   }, []);
 
   const logout = () => {

@@ -107,7 +107,7 @@ const MemberCreate = () => {
         birthDate: member.birthDate || null
       };
       await membersService.createMember(payload);
-      navigate('/tba/members');
+      navigate('/members');
     } catch (err) {
       console.error('Failed to create member', err);
       alert('حدث خطأ أثناء حفظ بيانات المشترك');
@@ -120,7 +120,7 @@ const MemberCreate = () => {
     <MainCard
       title="إضافة مشترك جديد"
       secondary={
-        <Button size="small" variant="outlined" onClick={() => navigate('/tba/members')}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/members')}>
           إلغاء والرجوع
         </Button>
       }

@@ -202,15 +202,15 @@ export default function ProvidersList() {
   };
 
   const handleCreate = () => {
-    navigate('/tba/providers/create');
+    navigate('/providers/create');
   };
 
   const handleView = (id) => {
-    navigate(`/tba/providers/view/${id}`);
+    navigate(`/providers/view/${id}`);
   };
 
   const handleEdit = (id) => {
-    navigate(`/tba/providers/edit/${id}`);
+    navigate(`/providers/edit/${id}`);
   };
 
   const openDeleteDialog = (provider) => {
