@@ -3,7 +3,7 @@ import { Box, Button, Chip, CircularProgress, Grid, Stack, Typography } from '@m
 import { EditOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useIntl } from 'react-intl';
 import MainCard from 'components/MainCard';
-import ModernPageHeader from 'components/ModernPageHeader';
+import ModernPageHeader from 'components/tba/ModernPageHeader';
 import { useEmployerDetails } from 'hooks/useEmployers';
 
 const COMPANIES = [
