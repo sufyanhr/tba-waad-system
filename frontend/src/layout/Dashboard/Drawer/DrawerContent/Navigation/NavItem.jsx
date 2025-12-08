@@ -124,7 +124,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
               <ListItemText
                 primary={
                   <Typography variant="h6" sx={{ color: isSelected ? iconSelectedColor : textColor }}>
-                    <FormattedMessage id={item.title} />
+                    <FormattedMessage id={item.translationKey || item.title} />
                   </Typography>
                 }
               />
@@ -230,7 +230,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
           <ListItemText
             primary={
               <Typography variant="h6" color={isSelected ? 'primary.main' : 'secondary.dark'}>
-                <FormattedMessage id={item.title} />
+                <FormattedMessage id={item.translationKey || item.title} />
               </Typography>
             }
           />

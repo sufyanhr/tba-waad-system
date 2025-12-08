@@ -52,10 +52,10 @@ export default function Navigation() {
           {
             id: 'main-group',
             type: 'group',
-            title: '',
+            translationKey: '',
             children: sidebarItems.map(item => ({
               id: item.id,
-              title: item.label,
+              translationKey: item.translationKey,
               type: 'item',
               url: item.path,
               icon: item.icon,

@@ -240,11 +240,11 @@ export default function NavGroup({
         <List
           subheader={
             <>
-              {item.title ? (
+              {item.translationKey ? (
                 drawerOpen && (
                   <Box sx={{ pl: 3, mb: 1.5 }}>
                     <Typography variant="subtitle2" color="text.secondary">
-                      <FormattedMessage id={item.title} />
+                      <FormattedMessage id={item.translationKey} />
                     </Typography>
                     {item.caption && (
                       <Typography variant="caption" color="secondary">
@@ -289,7 +289,9 @@ export default function NavGroup({
               sx={{ mr: 1 }}
               primary={
                 <Typography variant="body1" color={isSelected || anchorEl ? 'primary.main' : 'secondary.dark'}>
-                  <FormattedMessage id={currentItem.id === lastItemId ? 'more-items' : currentItem.title} />
+                  <FormattedMessage
+                    id={currentItem.id === lastItemId ? 'common.view-more' : currentItem.translationKey || currentItem.title}
+                  />
                 </Typography>
               }
             />

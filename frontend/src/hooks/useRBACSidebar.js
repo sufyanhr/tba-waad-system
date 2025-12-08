@@ -218,7 +218,7 @@ const useRBACSidebar = () => {
 
     return filteredItems.map((item) => ({
       id: item.id,
-      label: item.label,
+      translationKey: item.label,
       icon: item.icon,
       path: item.path,
       visible: true
