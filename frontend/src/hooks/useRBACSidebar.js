@@ -73,11 +73,11 @@ const useRBACSidebar = () => {
       return [];
     }
 
-    // Define all possible menu items
+    // Define all possible menu items - using translation keys from ar.json/en.json
     const allItems = [
       {
         id: 'dashboard',
-        label: 'لوحة التحكم',
+        label: 'nav.dashboard',
         icon: Dashboard,
         path: '/dashboard',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -85,7 +85,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'members',
-        label: 'الأعضاء',
+        label: 'nav.members',
         icon: People,
         path: '/members',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN'],
@@ -93,7 +93,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'employers',
-        label: 'أصحاب العمل',
+        label: 'nav.employers',
         icon: Business,
         path: '/employers',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -101,7 +101,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'claims',
-        label: 'المطالبات',
+        label: 'nav.claims',
         icon: Receipt,
         path: '/claims',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER'],
@@ -110,7 +110,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'visits',
-        label: 'الزيارات',
+        label: 'nav.visits',
         icon: LocalHospital,
         path: '/visits',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN', 'EMPLOYER_ADMIN', 'PROVIDER'],
@@ -119,7 +119,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'medical-services',
-        label: 'الخدمات الطبية',
+        label: 'nav.medical-services',
         icon: MedicalServices,
         path: '/medical-services',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -127,7 +127,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'medical-categories',
-        label: 'التصنيفات الطبية',
+        label: 'nav.medical-categories',
         icon: Category,
         path: '/medical-categories',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -135,7 +135,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'medical-packages',
-        label: 'الباقات الطبية',
+        label: 'nav.medical-packages',
         icon: LocalOffer,
         path: '/medical-packages',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -143,7 +143,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'providers',
-        label: 'مقدمو الخدمة',
+        label: 'nav.providers',
         icon: AssignmentInd,
         path: '/providers',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -151,7 +151,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'policies',
-        label: 'البوليصات',
+        label: 'nav.policies',
         icon: Description,
         path: '/policies',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -159,7 +159,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'companies',
-        label: 'شركات التأمين',
+        label: 'nav.insurance-companies',
         icon: Business,
         path: '/insurance-companies',
         roles: ['SUPER_ADMIN'],
@@ -167,7 +167,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'rbac',
-        label: 'إدارة الصلاحيات',
+        label: 'nav.rbac',
         icon: Security,
         path: '/rbac',
         roles: ['SUPER_ADMIN'],
@@ -175,7 +175,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'settings',
-        label: 'الإعدادات',
+        label: 'nav.settings',
         icon: Settings,
         path: '/settings',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
@@ -183,7 +183,7 @@ const useRBACSidebar = () => {
       },
       {
         id: 'audit',
-        label: 'سجل التدقيق',
+        label: 'nav.audit',
         icon: Timeline,
         path: '/audit',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],

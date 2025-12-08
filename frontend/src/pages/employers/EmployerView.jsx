@@ -40,10 +40,10 @@ const EmployerView = () => {
     return (
       <>
         <ModernPageHeader
-          title={intl.formatMessage({ id: 'view-employer' })}
+          title={intl.formatMessage({ id: 'employers.view' })}
           breadcrumbs={[
-            { title: intl.formatMessage({ id: 'employers' }), to: '/employers' },
-            { title: intl.formatMessage({ id: 'view-employer' }) }
+            { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
+            { title: intl.formatMessage({ id: 'employers.view' }) }
           ]}
           onBack={() => navigate('/employers')}
         />
@@ -60,15 +60,15 @@ const EmployerView = () => {
     return (
       <>
         <ModernPageHeader
-          title={intl.formatMessage({ id: 'view-employer' })}
+          title={intl.formatMessage({ id: 'employers.view' })}
           breadcrumbs={[
-            { title: intl.formatMessage({ id: 'employers' }), to: '/employers' },
-            { title: intl.formatMessage({ id: 'view-employer' }) }
+            { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
+            { title: intl.formatMessage({ id: 'employers.view' }) }
           ]}
           onBack={() => navigate('/employers')}
         />
         <MainCard>
-          <Typography color="error">{intl.formatMessage({ id: 'employer-not-found' })}</Typography>
+          <Typography color="error">{intl.formatMessage({ id: 'employers.not-found' })}</Typography>
         </MainCard>
       </>
     );
@@ -77,15 +77,15 @@ const EmployerView = () => {
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'view-employer' })}
+        title={intl.formatMessage({ id: 'employers.view' })}
         breadcrumbs={[
-          { title: intl.formatMessage({ id: 'employers' }), to: '/employers' },
-          { title: intl.formatMessage({ id: 'view-employer' }) }
+          { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
+          { title: intl.formatMessage({ id: 'employers.view' }) }
         ]}
         onBack={() => navigate('/employers')}
         action={
           <Button variant="contained" onClick={() => navigate(`/employers/edit/${employer.id}`)} startIcon={<EditOutlined />}>
-            {intl.formatMessage({ id: 'edit-employer' })}
+            {intl.formatMessage({ id: 'employers.edit' })}
           </Button>
         }
       />
@@ -94,18 +94,18 @@ const EmployerView = () => {
           <Grid item xs={12} md={6}>
             <Box sx={{ p: 2.5, bgcolor: 'grey.50', borderRadius: 1 }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                {intl.formatMessage({ id: 'basic-information' })}
+                {intl.formatMessage({ id: 'employers.basic-info' })}
               </Typography>
-              <InfoRow label={intl.formatMessage({ id: 'id' })} value={employer.id} />
-              <InfoRow label={intl.formatMessage({ id: 'employer-name' })} value={employer.name} />
-              <InfoRow label={intl.formatMessage({ id: 'employer-code' })} value={employer.companyCode} />
-              <InfoRow label={intl.formatMessage({ id: 'company' })} value={getCompanyName(employer.companyId)} />
+              <InfoRow label={intl.formatMessage({ id: 'employers.id' })} value={employer.id} />
+              <InfoRow label={intl.formatMessage({ id: 'employers.name' })} value={employer.name} />
+              <InfoRow label={intl.formatMessage({ id: 'employers.code' })} value={employer.companyCode} />
+              <InfoRow label={intl.formatMessage({ id: 'employers.company' })} value={getCompanyName(employer.companyId)} />
               <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
                 <Typography variant="subtitle2" sx={{ minWidth: 160, fontWeight: 600 }}>
-                  {intl.formatMessage({ id: 'status' })}:
+                  {intl.formatMessage({ id: 'common.status' })}:
                 </Typography>
                 <Chip
-                  label={employer.active ? intl.formatMessage({ id: 'active' }) : intl.formatMessage({ id: 'inactive' })}
+                  label={employer.active ? intl.formatMessage({ id: 'common.active' }) : intl.formatMessage({ id: 'common.inactive' })}
                   color={employer.active ? 'success' : 'default'}
                   size="small"
                 />
@@ -116,25 +116,25 @@ const EmployerView = () => {
           <Grid item xs={12} md={6}>
             <Box sx={{ p: 2.5, bgcolor: 'grey.50', borderRadius: 1 }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                {intl.formatMessage({ id: 'contact-information' })}
+                {intl.formatMessage({ id: 'profile.contact-information' })}
               </Typography>
-              <InfoRow label={intl.formatMessage({ id: 'phone' })} value={employer.phone} />
-              <InfoRow label={intl.formatMessage({ id: 'email' })} value={employer.email} />
-              <InfoRow label={intl.formatMessage({ id: 'address' })} value={employer.address} />
+              <InfoRow label={intl.formatMessage({ id: 'common.phone' })} value={employer.phone} />
+              <InfoRow label={intl.formatMessage({ id: 'common.email' })} value={employer.email} />
+              <InfoRow label={intl.formatMessage({ id: 'common.address' })} value={employer.address} />
             </Box>
           </Grid>
 
           <Grid item xs={12}>
             <Box sx={{ p: 2.5, bgcolor: 'grey.50', borderRadius: 1 }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                {intl.formatMessage({ id: 'audit-information' })}
+                {intl.formatMessage({ id: 'employers.audit-info' })}
               </Typography>
               <InfoRow
-                label={intl.formatMessage({ id: 'created-at' })}
+                label={intl.formatMessage({ id: 'employers.created-at' })}
                 value={employer.createdAt ? new Date(employer.createdAt).toLocaleString('ar-EG') : '-'}
               />
               <InfoRow
-                label={intl.formatMessage({ id: 'updated-at' })}
+                label={intl.formatMessage({ id: 'employers.updated-at' })}
                 value={employer.updatedAt ? new Date(employer.updatedAt).toLocaleString('ar-EG') : '-'}
               />
             </Box>
@@ -143,10 +143,10 @@ const EmployerView = () => {
           <Grid item xs={12}>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button variant="outlined" onClick={() => navigate('/employers')} startIcon={<ArrowLeftOutlined />}>
-                {intl.formatMessage({ id: 'back-to-list' })}
+                {intl.formatMessage({ id: 'common.back-to-list' })}
               </Button>
               <Button variant="contained" onClick={() => navigate(`/employers/edit/${employer.id}`)} startIcon={<EditOutlined />}>
-                {intl.formatMessage({ id: 'edit' })}
+                {intl.formatMessage({ id: 'common.edit' })}
               </Button>
             </Stack>
           </Grid>

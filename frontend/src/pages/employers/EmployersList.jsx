@@ -83,13 +83,13 @@ const EmployersList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(intl.formatMessage({ id: 'delete-employer-confirm' }))) return;
+    if (!window.confirm(intl.formatMessage({ id: 'employers.delete-confirm' }))) return;
     try {
       await employersService.deleteEmployer(id);
       refresh();
     } catch (err) {
       console.error('Failed to delete employer', err);
-      alert(intl.formatMessage({ id: 'error' }));
+      alert(intl.formatMessage({ id: 'common.error' }));
     }
   };
 
@@ -100,12 +100,12 @@ const EmployersList = () => {
   };
 
   const headCells = [
-    { id: 'name', label: intl.formatMessage({ id: 'employer-name-ar' }), sortable: true },
-    { id: 'companyCode', label: intl.formatMessage({ id: 'employer-code' }), sortable: true },
-    { id: 'phone', label: intl.formatMessage({ id: 'Phone' }), sortable: false },
-    { id: 'email', label: intl.formatMessage({ id: 'Email' }), sortable: false },
-    { id: 'active', label: intl.formatMessage({ id: 'Status' }), sortable: true },
-    { id: 'actions', label: intl.formatMessage({ id: 'Actions' }), sortable: false, align: 'center' }
+    { id: 'name', label: intl.formatMessage({ id: 'employers.name-ar' }), sortable: true },
+    { id: 'companyCode', label: intl.formatMessage({ id: 'employers.code' }), sortable: true },
+    { id: 'phone', label: intl.formatMessage({ id: 'common.phone' }), sortable: false },
+    { id: 'email', label: intl.formatMessage({ id: 'common.email' }), sortable: false },
+    { id: 'active', label: intl.formatMessage({ id: 'common.status' }), sortable: true },
+    { id: 'actions', label: intl.formatMessage({ id: 'common.actions' }), sortable: false, align: 'center' }
   ];
 
   const tableContent = useMemo(() => {
@@ -124,7 +124,7 @@ const EmployersList = () => {
         <TableRow>
           <TableCell colSpan={headCells.length}>
             <Alert severity="error" sx={{ my: 2 }}>
-              {intl.formatMessage({ id: 'error' })}: {error.message || 'Failed to load employers'}
+              {intl.formatMessage({ id: 'common.error' })}: {error.message || 'Failed to load employers'}
             </Alert>
           </TableCell>
         </TableRow>
@@ -137,15 +137,15 @@ const EmployersList = () => {
           <TableCell colSpan={headCells.length}>
             <ModernEmptyState
               icon={BusinessIcon}
-              title={intl.formatMessage({ id: 'no-employers-found' })}
-              description={intl.formatMessage({ id: 'no-employers-desc' })}
+              title={intl.formatMessage({ id: 'employers.no-found' })}
+              description={intl.formatMessage({ id: 'employers.no-found-desc' })}
               action={
                 <Button
                   variant="contained"
                   startIcon={<AddIcon />}
                   onClick={() => navigate('/employers/create')}
                 >
-                  {intl.formatMessage({ id: 'add-employer' })}
+                  {intl.formatMessage({ id: 'employers.add' })}
                 </Button>
               }
             />
@@ -172,24 +172,24 @@ const EmployersList = () => {
         </TableCell>
         <TableCell>
           <Chip
-            label={employer.active ? intl.formatMessage({ id: 'Active' }) : intl.formatMessage({ id: 'Inactive' })}
+            label={employer.active ? intl.formatMessage({ id: 'common.active' }) : intl.formatMessage({ id: 'common.inactive' })}
             size="small"
             color={employer.active ? 'success' : 'error'}
           />
         </TableCell>
         <TableCell align="center">
           <Stack direction="row" spacing={0.5} justifyContent="center">
-            <Tooltip title={intl.formatMessage({ id: 'view' })}>
+            <Tooltip title={intl.formatMessage({ id: 'common.view' })}>
               <IconButton size="small" color="primary" onClick={() => navigate(`/employers/view/${employer.id}`)}>
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title={intl.formatMessage({ id: 'Edit' })}>
+            <Tooltip title={intl.formatMessage({ id: 'common.edit' })}>
               <IconButton size="small" color="info" onClick={() => navigate(`/employers/edit/${employer.id}`)}>
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title={intl.formatMessage({ id: 'Delete' })}>
+            <Tooltip title={intl.formatMessage({ id: 'common.delete' })}>
               <IconButton size="small" color="error" onClick={() => handleDelete(employer.id)}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -203,19 +203,19 @@ const EmployersList = () => {
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'employers-list' })}
-        subtitle={intl.formatMessage({ id: 'employers-list-desc' })}
+        title={intl.formatMessage({ id: 'employers.list' })}
+        subtitle={intl.formatMessage({ id: 'employers.list-desc' })}
         icon={BusinessIcon}
-        breadcrumbs={[{ label: intl.formatMessage({ id: 'employers-list' }), path: '/employers' }]}
+        breadcrumbs={[{ label: intl.formatMessage({ id: 'employers.list' }), path: '/employers' }]}
         actions={
           <Stack direction="row" spacing={2}>
-            <Tooltip title={intl.formatMessage({ id: 'refresh' })}>
+            <Tooltip title={intl.formatMessage({ id: 'common.refresh' })}>
               <IconButton onClick={handleRefresh} color="primary">
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/employers/create')}>
-              {intl.formatMessage({ id: 'add-employer' })}
+              {intl.formatMessage({ id: 'employers.add' })}
             </Button>
           </Stack>
         }
@@ -228,7 +228,7 @@ const EmployersList = () => {
             <TextField
               fullWidth
               size="small"
-              placeholder={intl.formatMessage({ id: 'search-employers' })}
+              placeholder={intl.formatMessage({ id: 'employers.search' })}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
@@ -242,7 +242,7 @@ const EmployersList = () => {
               sx={{ maxWidth: { sm: 400 } }}
             />
             <Button variant="outlined" onClick={handleSearchSubmit} sx={{ minWidth: 100 }}>
-              {intl.formatMessage({ id: 'Search' })}
+              {intl.formatMessage({ id: 'common.search' })}
             </Button>
           </Stack>
         </Box>
@@ -283,7 +283,7 @@ const EmployersList = () => {
             page={params.page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage={intl.formatMessage({ id: 'rows-per-page' })}
+            labelRowsPerPage={intl.formatMessage({ id: 'common.rows-per-page' })}
           />
         )}
       </MainCard>

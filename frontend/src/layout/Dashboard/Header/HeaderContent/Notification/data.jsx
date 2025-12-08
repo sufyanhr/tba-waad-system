@@ -80,7 +80,7 @@ export const notificationData = [
     time: '1d ago',
     read: false,
     file: {
-      name: 'mantis_dashboard.fig',
+      name: 'alwahacare_dashboard.fig',
       size: '26mb',
       icon: figma
     }

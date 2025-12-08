@@ -44,12 +44,12 @@ const EmployerCreate = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!employer.companyId) newErrors.companyId = intl.formatMessage({ id: 'required' });
-    if (!employer.name) newErrors.name = intl.formatMessage({ id: 'required' });
-    if (!employer.nameEn) newErrors.nameEn = intl.formatMessage({ id: 'required' });
-    if (!employer.companyCode) newErrors.companyCode = intl.formatMessage({ id: 'required' });
+    if (!employer.companyId) newErrors.companyId = intl.formatMessage({ id: 'validation.required' });
+    if (!employer.name) newErrors.name = intl.formatMessage({ id: 'validation.required' });
+    if (!employer.nameEn) newErrors.nameEn = intl.formatMessage({ id: 'validation.required' });
+    if (!employer.companyCode) newErrors.companyCode = intl.formatMessage({ id: 'validation.required' });
     if (employer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employer.email)) {
-      newErrors.email = intl.formatMessage({ id: 'email-invalid' });
+      newErrors.email = intl.formatMessage({ id: 'validation.email-invalid' });
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -66,7 +66,7 @@ const EmployerCreate = () => {
       navigate('/employers');
     } catch (err) {
       console.error('Failed to create employer', err);
-      alert(intl.formatMessage({ id: 'error' }));
+      alert(intl.formatMessage({ id: 'common.error' }));
     } finally {
       setSaving(false);
     }
@@ -75,15 +75,15 @@ const EmployerCreate = () => {
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'employer-create-title' })}
+        title={intl.formatMessage({ id: 'employers.add' })}
         icon={BusinessIcon}
         breadcrumbs={[
-          { label: intl.formatMessage({ id: 'employers-list' }), path: '/employers' },
-          { label: intl.formatMessage({ id: 'add-employer' }), path: '/employers/create' }
+          { label: intl.formatMessage({ id: 'employers.list' }), path: '/employers' },
+          { label: intl.formatMessage({ id: 'employers.add' }), path: '/employers/create' }
         ]}
         actions={
           <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/employers')} variant="outlined">
-            {intl.formatMessage({ id: 'back' })}
+            {intl.formatMessage({ id: 'common.back' })}
           </Button>
         }
       />
@@ -97,7 +97,7 @@ const EmployerCreate = () => {
                 select
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'select-company' })}
+                label={intl.formatMessage({ id: 'employers.select-company' })}
                 value={employer.companyId}
                 onChange={handleChange('companyId')}
                 error={Boolean(errors.companyId)}
@@ -116,7 +116,7 @@ const EmployerCreate = () => {
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employer-code' })}
+                label={intl.formatMessage({ id: 'employers.code' })}
                 value={employer.companyCode}
                 onChange={handleChange('companyCode')}
                 error={Boolean(errors.companyCode)}
@@ -129,7 +129,7 @@ const EmployerCreate = () => {
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employer-name-ar' })}
+                label={intl.formatMessage({ id: 'employers.name-ar' })}
                 value={employer.name}
                 onChange={handleChange('name')}
                 error={Boolean(errors.name)}
@@ -142,7 +142,7 @@ const EmployerCreate = () => {
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employer-name-en' })}
+                label={intl.formatMessage({ id: 'employers.name-en' })}
                 value={employer.nameEn}
                 onChange={handleChange('nameEn')}
                 error={Boolean(errors.nameEn)}
@@ -154,7 +154,7 @@ const EmployerCreate = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'Phone' })}
+                label={intl.formatMessage({ id: 'common.phone' })}
                 value={employer.phone}
                 onChange={handleChange('phone')}
               />
@@ -164,7 +164,7 @@ const EmployerCreate = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'Email' })}
+                label={intl.formatMessage({ id: 'common.email' })}
                 type="email"
                 value={employer.email}
                 onChange={handleChange('email')}
@@ -177,7 +177,7 @@ const EmployerCreate = () => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'Address' })}
+                label={intl.formatMessage({ id: 'common.address' })}
                 value={employer.address}
                 onChange={handleChange('address')}
                 multiline
@@ -189,7 +189,7 @@ const EmployerCreate = () => {
             <Grid item xs={12}>
               <FormControlLabel
                 control={<Switch checked={employer.active} onChange={handleChange('active')} color="success" />}
-                label={intl.formatMessage({ id: 'Active' })}
+                label={intl.formatMessage({ id: 'common.active' })}
               />
             </Grid>
 
@@ -197,10 +197,10 @@ const EmployerCreate = () => {
             <Grid item xs={12}>
               <Stack direction="row" spacing={2} justifyContent="flex-end">
                 <Button variant="outlined" onClick={() => navigate('/employers')} disabled={saving}>
-                  {intl.formatMessage({ id: 'Cancel' })}
+                  {intl.formatMessage({ id: 'common.cancel' })}
                 </Button>
                 <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={saving}>
-                  {saving ? intl.formatMessage({ id: 'loading' }) : intl.formatMessage({ id: 'Save' })}
+                  {saving ? intl.formatMessage({ id: 'common.loading' }) : intl.formatMessage({ id: 'common.save' })}
                 </Button>
               </Stack>
             </Grid>

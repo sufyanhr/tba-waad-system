@@ -9,6 +9,9 @@ import Box from '@mui/material/Box';
 import MainCard from 'components/MainCard';
 import { ThemeDirection } from 'config';
 
+// third-party
+import { FormattedMessage } from 'react-intl';
+
 //asset
 import WelcomeImage from 'assets/images/analytics/welcome-banner.png';
 import WelcomeImageArrow from 'assets/images/analytics/welcome-arrow.png';
@@ -31,9 +34,11 @@ export default function WelcomeBanner() {
           <Stack
             sx={(theme) => ({ gap: 2, padding: 3.4, color: 'background.paper', ...theme.applyStyles('dark', { color: 'text.primary' }) })}
           >
-            <Typography variant="h2">Welcome to Mantis</Typography>
+            <Typography variant="h2">
+              <FormattedMessage id="dashboard.welcome" />
+            </Typography>
             <Typography variant="h6">
-              The purpose of a product update is to add new features, fix bugs or improve the performance of the product.
+              <FormattedMessage id="dashboard.welcome-description" />
             </Typography>
             <Box>
               <Button
@@ -51,7 +56,7 @@ export default function WelcomeBanner() {
                   }
                 })}
               >
-                View full statistic
+                <FormattedMessage id="dashboard.view-statistics" />
               </Button>
             </Box>
           </Stack>

@@ -79,7 +79,7 @@ export default function NotificationItem({ notification }) {
           >
             {user?.name}
             <Typography variant="body1">{message}</Typography>
-            {type === 'mention' && 'Mantis.'}
+            {type === 'mention' && 'AlWahaCare.'}
           </Typography>
         }
         secondary={

@@ -33,7 +33,7 @@ const EmployerEdit = () => {
         setEmployer(data);
       } catch (err) {
         console.error('Failed to load employer', err);
-        alert(intl.formatMessage({ id: 'error' }));
+        alert(intl.formatMessage({ id: 'common.error' }));
       } finally {
         setLoading(false);
       }
@@ -51,11 +51,11 @@ const EmployerEdit = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!employer.companyId) newErrors.companyId = intl.formatMessage({ id: 'required' });
-    if (!employer.name) newErrors.name = intl.formatMessage({ id: 'required' });
-    if (!employer.companyCode) newErrors.companyCode = intl.formatMessage({ id: 'required' });
+    if (!employer.companyId) newErrors.companyId = intl.formatMessage({ id: 'validation.required' });
+    if (!employer.name) newErrors.name = intl.formatMessage({ id: 'validation.required' });
+    if (!employer.companyCode) newErrors.companyCode = intl.formatMessage({ id: 'validation.required' });
     if (employer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employer.email)) {
-      newErrors.email = intl.formatMessage({ id: 'email-invalid' });
+      newErrors.email = intl.formatMessage({ id: 'validation.email-invalid' });
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -83,10 +83,10 @@ const EmployerEdit = () => {
     return (
       <>
         <ModernPageHeader
-          title={intl.formatMessage({ id: 'edit-employer' })}
+          title={intl.formatMessage({ id: 'employers.edit' })}
           breadcrumbs={[
-            { title: intl.formatMessage({ id: 'employers' }), to: '/employers' },
-            { title: intl.formatMessage({ id: 'edit-employer' }) }
+            { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
+            { title: intl.formatMessage({ id: 'employers.edit' }) }
           ]}
           onBack={() => navigate('/employers')}
         />
@@ -103,15 +103,15 @@ const EmployerEdit = () => {
     return (
       <>
         <ModernPageHeader
-          title={intl.formatMessage({ id: 'edit-employer' })}
+          title={intl.formatMessage({ id: 'employers.edit' })}
           breadcrumbs={[
-            { title: intl.formatMessage({ id: 'employers' }), to: '/employers' },
-            { title: intl.formatMessage({ id: 'edit-employer' }) }
+            { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
+            { title: intl.formatMessage({ id: 'employers.edit' }) }
           ]}
           onBack={() => navigate('/employers')}
         />
         <MainCard>
-          <Typography color="error">{intl.formatMessage({ id: 'employer-not-found' })}</Typography>
+          <Typography color="error">{intl.formatMessage({ id: 'employers.not-found' })}</Typography>
         </MainCard>
       </>
     );
@@ -120,10 +120,10 @@ const EmployerEdit = () => {
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'edit-employer' })}
+        title={intl.formatMessage({ id: 'employers.edit' })}
         breadcrumbs={[
-          { title: intl.formatMessage({ id: 'employers' }), to: '/employers' },
-          { title: intl.formatMessage({ id: 'edit-employer' }) }
+          { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
+          { title: intl.formatMessage({ id: 'employers.edit' }) }
         ]}
         onBack={() => navigate('/employers')}
       />
@@ -135,7 +135,7 @@ const EmployerEdit = () => {
                 select
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'company' })}
+                label={intl.formatMessage({ id: 'employers.company' })}
                 value={employer.companyId || ''}
                 onChange={handleChange('companyId')}
                 error={Boolean(errors.companyId)}
@@ -154,7 +154,7 @@ const EmployerEdit = () => {
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employer-name' })}
+                label={intl.formatMessage({ id: 'employers.name' })}
                 value={employer.name || ''}
                 onChange={handleChange('name')}
                 error={Boolean(errors.name)}
@@ -167,7 +167,7 @@ const EmployerEdit = () => {
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employer-code' })}
+                label={intl.formatMessage({ id: 'employers.code' })}
                 value={employer.companyCode || ''}
                 onChange={handleChange('companyCode')}
                 error={Boolean(errors.companyCode)}
@@ -179,9 +179,9 @@ const EmployerEdit = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'phone' })}
+                label={intl.formatMessage({ id: 'common.phone' })}
                 value={employer.phone || ''}
-                onChange={handleChange('phone')}
+                onChange={handleChange('common.phone')}
                 error={Boolean(errors.phone)}
                 helperText={errors.phone}
                 size="small"
@@ -191,10 +191,10 @@ const EmployerEdit = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'email' })}
+                label={intl.formatMessage({ id: 'common.email' })}
                 type="email"
                 value={employer.email || ''}
-                onChange={handleChange('email')}
+                onChange={handleChange('common.email')}
                 error={Boolean(errors.email)}
                 helperText={errors.email}
                 size="small"
@@ -204,9 +204,9 @@ const EmployerEdit = () => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'address' })}
+                label={intl.formatMessage({ id: 'common.address' })}
                 value={employer.address || ''}
-                onChange={handleChange('address')}
+                onChange={handleChange('common.address')}
                 multiline
                 rows={2}
                 size="small"
@@ -215,18 +215,18 @@ const EmployerEdit = () => {
 
             <Grid item xs={12}>
               <FormControlLabel
-                control={<Switch checked={employer.active ?? true} onChange={handleChange('active')} />}
-                label={intl.formatMessage({ id: 'active' })}
+                control={<Switch checked={employer.active ?? true} onChange={handleChange('common.active')} />}
+                label={intl.formatMessage({ id: 'common.active' })}
               />
             </Grid>
 
             <Grid item xs={12}>
               <Stack direction="row" spacing={2} justifyContent="flex-end">
                 <Button variant="outlined" onClick={() => navigate('/employers')} startIcon={<CloseOutlined />}>
-                  {intl.formatMessage({ id: 'cancel' })}
+                  {intl.formatMessage({ id: 'common.cancel' })}
                 </Button>
                 <Button type="submit" variant="contained" color="primary" disabled={saving} startIcon={<SaveOutlined />}>
-                  {saving ? intl.formatMessage({ id: 'saving' }) : intl.formatMessage({ id: 'save-changes' })}
+                  {saving ? intl.formatMessage({ id: 'common.saving' }) : intl.formatMessage({ id: 'common.save-changes' })}
                 </Button>
               </Stack>
             </Grid>
