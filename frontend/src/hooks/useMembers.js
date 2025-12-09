@@ -1,13 +1,12 @@
-// src/hooks/useMembers.js
 import { useEffect, useState, useCallback } from 'react';
-import * as membersService from 'services/members.service';
+import { membersService } from 'services/api/members.service';
 
 export const useMembersList = (initialParams = {}) => {
   const [params, setParams] = useState({
-    page: 0,
+    page: 1,
     size: 10,
     sortBy: 'id',
-    sortDir: 'ASC',
+    sortDir: 'desc',
     search: '',
     ...initialParams
   });
@@ -15,7 +14,7 @@ export const useMembersList = (initialParams = {}) => {
   const [data, setData] = useState({
     items: [],
     total: 0,
-    page: 0,
+    page: 1,
     size: 10
   });
 
@@ -27,7 +26,6 @@ export const useMembersList = (initialParams = {}) => {
       setLoading(true);
       setError(null);
       const response = await membersService.getMembers(params);
-      // تأكد أن المفاتيح موجودة
       setData({
         items: response.items ?? [],
         total: response.total ?? 0,
@@ -37,6 +35,7 @@ export const useMembersList = (initialParams = {}) => {
     } catch (err) {
       console.error('Failed to load members list', err);
       setError(err);
+      setData({ items: [], total: 0, page: params.page, size: params.size });
     } finally {
       setLoading(false);
     }
@@ -46,19 +45,23 @@ export const useMembersList = (initialParams = {}) => {
     load();
   }, [load]);
 
+  const refresh = useCallback(() => {
+    load();
+  }, [load]);
+
   return {
     data,
     loading,
     error,
     params,
     setParams,
-    refresh: load
+    refresh
   };
 };
 
 export const useMemberDetails = (id) => {
-  const [member, setMember] = useState(null);
-  const [loading, setLoading] = useState(!!id);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
@@ -67,10 +70,11 @@ export const useMemberDetails = (id) => {
       setLoading(true);
       setError(null);
       const response = await membersService.getMemberById(id);
-      setMember(response);
+      setData(response);
     } catch (err) {
       console.error('Failed to load member details', err);
       setError(err);
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -80,10 +84,14 @@ export const useMemberDetails = (id) => {
     load();
   }, [load]);
 
+  const refresh = useCallback(() => {
+    load();
+  }, [load]);
+
   return {
-    member,
+    data,
     loading,
     error,
-    refresh: load
+    refresh
   };
 };

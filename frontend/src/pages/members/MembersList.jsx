@@ -1,6 +1,6 @@
-// src/pages/members/MembersList.jsx
-import { useMemo, useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 import {
   Box,
   Button,
@@ -17,109 +17,252 @@ import {
   Typography,
   TablePagination,
   InputAdornment,
-  Tooltip
+  Tooltip,
+  Paper,
+  TableSortLabel,
+  Alert
 } from '@mui/material';
 import {
+  Add as AddIcon,
+  Search as SearchIcon,
   Visibility as VisibilityIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Search as SearchIcon,
-  Add as AddIcon
+  PeopleAlt as PeopleAltIcon,
+  Refresh as RefreshIcon,
+  Upload as UploadIcon
 } from '@mui/icons-material';
 
 import MainCard from 'components/MainCard';
+import ModernPageHeader from 'components/tba/ModernPageHeader';
+import ModernEmptyState from 'components/tba/ModernEmptyState';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import { useMembersList } from 'hooks/useMembers';
-import * as membersService from 'services/members.service';
+import { membersService } from 'services/api/members.service';
+import MembersBulkUploadDialog from 'components/members/MembersBulkUploadDialog';
 
 const MembersList = () => {
   const navigate = useNavigate();
+  const intl = useIntl();
   const [searchInput, setSearchInput] = useState('');
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDir, setSortDir] = useState('DESC');
+  const [orderBy, setOrderBy] = useState('id');
+  const [order, setOrder] = useState('desc');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const { data, loading, error, params, setParams, refresh } = useMembersList({
-    page: 0,
+    page: 1,
     size: 10,
-    sortBy: sortBy,
-    sortDir: sortDir
+    sortBy: 'id',
+    sortDir: 'desc'
   });
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setParams((prev) => ({ ...prev, page: 0, search: searchInput.trim() }));
+    setParams((prev) => ({ ...prev, page: 1, search: searchInput.trim() }));
   };
 
-  const handleSort = (column) => {
-    const isAsc = sortBy === column && sortDir === 'ASC';
-    const newDir = isAsc ? 'DESC' : 'ASC';
-    setSortDir(newDir);
-    setSortBy(column);
-    setParams((prev) => ({ ...prev, sortBy: column, sortDir: newDir }));
-  };
-
-  const handleChangePage = (_, newPage) => {
-    setParams((prev) => ({ ...prev, page: newPage }));
-  };
-
-  const handleChangeRowsPerPage = (event) => {
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    const newOrder = isAsc ? 'desc' : 'asc';
+    setOrder(newOrder);
+    setOrderBy(property);
     setParams((prev) => ({
       ...prev,
-      page: 0,
-      size: parseInt(event.target.value, 10)
+      sortBy: property,
+      sortDir: newOrder
     }));
   };
 
+  const handleChangePage = useCallback(
+    (_, newPage) => {
+      setParams((prev) => ({ ...prev, page: newPage + 1 }));
+    },
+    [setParams]
+  );
+
+  const handleChangeRowsPerPage = useCallback(
+    (event) => {
+      setParams((prev) => ({
+        ...prev,
+        page: 1,
+        size: parseInt(event.target.value, 10)
+      }));
+    },
+    [setParams]
+  );
+
   const handleDelete = async (id) => {
-    if (!window.confirm('هل أنت متأكد من حذف المشترك؟ (سيتم الإخفاء فقط)')) return;
+    if (!window.confirm(intl.formatMessage({ id: 'members.delete-confirm' }) || 'Delete this member?')) return;
     try {
       await membersService.deleteMember(id);
       refresh();
     } catch (err) {
       console.error('Failed to delete member', err);
-      alert('حدث خطأ أثناء الحذف');
+      alert(intl.formatMessage({ id: 'common.error' }) || 'Failed to delete');
     }
   };
 
-  const getStatusChip = (status) => {
-    const statusColors = {
-      ACTIVE: 'success',
-      INACTIVE: 'default',
-      SUSPENDED: 'warning',
-      TERMINATED: 'error'
-    };
-    return (
-      <Chip 
-        label={status || 'N/A'} 
-        color={statusColors[status] || 'default'} 
-        size="small" 
-        variant="outlined"
-      />
-    );
+  const handleRefresh = () => {
+    setSearchInput('');
+    setParams({ page: 1, size: 10, sortBy: 'id', sortDir: 'desc', search: '' });
+    refresh();
   };
 
-  return (
-    <MainCard 
-      title="الأعضاء (المؤمن عليهم)"
-      content={false}
-    >
-      <Box sx={{ p: 3 }}>
-        {/* Toolbar */}
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent="space-between"
-          alignItems={{ xs: 'stretch', sm: 'center' }}
-          spacing={2}
-          sx={{ mb: 3 }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            عرض قائمة المؤمن عليهم مع إمكانية البحث والفرز
-          </Typography>
+  const headCells = [
+    { id: 'id', label: intl.formatMessage({ id: 'common.id' }) || 'ID', sortable: true },
+    { id: 'memberCode', label: intl.formatMessage({ id: 'members.member-code' }) || 'Member Code', sortable: true },
+    { id: 'nationalId', label: intl.formatMessage({ id: 'members.national-id' }) || 'National ID', sortable: true },
+    {
+      id: 'fullNameAr',
+      label: intl.formatMessage({ id: 'members.full-name-ar' }) || 'Full Name (AR)',
+      sortable: true
+    },
+    {
+      id: 'employerName',
+      label: intl.formatMessage({ id: 'members.employer-name' }) || 'Employer',
+      sortable: false
+    },
+    {
+      id: 'insuranceCompany',
+      label: intl.formatMessage({ id: 'members.insurance-company' }) || 'Insurance Company',
+      sortable: false
+    },
+    { id: 'active', label: intl.formatMessage({ id: 'common.status' }) || 'Status', sortable: true },
+    { id: 'actions', label: intl.formatMessage({ id: 'common.actions' }) || 'Actions', sortable: false, align: 'center' }
+  ];
 
+  const tableContent = useMemo(() => {
+    if (loading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={headCells.length}>
+            <TableSkeleton />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (error) {
+      return (
+        <TableRow>
+          <TableCell colSpan={headCells.length}>
+            <Alert severity="error" sx={{ my: 2 }}>
+              {intl.formatMessage({ id: 'common.error' }) || 'Error'}: {error.message || 'Failed to load members'}
+            </Alert>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (!data?.items || data.items.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={headCells.length}>
+            <ModernEmptyState
+              icon={PeopleAltIcon}
+              title={intl.formatMessage({ id: 'members.no-found' }) || 'No members found'}
+              description={intl.formatMessage({ id: 'members.no-found-desc' }) || 'Start by adding your first member'}
+              action={
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/members/create')}>
+                  {intl.formatMessage({ id: 'members.add' }) || 'Add Member'}
+                </Button>
+              }
+            />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return data.items.map((member) => (
+      <TableRow hover key={member.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+        <TableCell>
+          <Typography variant="body2" fontWeight={500}>
+            {member.id}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Chip label={member.memberCode || '-'} size="small" variant="outlined" color="primary" />
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2">{member.nationalId || '-'}</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2" fontWeight={500}>
+            {member.fullNameAr || '-'}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2">{member.employerName || '-'}</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2">{member.insuranceCompanyName || '-'}</Typography>
+        </TableCell>
+        <TableCell>
+          <Chip
+            label={
+              member.active
+                ? intl.formatMessage({ id: 'common.active' }) || 'Active'
+                : intl.formatMessage({ id: 'common.inactive' }) || 'Inactive'
+            }
+            size="small"
+            color={member.active ? 'success' : 'error'}
+          />
+        </TableCell>
+        <TableCell align="center">
+          <Stack direction="row" spacing={0.5} justifyContent="center">
+            <Tooltip title={intl.formatMessage({ id: 'common.view' }) || 'View'}>
+              <IconButton size="small" color="primary" onClick={() => navigate(`/members/view/${member.id}`)}>
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={intl.formatMessage({ id: 'common.edit' }) || 'Edit'}>
+              <IconButton size="small" color="info" onClick={() => navigate(`/members/edit/${member.id}`)}>
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={intl.formatMessage({ id: 'common.delete' }) || 'Delete'}>
+              <IconButton size="small" color="error" onClick={() => handleDelete(member.id)}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </TableCell>
+      </TableRow>
+    ));
+  }, [data, loading, error, headCells.length, intl, navigate]);
+
+  return (
+    <>
+      <ModernPageHeader
+        title={intl.formatMessage({ id: 'members.list' }) || 'Members'}
+        subtitle={intl.formatMessage({ id: 'members.list-desc' }) || 'Manage insurance members'}
+        icon={PeopleAltIcon}
+        breadcrumbs={[{ label: intl.formatMessage({ id: 'members.list' }) || 'Members', path: '/members' }]}
+        actions={
           <Stack direction="row" spacing={2}>
+            <Tooltip title={intl.formatMessage({ id: 'common.refresh' }) || 'Refresh'}>
+              <IconButton onClick={handleRefresh} color="primary">
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+            <Button variant="outlined" startIcon={<UploadIcon />} onClick={() => setUploadDialogOpen(true)}>
+              {intl.formatMessage({ id: 'members.bulk-upload' }) || 'Upload Excel'}
+            </Button>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/members/create')}>
+              {intl.formatMessage({ id: 'members.add' }) || 'Add Member'}
+            </Button>
+          </Stack>
+        }
+      />
+
+      <MainCard content={false}>
+        {/* Toolbar */}
+        <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
+              fullWidth
               size="small"
-              placeholder="بحث بالاسم أو الرقم الوطني..."
+              placeholder={intl.formatMessage({ id: 'members.search' }) || 'Search members...'}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
@@ -130,154 +273,58 @@ const MembersList = () => {
                   </InputAdornment>
                 )
               }}
-              sx={{ minWidth: 250 }}
+              sx={{ maxWidth: { sm: 400 } }}
             />
-            <Button 
-              variant="contained" 
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/members/create')}
-            >
-              إضافة مشترك
+            <Button variant="outlined" onClick={handleSearchSubmit} sx={{ minWidth: 100 }}>
+              {intl.formatMessage({ id: 'common.search' }) || 'Search'}
             </Button>
           </Stack>
-        </Stack>
+        </Box>
 
-        {/* جدول البيانات */}
-        {loading ? (
-          <TableSkeleton rows={10} columns={7} />
-        ) : error ? (
-          <Typography color="error" align="center" sx={{ py: 3 }}>
-            حدث خطأ أثناء جلب البيانات
-          </Typography>
-        ) : (
-          <TableContainer>
-            <Table sx={{ '& .MuiTableCell-root': { py: 1.5 } }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>#</TableCell>
-                  <TableCell 
-                    sx={{ fontWeight: 600, cursor: 'pointer' }}
-                    onClick={() => handleSort('fullNameArabic')}
-                  >
-                    اسم المشترك (عربي)
+        {/* Table */}
+        <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
+          <Table sx={{ minWidth: 750 }} size="medium">
+            <TableHead>
+              <TableRow>
+                {headCells.map((headCell) => (
+                  <TableCell key={headCell.id} align={headCell.align || 'left'} sx={{ fontWeight: 600 }}>
+                    {headCell.sortable ? (
+                      <TableSortLabel
+                        active={orderBy === headCell.id}
+                        direction={orderBy === headCell.id ? order : 'asc'}
+                        onClick={() => handleRequestSort(headCell.id)}
+                      >
+                        {headCell.label}
+                      </TableSortLabel>
+                    ) : (
+                      headCell.label
+                    )}
                   </TableCell>
-                  <TableCell 
-                    sx={{ fontWeight: 600, cursor: 'pointer' }}
-                    onClick={() => handleSort('fullNameEnglish')}
-                  >
-                    اسم المشترك (إنجليزي)
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>الرقم الوطني</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>جهة العمل</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="center">الحالة</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>إجراءات</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.items.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
-                      <Typography variant="subtitle1" color="text.secondary">
-                        لا توجد بيانات حالياً
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  data.items.map((member, index) => (
-                    <TableRow 
-                      key={member.id} 
-                      hover
-                      sx={{ 
-                        '&:hover': { 
-                          bgcolor: 'action.hover',
-                          cursor: 'pointer'
-                        }
-                      }}
-                    >
-                      <TableCell align="center">
-                        <Typography variant="subtitle2">
-                          {data.page * data.size + index + 1}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {member.fullNameArabic || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {member.fullNameEnglish || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
-                          {member.civilId || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {member.employerName || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        {getStatusChip(member.status)}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Stack direction="row" spacing={0.5} justifyContent="center">
-                          <Tooltip title="عرض التفاصيل">
-                            <IconButton 
-                              size="small" 
-                              color="primary"
-                              onClick={() => navigate(`/members/view/${member.id}`)}
-                            >
-                              <VisibilityIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="تعديل">
-                            <IconButton 
-                              size="small" 
-                              color="info"
-                              onClick={() => navigate(`/members/edit/${member.id}`)}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="حذف">
-                            <IconButton 
-                              size="small" 
-                              color="error" 
-                              onClick={() => handleDelete(member.id)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableContent}</TableBody>
+          </Table>
+        </TableContainer>
 
-        {!loading && !error && (
+        {/* Pagination */}
+        {!loading && !error && data?.items && data.items.length > 0 && (
           <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={data.total}
-            page={params.page}
-            onPageChange={handleChangePage}
+            count={data.total || 0}
             rowsPerPage={params.size}
+            page={params.page - 1}
+            onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[10, 25, 50, 100]}
-            labelRowsPerPage="عدد الصفوف في الصفحة"
-            labelDisplayedRows={({ from, to, count }) => 
-              `${from}–${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
-            }
+            labelRowsPerPage={intl.formatMessage({ id: 'common.rows-per-page' }) || 'Rows per page:'}
           />
         )}
-      </Box>
-    </MainCard>
+      </MainCard>
+
+      {/* Bulk Upload Dialog */}
+      <MembersBulkUploadDialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)} onSuccess={refresh} />
+    </>
   );
 };
 
