@@ -33,9 +33,7 @@ import { useSnackbar } from 'notistack';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import visitsService from 'services/visits.service';
-import * as membersService from 'services/members.service';
-import { getActiveProviders } from 'services/providers.service';
+import { visitsService, membersService, providersService } from 'services/api';
 import { EMPLOYERS } from 'constants/companies';
 import MainCard from 'components/MainCard';
 import RBACGuard from 'components/tba/RBACGuard';
@@ -107,7 +105,7 @@ export default function VisitsList() {
   // Load providers
   const loadProviders = useCallback(async () => {
     try {
-      const response = await getActiveProviders();
+      const response = await providersService.getAll();
       setProviders(Array.isArray(response) ? response : []);
     } catch (err) {
       console.error('Error loading providers:', err);

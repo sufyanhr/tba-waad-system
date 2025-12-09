@@ -4,7 +4,7 @@ import apiClient from './axiosClient';
 
 const BASE_URL = '/api/insurance-companies';
 
-export const insuranceService = {
+export const insuranceCompaniesService = {
   /**
    * Get all insurance companies
    * @returns {Promise<Array>} List of insurance companies
@@ -60,4 +60,4 @@ export const insuranceService = {
   }
 };
 
-export default insuranceService;
+export default insuranceCompaniesService;

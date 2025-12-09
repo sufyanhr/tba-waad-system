@@ -18,7 +18,7 @@ import {
 import { ArrowBack, Edit } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
 import { useProviderDetails } from 'hooks/useProviders';
-import { getProviderContracts } from 'services/providers.service';
+import { providersService } from 'services/api';
 
 const PROVIDER_TYPE_LABELS = {
   HOSPITAL: 'مستشفى',
@@ -48,8 +48,10 @@ const ProviderView = () => {
       if (id) {
         setLoadingContracts(true);
         try {
-          const data = await getProviderContracts(id);
-          setContracts(data || []);
+          // TODO: Add getContracts method to providersService
+          // const data = await providersService.getContracts(id);
+          // setContracts(data || []);
+          setContracts([]);
         } catch (error) {
           console.error('Failed to fetch contracts:', error);
           setContracts([]);

@@ -28,8 +28,7 @@ import {
   createColumnHelper
 } from '@tanstack/react-table';
 import { useSnackbar } from 'notistack';
-import medicalServicesService from 'services/medical-services.service';
-import medicalCategoriesService from 'services/medical-categories.service';
+import { medicalServicesService, medicalCategoriesService } from 'services/api';
 import MainCard from 'components/MainCard';
 import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/TableSkeleton';

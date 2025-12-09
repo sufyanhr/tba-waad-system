@@ -1,11 +1,12 @@
 package com.waad.tba.modules.provider.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.waad.tba.modules.provider.dto.ProviderCreateDto;
 import com.waad.tba.modules.provider.dto.ProviderSelectorDto;
 import com.waad.tba.modules.provider.dto.ProviderUpdateDto;
 import com.waad.tba.modules.provider.dto.ProviderViewDto;
 import com.waad.tba.modules.provider.entity.Provider;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ProviderMapper {

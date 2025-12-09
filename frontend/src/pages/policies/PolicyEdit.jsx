@@ -22,7 +22,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import MainCard from 'components/MainCard';
 import { usePolicyDetails, useUpdatePolicy } from 'hooks/usePolicies';
-import { getInsuranceCompanies } from 'services/insuranceCompanies.service';
+import { insuranceCompaniesService } from 'services/api';
 
 const PolicyEdit = () => {
   const { id } = useParams();

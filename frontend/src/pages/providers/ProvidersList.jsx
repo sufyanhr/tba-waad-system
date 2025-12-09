@@ -29,7 +29,7 @@ import MainCard from 'components/MainCard';
 import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
-import { getProviders, deleteProvider } from 'services/providers.service';
+import { providersService } from 'services/api';
 import { useSnackbar } from 'notistack';
 
 // third-party
@@ -151,7 +151,7 @@ export default function ProvidersList() {
     setError(null);
 
     try {
-      const result = await getProviders({
+      const result = await providersService.getAll({
         page,
         size: rowsPerPage,
         search: searchTerm
@@ -222,7 +222,7 @@ export default function ProvidersList() {
     if (!selectedProvider) return;
 
     try {
-      await deleteProvider(selectedProvider.id);
+      await providersService.remove(selectedProvider.id);
       enqueueSnackbar('تم حذف المزود بنجاح', { variant: 'success' });
       setDeleteDialogOpen(false);
       setSelectedProvider(null);

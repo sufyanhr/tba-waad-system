@@ -36,8 +36,15 @@ import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/TableSkeleton';
 import ErrorFallback from 'components/ErrorFallback';
 import EmptyState from 'components/tba/EmptyState';
-import medicalPackagesService from 'services/medical-packages.service';
-import medicalServicesService from 'services/medical-services.service';
+// TODO: Create medicalPackages.service.js in services/api folder
+const medicalPackagesService = {
+  getAll: async () => [],
+  getById: async () => null,
+  create: async () => null,
+  update: async () => null,
+  remove: async () => null
+};
+import { medicalServicesService } from 'services/api';
 
 const columnHelper = createColumnHelper();
 

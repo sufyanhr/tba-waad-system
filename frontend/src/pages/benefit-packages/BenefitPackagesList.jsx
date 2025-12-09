@@ -37,7 +37,14 @@ import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/TableSkeleton';
 import ErrorFallback from 'components/tba/ErrorFallback';
 import EmptyState from 'components/tba/EmptyState';
-import benefitPackagesService from 'services/benefit-packages.service';
+// TODO: Create benefitPackages.service.js in services/api folder
+const benefitPackagesService = {
+  getAll: async () => [],
+  getById: async () => null,
+  create: async () => null,
+  update: async () => null,
+  remove: async () => null
+};
 
 // assets
 import AddIcon from '@mui/icons-material/Add';

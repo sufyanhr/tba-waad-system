@@ -17,10 +17,7 @@ import {
 import { Save as SaveIcon, ArrowBack } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
 import { usePreApprovalDetails, useUpdatePreApproval } from 'hooks/usePreApprovals';
-import { getMembers } from 'services/members.service';
-import { getInsuranceCompanies } from 'services/insuranceCompanies.service';
-import { getInsurancePolicies } from 'services/insurancePolicies.service';
-import { getBenefitPackages } from 'services/insurancePolicies.service';
+import { membersService, insuranceCompaniesService } from 'services/api';
 
 const PreApprovalEdit = () => {
   const { id } = useParams();
@@ -107,7 +104,7 @@ const PreApprovalEdit = () => {
   const fetchMembers = async (searchTerm = '') => {
     try {
       setLoadingMembers(true);
-      const result = await getMembers({ page: 1, size: 100, search: searchTerm });
+      const result = await membersService.getAll({ page: 1, size: 100, search: searchTerm });
       setMembers(result.items || []);
     } catch (err) {
       console.error('Error fetching members:', err);
@@ -119,7 +116,7 @@ const PreApprovalEdit = () => {
   const fetchCompanies = async () => {
     try {
       setLoadingCompanies(true);
-      const result = await getInsuranceCompanies({ page: 1, size: 1000 });
+      const result = await insuranceCompaniesService.getAll({ page: 1, size: 1000 });
       setCompanies(result.items || []);
     } catch (err) {
       console.error('Error fetching companies:', err);

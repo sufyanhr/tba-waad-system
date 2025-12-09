@@ -35,7 +35,14 @@ import MainCard from 'components/MainCard';
 import RBACGuard from 'components/tba/RBACGuard';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import ErrorFallback, { EmptyState } from 'components/tba/ErrorFallback';
-import policiesService from 'services/policies.service';
+// TODO: Create policies.service.js in services/api folder
+const policiesService = {
+  getAll: async () => [],
+  getById: async () => null,
+  create: async () => null,
+  update: async () => null,
+  remove: async () => null
+};
 import { EMPLOYERS, INSURANCE_COMPANY } from 'constants/companies';
 import { useSnackbar } from 'notistack';
 

@@ -1,11 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  getInsuranceCompanies,
-  getInsuranceCompanyById,
-  createInsuranceCompany,
-  updateInsuranceCompany,
-  deleteInsuranceCompany
-} from 'services/insuranceCompanies.service';
+import { insuranceCompaniesService } from 'services/api';
 
 /**
  * Hook for managing paginated insurance companies list
@@ -22,7 +16,7 @@ export const useInsuranceCompaniesList = (initialParams = { page: 1, size: 10 })
     try {
       setLoading(true);
       setError(null);
-      const result = await getInsuranceCompanies(params);
+      const result = await insuranceCompaniesService.getAll(params);
       setData(result);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch insurance companies');
@@ -61,7 +55,7 @@ export const useInsuranceCompanyDetails = (id) => {
     try {
       setLoading(true);
       setError(null);
-      const result = await getInsuranceCompanyById(id);
+      const result = await insuranceCompaniesService.getById(id);
       setInsuranceCompany(result);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch insurance company details');
@@ -95,7 +89,7 @@ export const useCreateInsuranceCompany = () => {
     try {
       setCreating(true);
       setError(null);
-      const result = await createInsuranceCompany(data);
+      const result = await insuranceCompaniesService.create(data);
       return result;
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Failed to create insurance company';
@@ -121,7 +115,7 @@ export const useUpdateInsuranceCompany = () => {
     try {
       setUpdating(true);
       setError(null);
-      const result = await updateInsuranceCompany(id, data);
+      const result = await insuranceCompaniesService.update(id, data);
       return result;
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Failed to update insurance company';
@@ -147,7 +141,7 @@ export const useDeleteInsuranceCompany = () => {
     try {
       setDeleting(true);
       setError(null);
-      await deleteInsuranceCompany(id);
+      await insuranceCompaniesService.remove(id);
       return true;
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Failed to delete insurance company';

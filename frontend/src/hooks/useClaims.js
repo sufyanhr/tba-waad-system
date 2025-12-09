@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getClaims, getClaimById, createClaim, updateClaim, deleteClaim } from 'services/claims.service';
+import { claimsService } from 'services/api';
 
 export const useClaimsList = (initialParams = { page: 0, size: 10 }) => {
   const [data, setData] = useState(null);
@@ -11,7 +11,7 @@ export const useClaimsList = (initialParams = { page: 0, size: 10 }) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getClaims(params);
+      const result = await claimsService.getAll(params);
       setData(result);
     } catch (err) {
       setError(err.message || 'فشل تحميل المطالبات');
@@ -44,7 +44,7 @@ export const useClaimDetails = (id) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getClaimById(id);
+      const result = await claimsService.getById(id);
       setClaim(result);
     } catch (err) {
       setError(err.message || 'فشل تحميل تفاصيل المطالبة');
@@ -73,7 +73,7 @@ export const useCreateClaim = () => {
     setCreating(true);
     setError(null);
     try {
-      const result = await createClaim(data);
+      const result = await claimsService.create(data);
       return { success: true, data: result };
     } catch (err) {
       const errorMsg = err.message || 'فشل إنشاء المطالبة';
@@ -95,7 +95,7 @@ export const useUpdateClaim = () => {
     setUpdating(true);
     setError(null);
     try {
-      const result = await updateClaim(id, data);
+      const result = await claimsService.update(id, data);
       return { success: true, data: result };
     } catch (err) {
       const errorMsg = err.message || 'فشل تحديث المطالبة';
@@ -117,7 +117,7 @@ export const useDeleteClaim = () => {
     setDeleting(true);
     setError(null);
     try {
-      await deleteClaim(id);
+      await claimsService.remove(id);
       return { success: true };
     } catch (err) {
       const errorMsg = err.message || 'فشل حذف المطالبة';
@@ -130,3 +130,4 @@ export const useDeleteClaim = () => {
 
   return { remove, deleting, error };
 };
+

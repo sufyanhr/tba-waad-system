@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getProviders, getProviderById, createProvider, updateProvider, deleteProvider } from 'services/providers.service';
+import { providersService } from 'services/api';
 
 export const useProvidersList = (initialParams = { page: 0, size: 10 }) => {
   const [data, setData] = useState(null);

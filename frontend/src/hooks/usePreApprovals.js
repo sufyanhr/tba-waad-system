@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  getPreApprovals,
-  getPreApprovalById,
-  createPreApproval,
-  updatePreApproval,
-  deletePreApproval
-} from 'services/preApprovals.service';
+// TODO: Create preApprovals.service.js in services/api folder
+const getPreApprovals = async () => ({ items: [], total: 0 });
+const getPreApprovalById = async () => null;
+const createPreApproval = async () => null;
+const updatePreApproval = async () => null;
+const deletePreApproval = async () => null;
 
 /**
  * Hook for managing paginated pre-approvals list

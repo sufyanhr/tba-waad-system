@@ -1,12 +1,12 @@
 package com.waad.tba.modules.medicalservice;
 
+import java.math.BigDecimal;
+
 import com.waad.tba.modules.medicalcategory.MedicalCategory;
 import com.waad.tba.modules.medicalservice.dto.MedicalServiceCreateDto;
 import com.waad.tba.modules.medicalservice.dto.MedicalServiceSelectorDto;
 import com.waad.tba.modules.medicalservice.dto.MedicalServiceUpdateDto;
 import com.waad.tba.modules.medicalservice.dto.MedicalServiceViewDto;
-
-import java.math.BigDecimal;
 
 /**
  * Mapper for MedicalService Entity
