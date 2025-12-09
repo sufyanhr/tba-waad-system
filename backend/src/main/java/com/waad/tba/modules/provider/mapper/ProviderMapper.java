@@ -102,7 +102,7 @@ public class ProviderMapper {
         
         return ProviderSelectorDto.builder()
                 .id(provider.getId())
-                .licenseNumber(provider.getLicenseNumber())
+                .code(provider.getLicenseNumber())
                 .nameAr(provider.getNameArabic())
                 .nameEn(provider.getNameEnglish())
                 .build();

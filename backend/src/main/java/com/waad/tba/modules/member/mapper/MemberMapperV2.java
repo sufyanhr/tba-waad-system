@@ -153,8 +153,8 @@ public class MemberMapperV2 {
         return MemberSelectorDto.builder()
                 .id(entity.getId())
                 .cardNumber(entity.getCardNumber())
-                .nameAr(entity.getFullNameArabic())
-                .nameEn(entity.getFullNameEnglish())
+                .fullNameAr(entity.getFullNameArabic())
+                .fullName(entity.getFullNameArabic())
                 .build();
     }
 
