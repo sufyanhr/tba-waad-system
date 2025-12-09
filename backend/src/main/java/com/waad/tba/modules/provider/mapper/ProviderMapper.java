@@ -1,6 +1,7 @@
 package com.waad.tba.modules.provider.mapper;
 
 import com.waad.tba.modules.provider.dto.ProviderCreateDto;
+import com.waad.tba.modules.provider.dto.ProviderSelectorDto;
 import com.waad.tba.modules.provider.dto.ProviderUpdateDto;
 import com.waad.tba.modules.provider.dto.ProviderViewDto;
 import com.waad.tba.modules.provider.entity.Provider;
@@ -93,6 +94,17 @@ public class ProviderMapper {
                 .defaultDiscountRate(provider.getDefaultDiscountRate())
                 .createdAt(provider.getCreatedAt())
                 .updatedAt(provider.getUpdatedAt())
+                .build();
+    }
+
+    public ProviderSelectorDto toSelectorDto(Provider provider) {
+        if (provider == null) return null;
+        
+        return ProviderSelectorDto.builder()
+                .id(provider.getId())
+                .licenseNumber(provider.getLicenseNumber())
+                .nameAr(provider.getNameArabic())
+                .nameEn(provider.getNameEnglish())
                 .build();
     }
 

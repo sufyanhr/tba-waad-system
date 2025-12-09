@@ -1,6 +1,7 @@
 package com.waad.tba.modules.provider.service;
 
 import com.waad.tba.modules.provider.dto.ProviderCreateDto;
+import com.waad.tba.modules.provider.dto.ProviderSelectorDto;
 import com.waad.tba.modules.provider.dto.ProviderUpdateDto;
 import com.waad.tba.modules.provider.dto.ProviderViewDto;
 import com.waad.tba.modules.provider.entity.Provider;
@@ -24,6 +25,18 @@ public class ProviderService {
 
     private final ProviderRepository providerRepository;
     private final ProviderMapper providerMapper;
+
+    public List<ProviderSelectorDto> getSelectorOptions() {
+        return providerRepository.findAllActive().stream()
+                .map(providerMapper::toSelectorDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProviderViewDto> search(String query) {
+        return providerRepository.search(query).stream()
+                .map(providerMapper::toViewDto)
+                .collect(Collectors.toList());
+    }
 
     public ProviderViewDto createProvider(ProviderCreateDto dto) {
         if (providerRepository.existsByLicenseNumber(dto.getLicenseNumber())) {

@@ -27,6 +27,12 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
     @Query("SELECT COUNT(p) FROM Provider p WHERE p.active = true")
     long countActive();
 
+    @Query("SELECT p FROM Provider p " +
+           "WHERE LOWER(p.nameArabic) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(p.nameEnglish) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(p.licenseNumber) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<Provider> search(@Param("query") String query);
+
     boolean existsByNameArabic(String nameArabic);
 
     boolean existsByNameEnglish(String nameEnglish);

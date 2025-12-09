@@ -29,9 +29,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     
     List<Member> findByStatus(Member.MemberStatus status);
     
-    // Note: 'relation' field removed from Member entity (moved to FamilyMember)
-    // All members are now considered "main" members, family members are in separate table
-    
     @Query("SELECT m FROM Member m WHERE m.employer.id = :employerId AND m.status = :status")
     List<Member> findByEmployerIdAndStatus(@Param("employerId") Long employerId, 
                                            @Param("status") Member.MemberStatus status);
@@ -41,7 +38,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByCivilIdAndIdNot(String civilId, Long id);
     boolean existsByCardNumberAndIdNot(String cardNumber, Long id);
     
-    // Paginated queries for employer filtering
     Page<Member> findByEmployerId(Long employerId, Pageable pageable);
     
     @Query("SELECT m FROM Member m WHERE m.employer.id = :employerId AND (" +
@@ -51,14 +47,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
            "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Member> searchByEmployer(@Param("employerId") Long employerId, @Param("search") String search, Pageable pageable);
     
-    // REMOVED: Company filtering - employer no longer has company relation
-    // @Query("SELECT m FROM Member m WHERE m.employer.company.id = :companyId")
-    // Page<Member> findByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
-    
-    // REMOVED: Company filtering with search
-    // @Query("SELECT m FROM Member m WHERE m.employer.company.id = :companyId AND (...)")
-    // Page<Member> searchPagedByCompany(@Param("companyId") Long companyId, @Param("search") String search, Pageable pageable);
-    
     @Query("SELECT m FROM Member m WHERE " +
            "LOWER(m.fullNameEnglish) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(m.fullNameArabic) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
@@ -66,7 +54,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
            "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<Member> searchPaged(@Param("search") String search, Pageable pageable);
     
-    // Insurance Company filtering (for INSURANCE_ADMIN)
+    @Query("SELECT m FROM Member m WHERE " +
+           "LOWER(m.fullNameEnglish) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(m.fullNameArabic) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(m.civilId) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(m.cardNumber) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<Member> search(@Param("query") String query);
+    
     @Query("SELECT m FROM Member m WHERE m.insuranceCompany.id = :companyId")
     Page<Member> findByInsuranceCompanyIdPaged(@Param("companyId") Long companyId, Pageable pageable);
     

@@ -28,6 +28,14 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     Page<Claim> searchPaged(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.member m " +
+           "WHERE c.active = true " +
+           "AND (LOWER(c.providerName) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(c.diagnosis) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(m.fullNameArabic) LIKE LOWER(CONCAT('%', :query, '%')))")
+    List<Claim> search(@Param("query") String query);
+
+    @Query("SELECT c FROM Claim c " +
            "LEFT JOIN FETCH c.member " +
            "LEFT JOIN FETCH c.insuranceCompany " +
            "LEFT JOIN FETCH c.insurancePolicy " +

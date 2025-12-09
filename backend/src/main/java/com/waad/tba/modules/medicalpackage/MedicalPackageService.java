@@ -1,14 +1,18 @@
 package com.waad.tba.modules.medicalpackage;
 
+import com.waad.tba.modules.medicalpackage.dto.MedicalPackageSelectorDto;
 import com.waad.tba.modules.medicalservice.MedicalService;
 import com.waad.tba.modules.medicalservice.MedicalServiceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +20,20 @@ public class MedicalPackageService {
 
     private final MedicalPackageRepository packageRepository;
     private final MedicalServiceRepository serviceRepository;
+
+    public List<MedicalPackageSelectorDto> getSelectorOptions() {
+        return packageRepository.findByActive(true).stream()
+                .map(MedicalPackageMapper::toSelectorDto)
+                .collect(Collectors.toList());
+    }
+
+    public Page<MedicalPackage> findAllPaginated(Pageable pageable, String search) {
+        return packageRepository.findAllWithSearch(search, pageable);
+    }
+
+    public List<MedicalPackage> search(String query) {
+        return packageRepository.search(query);
+    }
 
     public List<MedicalPackage> findAll() {
         return packageRepository.findAllWithServices();
@@ -41,7 +59,6 @@ public class MedicalPackageService {
 
     @Transactional
     public MedicalPackage create(MedicalPackageDTO dto) {
-        // Check if code already exists
         if (packageRepository.existsByCode(dto.getCode())) {
             throw new RuntimeException("Medical package with code " + dto.getCode() + " already exists");
         }
@@ -55,7 +72,6 @@ public class MedicalPackageService {
             .active(dto.getActive() != null ? dto.getActive() : true)
             .build();
 
-        // Add services if provided
         if (dto.getServiceIds() != null && !dto.getServiceIds().isEmpty()) {
             Set<MedicalService> services = new HashSet<>();
             for (Long serviceId : dto.getServiceIds()) {
@@ -73,7 +89,6 @@ public class MedicalPackageService {
     public MedicalPackage update(Long id, MedicalPackageDTO dto) {
         MedicalPackage existingPackage = findById(id);
 
-        // Check if code is being changed and if new code already exists
         if (!existingPackage.getCode().equals(dto.getCode()) && 
             packageRepository.existsByCode(dto.getCode())) {
             throw new RuntimeException("Medical package with code " + dto.getCode() + " already exists");
@@ -86,7 +101,6 @@ public class MedicalPackageService {
         existingPackage.setTotalCoverageLimit(dto.getTotalCoverageLimit());
         existingPackage.setActive(dto.getActive() != null ? dto.getActive() : true);
 
-        // Update services
         if (dto.getServiceIds() != null) {
             Set<MedicalService> services = new HashSet<>();
             for (Long serviceId : dto.getServiceIds()) {

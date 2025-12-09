@@ -29,6 +29,12 @@ public class ClaimService {
     private final ClaimRepository claimRepository;
     private final ClaimMapper claimMapper;
 
+    public List<ClaimViewDto> search(String query) {
+        return claimRepository.search(query).stream()
+                .map(claimMapper::toViewDto)
+                .collect(Collectors.toList());
+    }
+
     public ClaimViewDto createClaim(ClaimCreateDto dto) {
         validateCreateDto(dto);
         Claim claim = claimMapper.toEntity(dto);

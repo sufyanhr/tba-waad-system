@@ -3,6 +3,7 @@ package com.waad.tba.modules.reviewer.service;
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.reviewer.dto.ReviewerCompanyCreateDto;
 import com.waad.tba.modules.reviewer.dto.ReviewerCompanyResponseDto;
+import com.waad.tba.modules.reviewer.dto.ReviewerCompanySelectorDto;
 import com.waad.tba.modules.reviewer.entity.ReviewerCompany;
 import com.waad.tba.modules.reviewer.mapper.ReviewerCompanyMapper;
 import com.waad.tba.modules.reviewer.repository.ReviewerCompanyRepository;
@@ -23,6 +24,13 @@ public class ReviewerCompanyService {
 
     private final ReviewerCompanyRepository repository;
     private final ReviewerCompanyMapper mapper;
+
+    public List<ReviewerCompanySelectorDto> getSelectorOptions() {
+        return repository.findAll().stream()
+                .filter(ReviewerCompany::getActive)
+                .map(mapper::toSelectorDto)
+                .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     public List<ReviewerCompanyResponseDto> findAll() {

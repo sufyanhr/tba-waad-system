@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanySelectorDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
 import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 
@@ -24,6 +25,17 @@ public class InsuranceCompanyMapper {
                 .active(entity.getActive())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
+    public InsuranceCompanySelectorDto toSelectorDto(InsuranceCompany entity) {
+        if (entity == null) return null;
+        
+        return InsuranceCompanySelectorDto.builder()
+                .id(entity.getId())
+                .code(entity.getCode())
+                .nameAr(entity.getName())
+                .nameEn(entity.getName())
                 .build();
     }
 

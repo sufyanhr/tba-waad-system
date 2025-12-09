@@ -9,6 +9,7 @@ import com.waad.tba.modules.employer.entity.Employer;
 import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import com.waad.tba.modules.member.dto.FamilyMemberDto;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
+import com.waad.tba.modules.member.dto.MemberSelectorDto;
 import com.waad.tba.modules.member.dto.MemberUpdateDto;
 import com.waad.tba.modules.member.dto.MemberViewDto;
 import com.waad.tba.modules.member.entity.FamilyMember;
@@ -17,9 +18,6 @@ import com.waad.tba.modules.member.entity.Member;
 @Component
 public class MemberMapperV2 {
 
-    /* ---------------------------------------------------------
-     * Convert MemberCreateDto → Member entity
-     * --------------------------------------------------------- */
     public Member toEntity(MemberCreateDto dto) {
         if (dto == null) return null;
 
@@ -48,14 +46,12 @@ public class MemberMapperV2 {
                 .active(dto.getActive() != null && dto.getActive())
                 .build();
 
-        // Employer relation
         if (dto.getEmployerId() != null) {
             Employer employer = new Employer();
             employer.setId(dto.getEmployerId());
             entity.setEmployer(employer);
         }
 
-        // Insurance Company relation
         if (dto.getInsuranceCompanyId() != null) {
             InsuranceCompany ic = new InsuranceCompany();
             ic.setId(dto.getInsuranceCompanyId());
@@ -65,9 +61,6 @@ public class MemberMapperV2 {
         return entity;
     }
 
-    /* ---------------------------------------------------------
-     * Update Member entity
-     * --------------------------------------------------------- */
     public void updateEntityFromDto(Member entity, MemberUpdateDto dto) {
         if (entity == null || dto == null) return;
 
@@ -92,13 +85,8 @@ public class MemberMapperV2 {
         if (dto.getCardStatus() != null) entity.setCardStatus(dto.getCardStatus());
         if (dto.getNotes() != null) entity.setNotes(dto.getNotes());
         if (dto.getActive() != null) entity.setActive(dto.getActive());
-
-        // Insurance Company relation handled in service
     }
 
-    /* ---------------------------------------------------------
-     * Convert Member → MemberViewDto
-     * --------------------------------------------------------- */
     public MemberViewDto toViewDto(Member entity, List<FamilyMember> familyMembers) {
         if (entity == null) return null;
 
@@ -136,19 +124,16 @@ public class MemberMapperV2 {
                 .updatedAt(entity.getUpdatedAt())
                 .build();
 
-        // Employer info
         if (entity.getEmployer() != null) {
             dto.setEmployerId(entity.getEmployer().getId());
             dto.setEmployerName(entity.getEmployer().getNameAr());
         }
 
-        // Insurance Company info
         if (entity.getInsuranceCompany() != null) {
             dto.setInsuranceCompanyId(entity.getInsuranceCompany().getId());
             dto.setInsuranceCompanyName(entity.getInsuranceCompany().getName());
         }
 
-        // Family members
         if (familyMembers != null && !familyMembers.isEmpty()) {
             dto.setFamilyMembers(familyMembers.stream()
                     .map(this::toFamilyMemberDto)
@@ -162,9 +147,17 @@ public class MemberMapperV2 {
         return dto;
     }
 
-    /* ---------------------------------------------------------
-     * Family Member Mapping
-     * --------------------------------------------------------- */
+    public MemberSelectorDto toSelectorDto(Member entity) {
+        if (entity == null) return null;
+        
+        return MemberSelectorDto.builder()
+                .id(entity.getId())
+                .cardNumber(entity.getCardNumber())
+                .nameAr(entity.getFullNameArabic())
+                .nameEn(entity.getFullNameEnglish())
+                .build();
+    }
+
     public FamilyMemberDto toFamilyMemberDto(FamilyMember fm) {
         if (fm == null) return null;
 

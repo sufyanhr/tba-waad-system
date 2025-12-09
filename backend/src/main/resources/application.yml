@@ -1,11 +1,11 @@
 spring:
   application:
     name: tba-waad-system-backend
-    mail:
+  mail:
     host: smtp.hostinger.com
     port: 587
-    username: support@alwahacare.com
-    password: 6L8~nz@Go
+    username: ${EMAIL_USERNAME:support@alwahacare.com}
+    password: ${EMAIL_PASSWORD:}
     protocol: smtp
     properties:
       mail:
@@ -14,11 +14,11 @@ spring:
           starttls:
             enable: true
             required: true
-        debug: false
+      debug: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/tba_waad_system
-    username: postgres
-    password: 12345
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tba_waad_system}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345}
     driver-class-name: org.postgresql.Driver
     hikari:
       initialization-fail-timeout: -1

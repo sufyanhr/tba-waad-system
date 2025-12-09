@@ -4,6 +4,7 @@ import com.waad.tba.common.dto.ApiResponse;
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.modules.reviewer.dto.ReviewerCompanyCreateDto;
 import com.waad.tba.modules.reviewer.dto.ReviewerCompanyResponseDto;
+import com.waad.tba.modules.reviewer.dto.ReviewerCompanySelectorDto;
 import com.waad.tba.modules.reviewer.service.ReviewerCompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +28,18 @@ import java.util.List;
 public class ReviewerCompanyController {
 
     private final ReviewerCompanyService service;
+
+    @GetMapping("/selector")
+    @PreAuthorize("hasAuthority('VIEW_REVIEWER')")
+    @Operation(summary = "Get reviewer company selector options", description = "Returns active reviewer companies for dropdown/selector")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Reviewer company options retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=com.waad.tba.common.error.ApiError.class)))
+    })
+    public ResponseEntity<ApiResponse<List<ReviewerCompanySelectorDto>>> getSelectorOptions() {
+        List<ReviewerCompanySelectorDto> options = service.getSelectorOptions();
+        return ResponseEntity.ok(ApiResponse.success(options));
+    }
 
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('VIEW_REVIEWER')")

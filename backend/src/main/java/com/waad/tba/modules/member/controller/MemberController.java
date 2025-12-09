@@ -1,5 +1,7 @@
 package com.waad.tba.modules.member.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.waad.tba.common.dto.ApiResponse;
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
+import com.waad.tba.modules.member.dto.MemberSelectorDto;
 import com.waad.tba.modules.member.dto.MemberUpdateDto;
 import com.waad.tba.modules.member.dto.MemberViewDto;
 import com.waad.tba.modules.member.service.MemberService;
@@ -28,6 +31,14 @@ import lombok.RequiredArgsConstructor;
 public class MemberController {
 
     private final MemberService memberService;
+
+    @GetMapping("/selector")
+    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
+    @Operation(summary = "Get member selector options", description = "Returns active members for dropdown/selector")
+    public ResponseEntity<ApiResponse<List<MemberSelectorDto>>> getSelectorOptions() {
+        List<MemberSelectorDto> options = memberService.getSelectorOptions();
+        return ResponseEntity.ok(ApiResponse.success(options));
+    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGE_MEMBERS')")
@@ -61,22 +72,22 @@ public class MemberController {
     @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
     @Operation(summary = "List members with pagination", description = "Returns paginated list of members")
     public ResponseEntity<ApiResponse<PaginationResponse<MemberViewDto>>> list(
-            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page number (1-based)") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort by field") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Sort direction (asc/desc)") @RequestParam(defaultValue = "desc") String sortDir,
             @Parameter(description = "Search query") @RequestParam(required = false) String search) {
         
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
-        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        PageRequest pageRequest = PageRequest.of(Math.max(0, page - 1), size, sort);
         
         Page<MemberViewDto> pageResult = memberService.listMembers(pageRequest, search);
         
         PaginationResponse<MemberViewDto> response = PaginationResponse.<MemberViewDto>builder()
                 .items(pageResult.getContent())
                 .total(pageResult.getTotalElements())
-                .page(pageResult.getNumber())
-                .size(pageResult.getSize())
+                .page(page)
+                .size(size)
                 .build();
         
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -89,5 +100,21 @@ public class MemberController {
             @Parameter(description = "Member ID", required = true) @PathVariable Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok(ApiResponse.success("Member deleted successfully", null));
+    }
+
+    @GetMapping("/count")
+    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
+    @Operation(summary = "Count members", description = "Returns total number of members")
+    public ResponseEntity<ApiResponse<Long>> count() {
+        long total = memberService.count();
+        return ResponseEntity.ok(ApiResponse.success(total));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAuthority('VIEW_MEMBERS') or hasAuthority('MANAGE_MEMBERS')")
+    @Operation(summary = "Search members", description = "Search members by query")
+    public ResponseEntity<ApiResponse<List<MemberViewDto>>> search(@RequestParam String query) {
+        List<MemberViewDto> results = memberService.search(query);
+        return ResponseEntity.ok(ApiResponse.success(results));
     }
 }

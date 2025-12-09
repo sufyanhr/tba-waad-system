@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanySelectorDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
 import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import com.waad.tba.modules.insurance.mapper.InsuranceCompanyMapper;
@@ -26,6 +27,13 @@ public class InsuranceCompanyService {
 
     private final InsuranceCompanyRepository insuranceCompanyRepository;
     private final InsuranceCompanyMapper insuranceCompanyMapper;
+
+    public List<InsuranceCompanySelectorDto> getSelectorOptions() {
+        return insuranceCompanyRepository.findAll().stream()
+                .filter(InsuranceCompany::getActive)
+                .map(insuranceCompanyMapper::toSelectorDto)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public InsuranceCompanyResponseDto create(InsuranceCompanyCreateDto dto) {

@@ -1,15 +1,19 @@
 package com.waad.tba.modules.medicalcategory;
 
+import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.modules.medicalcategory.dto.MedicalCategoryCreateDto;
+import com.waad.tba.modules.medicalcategory.dto.MedicalCategorySelectorDto;
+import com.waad.tba.modules.medicalcategory.dto.MedicalCategoryUpdateDto;
+import com.waad.tba.modules.medicalcategory.dto.MedicalCategoryViewDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Medical Category Service
- * Business logic for managing medical categories
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -17,85 +21,74 @@ public class MedicalCategoryService {
 
     private final MedicalCategoryRepository repository;
 
-    /**
-     * Get all medical categories
-     * @return List of all categories
-     */
-    public List<MedicalCategory> findAll() {
-        return repository.findAll();
+    public List<MedicalCategorySelectorDto> getSelectorOptions() {
+        return repository.findAll().stream()
+                .map(MedicalCategoryMapper::toSelectorDto)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Get category by ID
-     * @param id Category ID
-     * @return MedicalCategory
-     * @throws RuntimeException if not found
-     */
-    public MedicalCategory findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medical category not found with id: " + id));
+    public Page<MedicalCategoryViewDto> findAllPaginated(Pageable pageable, String search) {
+        Page<MedicalCategory> page = repository.findAllWithSearch(search, pageable);
+        return page.map(MedicalCategoryMapper::toViewDto);
     }
 
-    /**
-     * Get category by code
-     * @param code Category code
-     * @return MedicalCategory
-     * @throws RuntimeException if not found
-     */
-    public MedicalCategory findByCode(String code) {
-        return repository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Medical category not found with code: " + code));
+    public MedicalCategoryViewDto findById(Long id) {
+        MedicalCategory entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Category not found with id: " + id));
+        return MedicalCategoryMapper.toViewDto(entity);
     }
 
-    /**
-     * Create new medical category
-     * @param category Category to create
-     * @return Created category
-     * @throws RuntimeException if code already exists
-     */
+    public MedicalCategoryViewDto findByCode(String code) {
+        MedicalCategory entity = repository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Category not found with code: " + code));
+        return MedicalCategoryMapper.toViewDto(entity);
+    }
+
     @Transactional
-    public MedicalCategory create(MedicalCategory category) {
-        if (repository.existsByCode(category.getCode())) {
-            throw new RuntimeException("Medical category with code " + category.getCode() + " already exists");
+    public MedicalCategoryViewDto create(MedicalCategoryCreateDto dto) {
+        if (repository.existsByCode(dto.getCode())) {
+            throw new IllegalArgumentException("Medical category with code " + dto.getCode() + " already exists");
         }
-        return repository.save(category);
+        
+        MedicalCategory entity = MedicalCategoryMapper.toEntity(dto);
+        MedicalCategory saved = repository.save(entity);
+        return MedicalCategoryMapper.toViewDto(saved);
     }
 
-    /**
-     * Update existing medical category
-     * @param id Category ID
-     * @param updatedCategory Updated category data
-     * @return Updated category
-     * @throws RuntimeException if not found
-     */
     @Transactional
-    public MedicalCategory update(Long id, MedicalCategory updatedCategory) {
-        MedicalCategory existing = findById(id);
+    public MedicalCategoryViewDto update(Long id, MedicalCategoryUpdateDto dto) {
+        MedicalCategory existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Category not found with id: " + id));
         
-        // Update fields
-        existing.setCode(updatedCategory.getCode());
-        existing.setNameAr(updatedCategory.getNameAr());
-        existing.setNameEn(updatedCategory.getNameEn());
-        existing.setDescription(updatedCategory.getDescription());
-        
-        return repository.save(existing);
+        MedicalCategoryMapper.updateEntity(existing, dto);
+        MedicalCategory updated = repository.save(existing);
+        return MedicalCategoryMapper.toViewDto(updated);
     }
 
-    /**
-     * Delete medical category
-     * @param id Category ID
-     * @throws RuntimeException if not found or has associated services
-     */
     @Transactional
     public void delete(Long id) {
-        MedicalCategory category = findById(id);
+        MedicalCategory category = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Category not found with id: " + id));
         
-        // Check if category has associated medical services
         if (!category.getMedicalServices().isEmpty()) {
-            throw new RuntimeException("Cannot delete category with associated medical services. " +
+            throw new IllegalStateException("Cannot delete category with associated medical services. " +
                     "Please reassign or delete the services first.");
         }
         
         repository.deleteById(id);
+    }
+
+    public long count() {
+        return repository.count();
+    }
+
+    public List<MedicalCategoryViewDto> search(String query) {
+        return repository.search(query).stream()
+                .map(MedicalCategoryMapper::toViewDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<MedicalCategory> findAll() {
+        return repository.findAll();
     }
 }

@@ -23,6 +23,7 @@ import com.waad.tba.modules.claim.dto.ClaimUpdateDto;
 import com.waad.tba.modules.claim.dto.ClaimViewDto;
 import com.waad.tba.modules.claim.service.ClaimService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -34,7 +35,7 @@ public class ClaimController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
-    public ResponseEntity<ApiResponse<ClaimViewDto>> createClaim(@RequestBody ClaimCreateDto dto) {
+    public ResponseEntity<ApiResponse<ClaimViewDto>> createClaim(@Valid @RequestBody ClaimCreateDto dto) {
         ClaimViewDto claim = claimService.createClaim(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Claim created successfully", claim));
@@ -44,7 +45,7 @@ public class ClaimController {
     @PreAuthorize("hasAuthority('MANAGE_CLAIMS')")
     public ResponseEntity<ApiResponse<ClaimViewDto>> updateClaim(
             @PathVariable Long id,
-            @RequestBody ClaimUpdateDto dto) {
+            @Valid @RequestBody ClaimUpdateDto dto) {
         ClaimViewDto claim = claimService.updateClaim(id, dto);
         return ResponseEntity.ok(ApiResponse.success("Claim updated successfully", claim));
     }
@@ -58,11 +59,11 @@ public class ClaimController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
-    public ResponseEntity<PaginationResponse<ClaimViewDto>> listClaims(
+    public ResponseEntity<ApiResponse<PaginationResponse<ClaimViewDto>>> listClaims(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search) {
-        Page<ClaimViewDto> claimsPage = claimService.listClaims(page, size, search);
+        Page<ClaimViewDto> claimsPage = claimService.listClaims(Math.max(0, page - 1), size, search);
         
         PaginationResponse<ClaimViewDto> response = PaginationResponse.<ClaimViewDto>builder()
                 .items(claimsPage.getContent())
@@ -71,7 +72,7 @@ public class ClaimController {
                 .size(size)
                 .build();
         
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/{id}")
@@ -86,6 +87,13 @@ public class ClaimController {
     public ResponseEntity<ApiResponse<Long>> countClaims() {
         long count = claimService.countClaims();
         return ResponseEntity.ok(ApiResponse.success("Claims counted successfully", count));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAuthority('VIEW_CLAIMS')")
+    public ResponseEntity<ApiResponse<List<ClaimViewDto>>> search(@RequestParam String query) {
+        List<ClaimViewDto> results = claimService.search(query);
+        return ResponseEntity.ok(ApiResponse.success(results));
     }
 
     @GetMapping("/member/{memberId}")

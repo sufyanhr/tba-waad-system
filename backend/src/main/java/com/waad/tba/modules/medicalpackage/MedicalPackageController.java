@@ -2,6 +2,9 @@ package com.waad.tba.modules.medicalpackage;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,36 +15,62 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.waad.tba.common.dto.ApiResponse;
+import com.waad.tba.common.dto.PaginationResponse;
+import com.waad.tba.modules.medicalpackage.dto.MedicalPackageSelectorDto;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/medical-packages")
 @RequiredArgsConstructor
+@Tag(name = "Medical Packages", description = "APIs for managing medical packages")
 public class MedicalPackageController {
 
     private final MedicalPackageService service;
 
+    @GetMapping("/selector")
+    @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_READ')")
+    @Operation(summary = "Get medical package selector options", description = "Returns active medical packages for dropdown/selector")
+    public ResponseEntity<ApiResponse<List<MedicalPackageSelectorDto>>> getSelectorOptions() {
+        List<MedicalPackageSelectorDto> options = service.getSelectorOptions();
+        return ResponseEntity.ok(ApiResponse.success(options));
+    }
+
     /**
      * GET /api/medical-packages
-     * Get all medical packages
+     * Get all medical packages with pagination
      */
     @GetMapping
     @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_READ')")
-    public ResponseEntity<ApiResponse<List<MedicalPackage>>> getAll() {
-        try {
-            List<MedicalPackage> packages = service.findAll();
-            return ResponseEntity.ok(
-                ApiResponse.success("Medical packages retrieved successfully", packages)
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.error("Failed to retrieve medical packages: " + e.getMessage())
-            );
-        }
+    @Operation(summary = "List medical packages with pagination", description = "Returns paginated list of medical packages with optional search")
+    public ResponseEntity<ApiResponse<PaginationResponse<MedicalPackage>>> list(
+            @Parameter(description = "Page number (1-based)") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Search query") @RequestParam(required = false) String search,
+            @Parameter(description = "Sort by field") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDir) {
+        
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+        PageRequest pageRequest = PageRequest.of(Math.max(0, page - 1), size, sort);
+        
+        Page<MedicalPackage> pageResult = service.findAllPaginated(pageRequest, search);
+        
+        PaginationResponse<MedicalPackage> response = PaginationResponse.<MedicalPackage>builder()
+                .items(pageResult.getContent())
+                .total(pageResult.getTotalElements())
+                .page(page)
+                .size(size)
+                .build();
+        
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -107,17 +136,12 @@ public class MedicalPackageController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_CREATE')")
-    public ResponseEntity<ApiResponse<MedicalPackage>> create(@RequestBody MedicalPackageDTO dto) {
-        try {
-            MedicalPackage created = service.create(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.success("Medical package created successfully", created)
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.error("Failed to create medical package: " + e.getMessage())
-            );
-        }
+    @Operation(summary = "Create medical package")
+    public ResponseEntity<ApiResponse<MedicalPackage>> create(@Valid @RequestBody MedicalPackageDTO dto) {
+        MedicalPackage created = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            ApiResponse.success("Medical package created successfully", created)
+        );
     }
 
     /**
@@ -126,17 +150,12 @@ public class MedicalPackageController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_UPDATE')")
-    public ResponseEntity<ApiResponse<MedicalPackage>> update(@PathVariable Long id, @RequestBody MedicalPackageDTO dto) {
-        try {
-            MedicalPackage updated = service.update(id, dto);
-            return ResponseEntity.ok(
-                ApiResponse.success("Medical package updated successfully", updated)
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.error("Failed to update medical package: " + e.getMessage())
-            );
-        }
+    @Operation(summary = "Update medical package")
+    public ResponseEntity<ApiResponse<MedicalPackage>> update(@PathVariable Long id, @Valid @RequestBody MedicalPackageDTO dto) {
+        MedicalPackage updated = service.update(id, dto);
+        return ResponseEntity.ok(
+            ApiResponse.success("Medical package updated successfully", updated)
+        );
     }
 
     /**
@@ -145,17 +164,12 @@ public class MedicalPackageController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_DELETE')")
+    @Operation(summary = "Delete medical package")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-        try {
-            service.delete(id);
-            return ResponseEntity.ok(
-                ApiResponse.success("Medical package deleted successfully", null)
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.error("Failed to delete medical package: " + e.getMessage())
-            );
-        }
+        service.delete(id);
+        return ResponseEntity.ok(
+            ApiResponse.success("Medical package deleted successfully", null)
+        );
     }
 
     /**
@@ -164,16 +178,19 @@ public class MedicalPackageController {
      */
     @GetMapping("/count")
     @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_READ')")
+    @Operation(summary = "Count medical packages")
     public ResponseEntity<ApiResponse<Long>> count() {
-        try {
-            Long count = service.count();
-            return ResponseEntity.ok(
-                ApiResponse.success("Package count retrieved successfully", count)
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.error("Failed to retrieve package count: " + e.getMessage())
-            );
-        }
+        Long count = service.count();
+        return ResponseEntity.ok(
+            ApiResponse.success("Package count retrieved successfully", count)
+        );
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAuthority('MEDICAL_PACKAGE_READ')")
+    @Operation(summary = "Search medical packages")
+    public ResponseEntity<ApiResponse<List<MedicalPackage>>> search(@RequestParam String query) {
+        List<MedicalPackage> results = service.search(query);
+        return ResponseEntity.ok(ApiResponse.success(results));
     }
 }

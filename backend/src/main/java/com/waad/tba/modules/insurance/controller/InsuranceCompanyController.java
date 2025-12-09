@@ -21,6 +21,7 @@ import com.waad.tba.common.dto.ApiResponse;
 import com.waad.tba.common.dto.PaginationResponse;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyCreateDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyResponseDto;
+import com.waad.tba.modules.insurance.dto.InsuranceCompanySelectorDto;
 import com.waad.tba.modules.insurance.dto.InsuranceCompanyUpdateDto;
 import com.waad.tba.modules.insurance.service.InsuranceCompanyService;
 
@@ -38,6 +39,19 @@ import lombok.RequiredArgsConstructor;
 public class InsuranceCompanyController {
 
     private final InsuranceCompanyService insuranceCompanyService;
+
+    @GetMapping("/selector")
+    @PreAuthorize("hasAuthority('VIEW_INSURANCE')")
+    @Operation(summary = "Get insurance company selector options", description = "Returns active insurance companies for dropdown/selector")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Insurance company options retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=com.waad.tba.common.error.ApiError.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden", content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=com.waad.tba.common.error.ApiError.class)))
+    })
+    public ResponseEntity<ApiResponse<List<InsuranceCompanySelectorDto>>> getSelectorOptions() {
+        List<InsuranceCompanySelectorDto> options = insuranceCompanyService.getSelectorOptions();
+        return ResponseEntity.ok(ApiResponse.success(options));
+    }
 
     /**
      * @deprecated Use GET /api/insurance-companies?page=&size=&search= instead (paginated search)

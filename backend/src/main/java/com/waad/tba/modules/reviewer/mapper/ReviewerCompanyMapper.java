@@ -2,6 +2,7 @@ package com.waad.tba.modules.reviewer.mapper;
 
 import com.waad.tba.modules.reviewer.dto.ReviewerCompanyCreateDto;
 import com.waad.tba.modules.reviewer.dto.ReviewerCompanyResponseDto;
+import com.waad.tba.modules.reviewer.dto.ReviewerCompanySelectorDto;
 import com.waad.tba.modules.reviewer.entity.ReviewerCompany;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,17 @@ public class ReviewerCompanyMapper {
                 .active(entity.getActive())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
+    public ReviewerCompanySelectorDto toSelectorDto(ReviewerCompany entity) {
+        if (entity == null) return null;
+        
+        return ReviewerCompanySelectorDto.builder()
+                .id(entity.getId())
+                .code(entity.getId().toString())
+                .nameAr(entity.getName())
+                .nameEn(entity.getName())
                 .build();
     }
 

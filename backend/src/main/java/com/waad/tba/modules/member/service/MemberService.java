@@ -15,6 +15,7 @@ import com.waad.tba.modules.insurance.entity.InsuranceCompany;
 import com.waad.tba.modules.insurance.repository.InsuranceCompanyRepository;
 import com.waad.tba.modules.member.dto.FamilyMemberDto;
 import com.waad.tba.modules.member.dto.MemberCreateDto;
+import com.waad.tba.modules.member.dto.MemberSelectorDto;
 import com.waad.tba.modules.member.dto.MemberUpdateDto;
 import com.waad.tba.modules.member.dto.MemberViewDto;
 import com.waad.tba.modules.member.entity.FamilyMember;
@@ -36,32 +37,43 @@ public class MemberService {
     private final EmployerRepository employerRepo;
     private final InsuranceCompanyRepository insuranceRepo;
 
-    /* ============================================================
-     * CREATE MEMBER + FAMILY
-     * ============================================================ */
+    public List<MemberSelectorDto> getSelectorOptions() {
+        return memberRepository.findAll().stream()
+                .map(mapper::toSelectorDto)
+                .collect(Collectors.toList());
+    }
+
+    public long count() {
+        return memberRepository.count();
+    }
+
+    public List<MemberViewDto> search(String query) {
+        return memberRepository.search(query).stream()
+                .map(member -> {
+                    List<FamilyMember> family = familyRepo.findByMemberId(member.getId());
+                    return mapper.toViewDto(member, family);
+                })
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public MemberViewDto createMember(MemberCreateDto dto) {
 
-        // Validate employer
         Employer employer = employerRepo.findById(dto.getEmployerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employer not found with id: " + dto.getEmployerId()));
 
-        // Validate insurance company (optional)
         InsuranceCompany insuranceCompany = null;
         if (dto.getInsuranceCompanyId() != null) {
             insuranceCompany = insuranceRepo.findById(dto.getInsuranceCompanyId())
                     .orElseThrow(() -> new ResourceNotFoundException("Insurance company not found"));
         }
 
-        // Convert DTO → Entity
         Member member = mapper.toEntity(dto);
         member.setEmployer(employer);
         member.setInsuranceCompany(insuranceCompany);
 
-        // Save member first
         Member savedMember = memberRepository.save(member);
 
-        // Save family members
         List<FamilyMember> family = dto.getFamilyMembers() != null
                 ? dto.getFamilyMembers().stream()
                         .map(mapper::toFamilyMemberEntity)
@@ -76,19 +88,14 @@ public class MemberService {
         return mapper.toViewDto(savedMember, family);
     }
 
-    /* ============================================================
-     * UPDATE MEMBER + SYNC FAMILY MEMBERS
-     * ============================================================ */
     @Transactional
     public MemberViewDto updateMember(Long id, MemberUpdateDto dto) {
 
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found: " + id));
 
-        // Update member fields from DTO
         mapper.updateEntityFromDto(member, dto);
 
-        // Update insurance company relation if provided
         if (dto.getInsuranceCompanyId() != null) {
             InsuranceCompany insuranceCompany = insuranceRepo.findById(dto.getInsuranceCompanyId())
                     .orElseThrow(() -> new ResourceNotFoundException("Insurance company not found"));
@@ -96,10 +103,6 @@ public class MemberService {
         }
 
         memberRepository.save(member);
-
-        /* ---------------------------------------------------------
-         * SYNC FAMILY MEMBERS (add / update / delete)
-         * --------------------------------------------------------- */
 
         List<FamilyMember> existing = familyRepo.findByMemberId(member.getId());
 
@@ -110,14 +113,12 @@ public class MemberService {
                         .collect(Collectors.toList())
                 : List.of();
 
-        // Delete removed family members
         for (FamilyMember fm : existing) {
             if (!incomingIds.contains(fm.getId())) {
                 familyRepo.delete(fm);
             }
         }
 
-        // Add/update incoming
         if (dto.getFamilyMembers() != null) {
             for (FamilyMemberDto fmd : dto.getFamilyMembers()) {
                 FamilyMember fm;
@@ -132,7 +133,6 @@ public class MemberService {
                     fm.setMember(member);
                 }
 
-                // Update fields
                 FamilyMember newEntity = mapper.toFamilyMemberEntity(fmd);
                 newEntity.setId(fm.getId());
                 newEntity.setMember(member);
@@ -146,9 +146,6 @@ public class MemberService {
         return mapper.toViewDto(member, updatedFamily);
     }
 
-    /* ============================================================
-     * FIND ONE MEMBER
-     * ============================================================ */
     @Transactional(readOnly = true)
     public MemberViewDto getMember(Long id) {
 
@@ -160,9 +157,6 @@ public class MemberService {
         return mapper.toViewDto(member, family);
     }
 
-    /* ============================================================
-     * LIST MEMBERS WITH PAGINATION AND SEARCH
-     * ============================================================ */
     @Transactional(readOnly = true)
     public Page<MemberViewDto> listMembers(Pageable pageable, String search) {
         Page<Member> memberPage;
@@ -179,9 +173,6 @@ public class MemberService {
         });
     }
 
-    /* ============================================================
-     * DELETE MEMBER (Soft Delete)
-     * ============================================================ */
     @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
