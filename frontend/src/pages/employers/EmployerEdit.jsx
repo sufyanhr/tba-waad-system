@@ -1,61 +1,63 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { Box, Button, CircularProgress, FormControlLabel, Grid, MenuItem, Stack, Switch, TextField, Alert } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, Save as SaveIcon, Business as BusinessIcon } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  Grid,
+  Stack,
+  Switch,
+  TextField,
+  Divider,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import {
+  ArrowBack as ArrowBackIcon,
+  Save as SaveIcon,
+  Edit as EditIcon
+} from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
+
 import MainCard from 'components/MainCard';
 import ModernPageHeader from 'components/tba/ModernPageHeader';
-import * as employersService from 'services/employers.service';
-
-const COMPANIES = [
-  { id: 1, name: 'الشركة الليبية للأسمنت', nameEn: 'Libyan Cement Company' },
-  { id: 2, name: 'منطقة جليانة', nameEn: 'Jlyana District' },
-  { id: 3, name: 'مصلحة الجمارك', nameEn: 'Customs Authority' },
-  { id: 4, name: 'مصرف الوحدة', nameEn: 'Al-Wahda Bank' },
-  { id: 5, name: 'شركة وعد لإدارة النفقات الطبية', nameEn: 'Waad Medical Expenses Management' }
-];
+import { useEmployerDetails } from 'hooks/useEmployers';
+import { updateEmployer } from 'services/api/employers.service';
 
 const EmployerEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const intl = useIntl();
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const { data: employerData, loading: loadingEmployer, error: fetchError } = useEmployerDetails(id);
   const [employer, setEmployer] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    const loadEmployer = async () => {
-      try {
-        setLoading(true);
-        const data = await employersService.getEmployerById(id);
-        setEmployer(data);
-      } catch (err) {
-        console.error('Failed to load employer', err);
-        alert(intl.formatMessage({ id: 'common.error' }));
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadEmployer();
-  }, [id, intl]);
+    if (employerData) {
+      setEmployer(employerData);
+    }
+  }, [employerData]);
 
   const handleChange = (field) => (event) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     setEmployer((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }));
     }
   };
 
   const validate = () => {
+    if (!employer) return false;
     const newErrors = {};
-    if (!employer.companyId) newErrors.companyId = intl.formatMessage({ id: 'validation.required' });
-    if (!employer.name) newErrors.name = intl.formatMessage({ id: 'validation.required' });
-    if (!employer.companyCode) newErrors.companyCode = intl.formatMessage({ id: 'validation.required' });
-    if (employer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employer.email)) {
-      newErrors.email = intl.formatMessage({ id: 'validation.email-invalid' });
+    if (!employer.employerCode?.trim()) {
+      newErrors.employerCode = intl.formatMessage({ id: 'validation.required' }) || 'Required';
+    }
+    if (!employer.nameAr?.trim()) {
+      newErrors.nameAr = intl.formatMessage({ id: 'validation.required' }) || 'Required';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -64,54 +66,61 @@ const EmployerEdit = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validate()) {
+      enqueueSnackbar(
+        intl.formatMessage({ id: 'validation.fix-errors' }) || 'Please fix validation errors',
+        { variant: 'warning' }
+      );
+      return;
+    }
 
     try {
       setSaving(true);
-      await employersService.updateEmployer(id, employer);
-      alert('تم تحديث جهة العمل بنجاح');
+      await updateEmployer(id, employer);
+      enqueueSnackbar(
+        intl.formatMessage({ id: 'employers.updated-success' }) || 'Employer updated successfully',
+        { variant: 'success' }
+      );
       navigate('/employers');
     } catch (err) {
-      console.error('Failed to update employer', err);
-      alert('حدث خطأ أثناء تحديث جهة العمل');
+      console.error('Failed to update employer:', err);
+      enqueueSnackbar(
+        intl.formatMessage({ id: 'common.error' }) || 'Failed to update employer',
+        { variant: 'error' }
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
+  if (loadingEmployer) {
     return (
-      <>
-        <ModernPageHeader
-          title={intl.formatMessage({ id: 'employers.edit' })}
-          breadcrumbs={[
-            { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
-            { title: intl.formatMessage({ id: 'employers.edit' }) }
-          ]}
-          onBack={() => navigate('/employers')}
-        />
-        <MainCard>
-          <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
-            <CircularProgress />
-          </Stack>
-        </MainCard>
-      </>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
     );
   }
 
-  if (!employer) {
+  if (fetchError || !employer) {
     return (
       <>
         <ModernPageHeader
-          title={intl.formatMessage({ id: 'employers.edit' })}
+          title={intl.formatMessage({ id: 'employers.edit' }) || 'Edit Employer'}
+          icon={EditIcon}
           breadcrumbs={[
-            { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
-            { title: intl.formatMessage({ id: 'employers.edit' }) }
+            { label: intl.formatMessage({ id: 'employers.list' }) || 'Employers', path: '/employers' },
+            { label: intl.formatMessage({ id: 'employers.edit' }) || 'Edit', path: `/employers/edit/${id}` }
           ]}
-          onBack={() => navigate('/employers')}
         />
         <MainCard>
-          <Typography color="error">{intl.formatMessage({ id: 'employers.not-found' })}</Typography>
+          <Alert severity="error">
+            {intl.formatMessage({ id: 'employers.not-found' }) || 'Employer not found'}
+          </Alert>
+          <Box sx={{ mt: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/employers')} variant="outlined">
+              {intl.formatMessage({ id: 'common.back' }) || 'Back to List'}
+            </Button>
+          </Box>
         </MainCard>
       </>
     );
@@ -120,117 +129,83 @@ const EmployerEdit = () => {
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'employers.edit' })}
+        title={intl.formatMessage({ id: 'employers.edit' }) || 'Edit Employer'}
+        subtitle={employer.nameAr || employer.employerCode}
+        icon={EditIcon}
         breadcrumbs={[
-          { title: intl.formatMessage({ id: 'employers.list' }), to: '/employers' },
-          { title: intl.formatMessage({ id: 'employers.edit' }) }
+          { label: intl.formatMessage({ id: 'employers.list' }) || 'Employers', path: '/employers' },
+          { label: intl.formatMessage({ id: 'employers.edit' }) || 'Edit', path: `/employers/edit/${id}` }
         ]}
-        onBack={() => navigate('/employers')}
+        actions={
+          <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/employers')} variant="outlined">
+            {intl.formatMessage({ id: 'common.back' }) || 'Back'}
+          </Button>
+        }
       />
+
       <MainCard>
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2.5}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                select
-                fullWidth
-                required
-                label={intl.formatMessage({ id: 'employers.company' })}
-                value={employer.companyId || ''}
-                onChange={handleChange('companyId')}
-                error={Boolean(errors.companyId)}
-                helperText={errors.companyId}
-                size="small"
-              >
-                {COMPANIES.map((company) => (
-                  <MenuItem key={company.id} value={company.id}>
-                    {company.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
+            {/* Employer Code */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employers.name' })}
-                value={employer.name || ''}
-                onChange={handleChange('name')}
-                error={Boolean(errors.name)}
-                helperText={errors.name}
-                size="small"
+                label={intl.formatMessage({ id: 'employers.employer-code' }) || 'Employer Code'}
+                value={employer.employerCode || ''}
+                onChange={handleChange('employerCode')}
+                error={!!errors.employerCode}
+                helperText={errors.employerCode}
+                placeholder={intl.formatMessage({ id: 'employers.employer-code-placeholder' }) || 'Enter employer code'}
               />
             </Grid>
 
+            {/* Name Arabic */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employers.code' })}
-                value={employer.companyCode || ''}
-                onChange={handleChange('companyCode')}
-                error={Boolean(errors.companyCode)}
-                helperText={errors.companyCode}
-                size="small"
+                label={intl.formatMessage({ id: 'employers.name-ar' }) || 'Name (Arabic)'}
+                value={employer.nameAr || ''}
+                onChange={handleChange('nameAr')}
+                error={!!errors.nameAr}
+                helperText={errors.nameAr}
+                placeholder={intl.formatMessage({ id: 'employers.name-ar-placeholder' }) || 'Enter Arabic name'}
               />
             </Grid>
 
+            {/* Name English */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={intl.formatMessage({ id: 'common.phone' })}
-                value={employer.phone || ''}
-                onChange={handleChange('common.phone')}
-                error={Boolean(errors.phone)}
-                helperText={errors.phone}
-                size="small"
+                label={intl.formatMessage({ id: 'employers.name-en' }) || 'Name (English)'}
+                value={employer.nameEn || ''}
+                onChange={handleChange('nameEn')}
+                placeholder={intl.formatMessage({ id: 'employers.name-en-placeholder' }) || 'Enter English name'}
               />
             </Grid>
 
+            {/* Active Status */}
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label={intl.formatMessage({ id: 'common.email' })}
-                type="email"
-                value={employer.email || ''}
-                onChange={handleChange('common.email')}
-                error={Boolean(errors.email)}
-                helperText={errors.email}
-                size="small"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={intl.formatMessage({ id: 'common.address' })}
-                value={employer.address || ''}
-                onChange={handleChange('common.address')}
-                multiline
-                rows={2}
-                size="small"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
               <FormControlLabel
-                control={<Switch checked={employer.active ?? true} onChange={handleChange('common.active')} />}
-                label={intl.formatMessage({ id: 'common.active' })}
+                control={<Switch checked={employer.active || false} onChange={handleChange('active')} color="primary" />}
+                label={intl.formatMessage({ id: 'common.active' }) || 'Active'}
               />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button variant="outlined" onClick={() => navigate('/employers')} startIcon={<CloseOutlined />}>
-                  {intl.formatMessage({ id: 'common.cancel' })}
-                </Button>
-                <Button type="submit" variant="contained" color="primary" disabled={saving} startIcon={<SaveOutlined />}>
-                  {saving ? intl.formatMessage({ id: 'common.saving' }) : intl.formatMessage({ id: 'common.save-changes' })}
-                </Button>
-              </Stack>
             </Grid>
           </Grid>
+
+          {/* Form Actions */}
+          <Divider sx={{ my: 3 }} />
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button variant="outlined" onClick={() => navigate('/employers')} disabled={saving}>
+              {intl.formatMessage({ id: 'common.cancel' }) || 'Cancel'}
+            </Button>
+            <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={saving}>
+              {saving
+                ? intl.formatMessage({ id: 'common.saving' }) || 'Saving...'
+                : intl.formatMessage({ id: 'common.save' }) || 'Save'}
+            </Button>
+          </Stack>
         </Box>
       </MainCard>
     </>

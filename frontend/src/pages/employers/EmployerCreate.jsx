@@ -1,34 +1,38 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { Box, Button, FormControlLabel, Grid, MenuItem, Stack, Switch, TextField, Alert } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, Save as SaveIcon, Business as BusinessIcon } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  Grid,
+  Stack,
+  Switch,
+  TextField,
+  Divider
+} from '@mui/material';
+import {
+  ArrowBack as ArrowBackIcon,
+  Save as SaveIcon,
+  Business as BusinessIcon
+} from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
+
 import MainCard from 'components/MainCard';
 import ModernPageHeader from 'components/tba/ModernPageHeader';
-import * as employersService from 'services/employers.service';
-
-const COMPANIES = [
-  { id: 1, name: 'الشركة الليبية للأسمنت', nameEn: 'Libyan Cement Company' },
-  { id: 2, name: 'منطقة جليانة', nameEn: 'Jlyana District' },
-  { id: 3, name: 'مصلحة الجمارك', nameEn: 'Customs Authority' },
-  { id: 4, name: 'مصرف الوحدة', nameEn: 'Al-Wahda Bank' },
-  { id: 5, name: 'شركة وعد لإدارة النفقات الطبية', nameEn: 'Waad Medical Expenses Management' }
-];
+import { createEmployer } from 'services/api/employers.service';
 
 const emptyEmployer = {
-  companyId: '',
-  name: '',
+  employerCode: '',
+  nameAr: '',
   nameEn: '',
-  companyCode: '',
-  phone: '',
-  email: '',
-  address: '',
   active: true
 };
 
 const EmployerCreate = () => {
   const navigate = useNavigate();
   const intl = useIntl();
+  const { enqueueSnackbar } = useSnackbar();
   const [employer, setEmployer] = useState(emptyEmployer);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -44,12 +48,11 @@ const EmployerCreate = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!employer.companyId) newErrors.companyId = intl.formatMessage({ id: 'validation.required' });
-    if (!employer.name) newErrors.name = intl.formatMessage({ id: 'validation.required' });
-    if (!employer.nameEn) newErrors.nameEn = intl.formatMessage({ id: 'validation.required' });
-    if (!employer.companyCode) newErrors.companyCode = intl.formatMessage({ id: 'validation.required' });
-    if (employer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employer.email)) {
-      newErrors.email = intl.formatMessage({ id: 'validation.email-invalid' });
+    if (!employer.employerCode?.trim()) {
+      newErrors.employerCode = intl.formatMessage({ id: 'validation.required' }) || 'Required';
+    }
+    if (!employer.nameAr?.trim()) {
+      newErrors.nameAr = intl.formatMessage({ id: 'validation.required' }) || 'Required';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -58,15 +61,28 @@ const EmployerCreate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validate()) {
+      enqueueSnackbar(
+        intl.formatMessage({ id: 'validation.fix-errors' }) || 'Please fix validation errors',
+        { variant: 'warning' }
+      );
+      return;
+    }
 
     try {
       setSaving(true);
-      await employersService.createEmployer(employer);
+      await createEmployer(employer);
+      enqueueSnackbar(
+        intl.formatMessage({ id: 'employers.created-success' }) || 'Employer created successfully',
+        { variant: 'success' }
+      );
       navigate('/employers');
     } catch (err) {
-      console.error('Failed to create employer', err);
-      alert(intl.formatMessage({ id: 'common.error' }));
+      console.error('Failed to create employer:', err);
+      enqueueSnackbar(
+        intl.formatMessage({ id: 'common.error' }) || 'Failed to save employer',
+        { variant: 'error' }
+      );
     } finally {
       setSaving(false);
     }
@@ -75,15 +91,15 @@ const EmployerCreate = () => {
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'employers.add' })}
+        title={intl.formatMessage({ id: 'employers.add' }) || 'Add Employer'}
         icon={BusinessIcon}
         breadcrumbs={[
-          { label: intl.formatMessage({ id: 'employers.list' }), path: '/employers' },
-          { label: intl.formatMessage({ id: 'employers.add' }), path: '/employers/create' }
+          { label: intl.formatMessage({ id: 'employers.list' }) || 'Employers', path: '/employers' },
+          { label: intl.formatMessage({ id: 'employers.add' }) || 'Add', path: '/employers/create' }
         ]}
         actions={
           <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/employers')} variant="outlined">
-            {intl.formatMessage({ id: 'common.back' })}
+            {intl.formatMessage({ id: 'common.back' }) || 'Back'}
           </Button>
         }
       />
@@ -91,120 +107,66 @@ const EmployerCreate = () => {
       <MainCard>
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2.5}>
-            {/* Company Selection */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                select
-                fullWidth
-                required
-                label={intl.formatMessage({ id: 'employers.select-company' })}
-                value={employer.companyId}
-                onChange={handleChange('companyId')}
-                error={Boolean(errors.companyId)}
-                helperText={errors.companyId}
-              >
-                {COMPANIES.map((company) => (
-                  <MenuItem key={company.id} value={company.id}>
-                    {company.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
             {/* Employer Code */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employers.code' })}
-                value={employer.companyCode}
-                onChange={handleChange('companyCode')}
-                error={Boolean(errors.companyCode)}
-                helperText={errors.companyCode}
+                label={intl.formatMessage({ id: 'employers.employer-code' }) || 'Employer Code'}
+                value={employer.employerCode}
+                onChange={handleChange('employerCode')}
+                error={!!errors.employerCode}
+                helperText={errors.employerCode}
+                placeholder={intl.formatMessage({ id: 'employers.employer-code-placeholder' }) || 'Enter employer code'}
               />
             </Grid>
 
-            {/* Arabic Name */}
+            {/* Name Arabic */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 required
-                label={intl.formatMessage({ id: 'employers.name-ar' })}
-                value={employer.name}
-                onChange={handleChange('name')}
-                error={Boolean(errors.name)}
-                helperText={errors.name}
+                label={intl.formatMessage({ id: 'employers.name-ar' }) || 'Name (Arabic)'}
+                value={employer.nameAr}
+                onChange={handleChange('nameAr')}
+                error={!!errors.nameAr}
+                helperText={errors.nameAr}
+                placeholder={intl.formatMessage({ id: 'employers.name-ar-placeholder' }) || 'Enter Arabic name'}
               />
             </Grid>
 
-            {/* English Name */}
+            {/* Name English */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                required
-                label={intl.formatMessage({ id: 'employers.name-en' })}
+                label={intl.formatMessage({ id: 'employers.name-en' }) || 'Name (English)'}
                 value={employer.nameEn}
                 onChange={handleChange('nameEn')}
-                error={Boolean(errors.nameEn)}
-                helperText={errors.nameEn}
-              />
-            </Grid>
-
-            {/* Phone */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label={intl.formatMessage({ id: 'common.phone' })}
-                value={employer.phone}
-                onChange={handleChange('phone')}
-              />
-            </Grid>
-
-            {/* Email */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label={intl.formatMessage({ id: 'common.email' })}
-                type="email"
-                value={employer.email}
-                onChange={handleChange('email')}
-                error={Boolean(errors.email)}
-                helperText={errors.email}
-              />
-            </Grid>
-
-            {/* Address */}
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={intl.formatMessage({ id: 'common.address' })}
-                value={employer.address}
-                onChange={handleChange('address')}
-                multiline
-                rows={3}
+                placeholder={intl.formatMessage({ id: 'employers.name-en-placeholder' }) || 'Enter English name'}
               />
             </Grid>
 
             {/* Active Status */}
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <FormControlLabel
-                control={<Switch checked={employer.active} onChange={handleChange('active')} color="success" />}
-                label={intl.formatMessage({ id: 'common.active' })}
+                control={<Switch checked={employer.active} onChange={handleChange('active')} color="primary" />}
+                label={intl.formatMessage({ id: 'common.active' }) || 'Active'}
               />
             </Grid>
-
-            {/* Action Buttons */}
-            <Grid item xs={12}>
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button variant="outlined" onClick={() => navigate('/employers')} disabled={saving}>
-                  {intl.formatMessage({ id: 'common.cancel' })}
-                </Button>
-                <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={saving}>
-                  {saving ? intl.formatMessage({ id: 'common.loading' }) : intl.formatMessage({ id: 'common.save' })}
-                </Button>
-              </Stack>
-            </Grid>
           </Grid>
+
+          {/* Form Actions */}
+          <Divider sx={{ my: 3 }} />
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button variant="outlined" onClick={() => navigate('/employers')} disabled={saving}>
+              {intl.formatMessage({ id: 'common.cancel' }) || 'Cancel'}
+            </Button>
+            <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={saving}>
+              {saving
+                ? intl.formatMessage({ id: 'common.saving' }) || 'Saving...'
+                : intl.formatMessage({ id: 'common.save' }) || 'Save'}
+            </Button>
+          </Stack>
         </Box>
       </MainCard>
     </>

@@ -21,7 +21,6 @@ const MemberView = Loadable(lazy(() => import('pages/members/MemberView')));
 const EmployersList = Loadable(lazy(() => import('pages/employers/EmployersList')));
 const EmployerCreate = Loadable(lazy(() => import('pages/employers/EmployerCreate')));
 const EmployerEdit = Loadable(lazy(() => import('pages/employers/EmployerEdit')));
-const EmployerView = Loadable(lazy(() => import('pages/employers/EmployerView')));
 
 // ==============================|| LAZY LOADING - CLAIMS ||============================== //
 
@@ -194,7 +193,7 @@ const MainRoutes = {
           )
         },
         {
-          path: 'add',
+          path: 'create',
           element: (
             <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
               <EmployerCreate />
@@ -206,14 +205,6 @@ const MainRoutes = {
           element: (
             <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
               <EmployerEdit />
-            </RoleGuard>
-          )
-        },
-        {
-          path: ':id',
-          element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
-              <EmployerView />
             </RoleGuard>
           )
         }

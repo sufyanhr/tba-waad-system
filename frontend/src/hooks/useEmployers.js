@@ -1,87 +1,79 @@
-import { useEffect, useState, useCallback } from 'react';
-import * as employersService from 'services/employers.service';
+import { useState, useEffect } from 'react';
+import { getEmployers, getEmployerById } from 'services/api/employers.service';
 
-export const useEmployersList = (initialParams = {}) => {
-  const [params, setParams] = useState({
-    page: 0,
-    size: 10,
-    sortBy: 'id',
-    sortDir: 'ASC',
-    search: '',
-    ...initialParams
-  });
-
-  const [data, setData] = useState({
-    items: [],
-    total: 0,
-    page: 0,
-    size: 10
-  });
-
-  const [loading, setLoading] = useState(false);
+/**
+ * Custom hook to fetch all employers list
+ * @returns {Object} { data, loading, error, refetch }
+ */
+export const useEmployersList = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const load = useCallback(async () => {
+  const fetchEmployers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await employersService.getEmployers(params);
-      setData({
-        items: response.items ?? [],
-        total: response.total ?? 0,
-        page: response.page ?? params.page,
-        size: response.size ?? params.size
-      });
+      const result = await getEmployers();
+      setData(result || []);
     } catch (err) {
-      console.error('Failed to load employers list', err);
+      console.error('Failed to fetch employers:', err);
       setError(err);
+      setData([]);
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  };
 
   useEffect(() => {
-    load();
-  }, [load]);
+    fetchEmployers();
+  }, []);
 
-  return {
-    data,
-    loading,
-    error,
-    params,
-    setParams,
-    refresh: load
+  const refetch = () => {
+    fetchEmployers();
   };
+
+  return { data, loading, error, refetch };
 };
 
+/**
+ * Custom hook to fetch single employer by ID
+ * @param {number} id - Employer ID
+ * @returns {Object} { data, loading, error, refetch }
+ */
 export const useEmployerDetails = (id) => {
-  const [employer, setEmployer] = useState(null);
-  const [loading, setLoading] = useState(!!id);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const load = useCallback(async () => {
-    if (!id) return;
+  const fetchEmployer = async () => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      const response = await employersService.getEmployerById(id);
-      setEmployer(response);
+      const result = await getEmployerById(id);
+      setData(result);
     } catch (err) {
-      console.error('Failed to load employer details', err);
+      console.error('Failed to fetch employer:', err);
       setError(err);
+      setData(null);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  };
 
   useEffect(() => {
-    load();
-  }, [load]);
+    fetchEmployer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
-  return {
-    employer,
-    loading,
-    error,
-    refresh: load
+  const refetch = () => {
+    fetchEmployer();
   };
+
+  return { data, loading, error, refetch };
 };
