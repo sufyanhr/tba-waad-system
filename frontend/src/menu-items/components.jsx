@@ -20,6 +20,70 @@ import {
   Gavel as GavelIcon
 } from '@mui/icons-material';
 
+// ==============================|| RBAC MENU FILTERING ||============================== //
+
+/**
+ * Filter menu items based on user roles (RBAC)
+ * @param {Array} menuItems - Full menu structure
+ * @param {Array} userRoles - User's assigned roles
+ * @returns {Array} Filtered menu items
+ */
+export const filterMenuByRoles = (menuItems, userRoles = []) => {
+  // ADMIN sees everything
+  if (userRoles.includes('ADMIN')) {
+    return menuItems;
+  }
+
+  const roleRules = {
+    EMPLOYER: {
+      hide: ['employers', 'insurance-companies', 'providers', 'provider-contracts', 'policies', 'users', 'roles', 'companies', 'audit'],
+      show: ['dashboard', 'members', 'claims', 'visits', 'pre-approvals', 'medical-categories', 'medical-services', 'medical-packages', 'settings']
+    },
+    INSURANCE_COMPANY: {
+      hide: ['employers', 'users', 'roles', 'companies'],
+      show: ['dashboard', 'members', 'providers', 'insurance-companies', 'claims', 'visits', 'pre-approvals', 'medical-categories', 'medical-services', 'medical-packages', 'provider-contracts', 'policies', 'audit', 'settings']
+    },
+    REVIEWER: {
+      hide: ['employers', 'insurance-companies', 'providers', 'members', 'visits', 'provider-contracts', 'policies', 'users', 'roles', 'companies'],
+      show: ['dashboard', 'claims', 'pre-approvals', 'medical-categories', 'medical-services', 'medical-packages', 'audit', 'settings']
+    }
+  };
+
+  // Get hide rules for all user roles
+  const hideItems = new Set();
+  userRoles.forEach(role => {
+    if (roleRules[role]) {
+      roleRules[role].hide.forEach(item => hideItems.add(item));
+    }
+  });
+
+  // Filter menu items recursively
+  const filterItems = (items) => {
+    return items
+      .map(item => {
+        // If item has children, filter them recursively
+        if (item.children) {
+          const filteredChildren = filterItems(item.children);
+          // Only include group if it has visible children
+          if (filteredChildren.length > 0) {
+            return { ...item, children: filteredChildren };
+          }
+          return null;
+        }
+
+        // Hide item if it's in the hide list
+        if (hideItems.has(item.id)) {
+          return null;
+        }
+
+        return item;
+      })
+      .filter(Boolean); // Remove null items
+  };
+
+  return filterItems(menuItems);
+};
+
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItem = [

@@ -9,6 +9,7 @@ import authReducer from 'contexts/auth-reducer/auth';
 // project imports
 import Loader from 'components/Loader';
 import axios from 'utils/axios'; // axiosServices الصحيح
+import { useRBACStore } from 'api/rbac'; // RBAC Zustand store
 
 // ==============================|| INITIAL STATE ||============================== //
 
@@ -62,15 +63,8 @@ export const JWTProvider = ({ children }) => {
           const response = await axios.get('/auth/me'); // ✔ بدون /api
           const userData = response.data.data;
 
-          // Store user roles and permissions in localStorage
-          if (userData.roles) {
-            localStorage.setItem('userRoles', JSON.stringify(userData.roles));
-          }
-          if (userData.permissions) {
-            localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
-          }
-          // Store full user data for EMPLOYER role auto-lock
-          localStorage.setItem('userData', JSON.stringify(userData));
+          // Initialize RBAC store (Phase 1.5)
+          useRBACStore.getState().initialize(userData);
 
           dispatch({
             type: LOGIN,
@@ -103,15 +97,8 @@ export const JWTProvider = ({ children }) => {
 
     setSession(token);
 
-    // Store user roles and permissions in localStorage
-    if (userData.roles) {
-      localStorage.setItem('userRoles', JSON.stringify(userData.roles));
-    }
-    if (userData.permissions) {
-      localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
-    }
-    // Store full user data for EMPLOYER role auto-lock
-    localStorage.setItem('userData', JSON.stringify(userData));
+    // Initialize RBAC store (Phase 1.5)
+    useRBACStore.getState().initialize(userData);
 
     dispatch({
       type: LOGIN,
@@ -122,23 +109,23 @@ export const JWTProvider = ({ children }) => {
       }
     });
 
-    // Phase B2: Auto-redirect based on role
+    // Phase 1.5: Auto-redirect based on role (updated for new role names)
     return getRedirectPath(userData.roles);
   };
 
   /**
-   * Phase B2: Get redirect path based on user role
+   * Phase 1.5: Get redirect path based on user role (updated for new role names)
    * @param {string[]} roles - Array of user roles
    * @returns {string} - Redirect path
    */
   const getRedirectPath = useCallback((roles) => {
     if (!roles || roles.length === 0) return '/profile';
 
-    // Priority order for roles
-    if (roles.includes('SUPER_ADMIN')) return '/dashboard';
-    if (roles.includes('INSURANCE_ADMIN')) return '/dashboard';
-    if (roles.includes('EMPLOYER_ADMIN')) return '/members';
-    if (roles.includes('PROVIDER')) return '/claims';
+    // Priority order for roles (Phase 1.5 role names)
+    if (roles.includes('ADMIN')) return '/dashboard';
+    if (roles.includes('INSURANCE_COMPANY')) return '/dashboard';
+    if (roles.includes('EMPLOYER')) return '/members';
+    if (roles.includes('REVIEWER')) return '/claims';
     
     // Default fallback
     return '/profile';
@@ -146,9 +133,10 @@ export const JWTProvider = ({ children }) => {
 
   const logout = () => {
     setSession(null);
-    localStorage.removeItem('userRoles');
-    localStorage.removeItem('userPermissions');
-    localStorage.removeItem('userData');
+    
+    // Clear RBAC store (Phase 1.5)
+    useRBACStore.getState().clear();
+    
     dispatch({ type: LOGOUT });
     // redirect to login to ensure UI resets
     try {

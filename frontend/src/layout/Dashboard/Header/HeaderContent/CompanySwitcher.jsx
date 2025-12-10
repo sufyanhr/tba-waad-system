@@ -1,29 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Box, FormControl, Select, MenuItem, Typography, Chip, Avatar } from '@mui/material';
-import { BankOutlined } from '@ant-design/icons';
-import useCompany from 'hooks/useCompany';
-import useAuth from 'hooks/useAuth';
+import { BankOutlined, LockOutlined } from '@ant-design/icons';
+import { useEmployerContext, useRoles } from 'api/rbac';
 import axios from 'utils/axios';
 
 // ==============================|| EMPLOYER SWITCHER ||============================== //
 
 export default function CompanySwitcher() {
-  const { roles } = useAuth();
-  const { selectedEmployerId, setCompany } = useCompany();
+  const roles = useRoles();
+  const { employerId, canSwitch, setEmployerId } = useEmployerContext();
   const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Check if user should see the employer switcher
-  // Show for ALL users EXCEPT: EMPLOYER, INSURANCE_ADMIN, PROVIDER
-  const shouldShowSwitcher =
-    roles &&
-    !roles.includes('EMPLOYER') &&
-    !roles.includes('INSURANCE_ADMIN') &&
-    !roles.includes('PROVIDER');
-
   useEffect(() => {
     // Only fetch employers if switcher should be shown
-    if (!shouldShowSwitcher) {
+    if (!canSwitch) {
       return;
     }
 
@@ -36,9 +27,6 @@ export default function CompanySwitcher() {
         });
         const employersList = response.data.data?.items || response.data.items || response.data || [];
         setEmployers(employersList);
-
-        // Default: no employer selected (set to null)
-        // Users can manually select an employer if needed
       } catch (error) {
         console.error('Error fetching employers:', error);
         setEmployers([]);
@@ -49,19 +37,16 @@ export default function CompanySwitcher() {
 
     fetchEmployers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldShowSwitcher]);
+  }, [canSwitch]);
 
-  // Don't show for excluded roles
-  if (!shouldShowSwitcher) {
+  // Don't show for users who can't switch (EMPLOYER role is locked to their company)
+  if (!canSwitch) {
     return null;
   }
 
   const handleEmployerChange = (event) => {
-    const employerId = event.target.value;
-    const employer = employers.find((e) => e.id === employerId);
-    if (employer) {
-      setCompany(employer.id, employer.name);
-    }
+    const selectedId = event.target.value;
+    setEmployerId(selectedId); // RBAC store handles everything (localStorage, axios headers, etc.)
   };
 
   const getEmployerInitials = (name) => {
@@ -87,9 +72,10 @@ export default function CompanySwitcher() {
     <Box sx={{ minWidth: 200 }}>
       <FormControl fullWidth size="small">
         <Select
-          value={selectedEmployerId || ''}
+          value={employerId || ''}
           onChange={handleEmployerChange}
           displayEmpty
+          disabled={!canSwitch}
           sx={{
             '& .MuiSelect-select': {
               display: 'flex',
@@ -109,6 +95,7 @@ export default function CompanySwitcher() {
             const employer = employers.find((e) => e.id === selected);
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {!canSwitch && <LockOutlined style={{ fontSize: 16, color: 'text.secondary' }} />}
                 <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: 'primary.main' }}>{getEmployerInitials(employer?.name)}</Avatar>
                 <Typography variant="body2">{employer?.name || 'Unknown'}</Typography>
               </Box>
@@ -138,7 +125,7 @@ export default function CompanySwitcher() {
                       </Typography>
                     )}
                   </Box>
-                  {employer.id === selectedEmployerId && <Chip label="Active" size="small" color="primary" />}
+                  {employer.id === employerId && <Chip label="Active" size="small" color="primary" />}
                 </Box>
               </MenuItem>
             ))

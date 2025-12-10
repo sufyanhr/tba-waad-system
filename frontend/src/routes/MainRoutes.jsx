@@ -3,7 +3,7 @@ import { lazy } from 'react';
 // project imports
 import Loadable from 'components/Loadable';
 import MainLayout from 'layout/Dashboard';
-import RoleGuard from 'utils/route-guard/RoleGuard';
+import RouteGuard from './RouteGuard';
 
 // ==============================|| LAZY LOADING - DASHBOARD ||============================== //
 
@@ -121,6 +121,7 @@ const AuditLog = Loadable(lazy(() => import('pages/audit')));
 
 // ==============================|| LAZY LOADING - ERROR PAGES ||============================== //
 
+const NoAccess = Loadable(lazy(() => import('pages/errors/NoAccess')));
 const Error403 = Loadable(lazy(() => import('pages/errors/Forbidden403')));
 const Error404 = Loadable(lazy(() => import('pages/errors/NotFound404')));
 const Error500 = Loadable(lazy(() => import('pages/errors/ServerError500')));
@@ -135,9 +136,9 @@ const MainRoutes = {
     {
       path: 'dashboard',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN', 'TBA_OPERATIONS']}>
+        <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
           <Dashboard />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -148,33 +149,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <MembersList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <MemberCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <MemberEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <MemberView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -187,25 +188,25 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <EmployersList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'create',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <EmployerCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <EmployerEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -218,33 +219,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER', 'REVIEWER']}>
               <ClaimsList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <ClaimCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <ClaimEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER', 'TBA_FINANCE']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER', 'REVIEWER']}>
               <ClaimView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -257,33 +258,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <ProvidersList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <ProviderCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <ProviderEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <ProviderView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -293,9 +294,9 @@ const MainRoutes = {
     {
       path: 'provider-contracts',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <ProviderContractsList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -303,9 +304,9 @@ const MainRoutes = {
     {
       path: 'visits',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER']}>
+        <RouteGuard allowedRoles={['ADMIN', 'REVIEWER']}>
           <VisitsList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -316,33 +317,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <PoliciesList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <PolicyCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <PolicyEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <PolicyView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -355,33 +356,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER']}>
+            <RouteGuard allowedRoles={['ADMIN', 'REVIEWER']}>
               <PreApprovalsList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS']}>
+            <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
               <PreApprovalCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER']}>
+            <RouteGuard allowedRoles={['ADMIN', 'REVIEWER']}>
               <PreApprovalEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'TBA_OPERATIONS', 'TBA_MEDICAL_REVIEWER']}>
+            <RouteGuard allowedRoles={['ADMIN', 'REVIEWER']}>
               <PreApprovalView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -391,9 +392,9 @@ const MainRoutes = {
     {
       path: 'benefit-packages',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <BenefitPackagesList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -404,33 +405,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <InsuranceCompaniesList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <InsuranceCompanyCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <InsuranceCompanyEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <InsuranceCompanyView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -443,33 +444,33 @@ const MainRoutes = {
         {
           path: '',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <InsurancePoliciesList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'add',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <InsurancePolicyCreate />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'edit/:id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <InsurancePolicyEdit />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: ':id',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+            <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
               <InsurancePolicyView />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -479,9 +480,9 @@ const MainRoutes = {
     {
       path: 'medical-services',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <MedicalServicesList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -489,9 +490,9 @@ const MainRoutes = {
     {
       path: 'medical-categories',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <MedicalCategoriesList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -499,9 +500,9 @@ const MainRoutes = {
     {
       path: 'medical-packages',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <MedicalPackagesList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -509,9 +510,9 @@ const MainRoutes = {
     {
       path: 'companies',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN']}>
+        <RouteGuard allowedRoles={['SUPER_ADMIN']}>
           <CompaniesList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -519,9 +520,9 @@ const MainRoutes = {
     {
       path: 'reviewer-companies',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <ReviewerCompaniesList />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -532,25 +533,25 @@ const MainRoutes = {
         {
           path: 'companies',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <AdminCompaniesList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'users',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <AdminUsersList />
-            </RoleGuard>
+            </RouteGuard>
           )
         },
         {
           path: 'roles',
           element: (
-            <RoleGuard roles={['SUPER_ADMIN']}>
+            <RouteGuard allowedRoles={['SUPER_ADMIN']}>
               <AdminRolesList />
-            </RoleGuard>
+            </RouteGuard>
           )
         }
       ]
@@ -560,9 +561,9 @@ const MainRoutes = {
     {
       path: 'rbac',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <RbacDashboard />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -570,9 +571,9 @@ const MainRoutes = {
     {
       path: 'settings',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN', 'COMPANY_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'EMPLOYER']}>
           <Settings />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
@@ -595,15 +596,19 @@ const MainRoutes = {
     {
       path: 'audit',
       element: (
-        <RoleGuard roles={['SUPER_ADMIN', 'INSURANCE_ADMIN']}>
+        <RouteGuard allowedRoles={['ADMIN', 'INSURANCE_COMPANY', 'REVIEWER']}>
           <AuditLog />
-        </RoleGuard>
+        </RouteGuard>
       )
     },
 
     // Error Pages
     {
       path: '403',
+      element: <NoAccess />
+    },
+    {
+      path: 'forbidden',
       element: <Error403 />
     },
     {

@@ -7,18 +7,24 @@ import Box from '@mui/material/Box';
 
 // project imports
 import NavGroup from './NavGroup';
-import menuItem from 'menu-items/components';
+import menuItem, { filterMenuByRoles } from 'menu-items/components';
+import { useRoles } from 'api/rbac';
 
 // ==============================|| DRAWER - NAVIGATION ||============================== //
 
 export default function Navigation({ searchValue }) {
   const deferredSearch = useDeferredValue(searchValue?.trim().toLowerCase() ?? '');
+  const userRoles = useRoles();
 
   const filteredMenuItems = useMemo(() => {
-    if (!deferredSearch) return menuItem;
+    // First, filter by RBAC roles
+    const rbacFilteredMenu = filterMenuByRoles(menuItem, userRoles);
+
+    // Then, filter by search value
+    if (!deferredSearch) return rbacFilteredMenu;
 
     const result = [];
-    menuItem.forEach((parentMenu) => {
+    rbacFilteredMenu.forEach((parentMenu) => {
       const matchedChildren = parentMenu.children?.filter((child) => child.search?.toLowerCase().includes(deferredSearch));
 
       if (matchedChildren && matchedChildren.length > 0) {
@@ -27,7 +33,7 @@ export default function Navigation({ searchValue }) {
     });
 
     return result;
-  }, [deferredSearch]);
+  }, [deferredSearch, userRoles]);
 
   const navGroups = filteredMenuItems.map((item) => {
     switch (item.type) {
