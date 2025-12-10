@@ -1,612 +1,705 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useIntl } from 'react-intl';
 import {
   Box,
   Button,
-  FormControlLabel,
   Grid,
   MenuItem,
-  Stack,
-  Switch,
-  TextField,
-  Alert,
-  Tabs,
-  Tab,
   Paper,
+  Stack,
+  TextField,
   Typography,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Divider,
-  CircularProgress
+  FormControl,
+  InputLabel,
+  Select,
+  FormHelperText,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
   Save as SaveIcon,
-  Edit as EditIcon,
-  Person as PersonIcon,
-  CardMembership as CardMembershipIcon,
-  ContactPhone as ContactPhoneIcon,
-  FamilyRestroom as FamilyRestroomIcon
+  ArrowBack as ArrowBackIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  PeopleAlt as PeopleAltIcon
 } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+
 import MainCard from 'components/MainCard';
 import ModernPageHeader from 'components/tba/ModernPageHeader';
-import { membersService } from 'services/api/members.service';
-import { useMemberDetails } from 'hooks/useMembers';
-import axios from 'axios';
+import { getMemberById, updateMember } from 'services/api/members.service';
+import axiosClient from 'utils/axios';
+import { openSnackbar } from 'api/snackbar';
 
-const TabPanel = ({ children, value, index }) => {
-  return value === index && <Box sx={{ py: 3 }}>{children}</Box>;
-};
-
+/**
+ * Member Edit Page
+ * Backend: MemberController.update → MemberUpdateDto
+ */
 const MemberEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const intl = useIntl();
-  const { data: memberData, loading: loadingMember } = useMemberDetails(id);
-  const [activeTab, setActiveTab] = useState(0);
-  const [member, setMember] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState({});
+
+  // Form State (aligned with MemberUpdateDto)
+  const [form, setForm] = useState({
+    fullNameArabic: '',
+    fullNameEnglish: '',
+    cardNumber: '',
+    birthDate: null,
+    gender: '',
+    maritalStatus: '',
+    phone: '',
+    email: '',
+    address: '',
+    nationality: '',
+    policyNumber: '',
+    benefitPackageId: '',
+    insuranceCompanyId: '',
+    employeeNumber: '',
+    joinDate: null,
+    occupation: '',
+    status: '',
+    startDate: null,
+    endDate: null,
+    cardStatus: '',
+    blockedReason: '',
+    notes: '',
+    active: true,
+    familyMembers: []
+  });
+
+  // Family Member Draft
+  const [familyDraft, setFamilyDraft] = useState({
+    fullNameArabic: '',
+    fullNameEnglish: '',
+    civilId: '',
+    birthDate: null,
+    gender: 'MALE',
+    relationship: 'SON',
+    active: true
+  });
+
+  // Selectors Data
   const [employers, setEmployers] = useState([]);
   const [insuranceCompanies, setInsuranceCompanies] = useState([]);
-  const [loadingDropdowns, setLoadingDropdowns] = useState(true);
+  const [benefitPackages, setBenefitPackages] = useState([]);
 
-  useEffect(() => {
-    const fetchDropdownData = async () => {
-      try {
-        setLoadingDropdowns(true);
-        const [employersRes, insuranceRes] = await Promise.all([
-          axios.get('/api/employers/selector'),
-          axios.get('/api/insurance-companies/selector')
-        ]);
-        setEmployers(employersRes.data || []);
-        setInsuranceCompanies(insuranceRes.data || []);
-      } catch (err) {
-        console.error('Failed to load dropdown data', err);
-        alert(intl.formatMessage({ id: 'common.error' }) || 'Failed to load data');
-      } finally {
-        setLoadingDropdowns(false);
-      }
-    };
-    fetchDropdownData();
-  }, [intl]);
+  // Loading & Errors
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [loadError, setLoadError] = useState(null);
 
+  // Load Member Data
   useEffect(() => {
-    if (memberData) {
-      setMember(memberData);
+    loadData();
+  }, [id]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setLoadError(null);
+
+      // Load Member
+      const member = await getMemberById(id);
+
+      // Populate form
+      setForm({
+        fullNameArabic: member.fullNameArabic || '',
+        fullNameEnglish: member.fullNameEnglish || '',
+        cardNumber: member.cardNumber || '',
+        birthDate: member.birthDate || null,
+        gender: member.gender || '',
+        maritalStatus: member.maritalStatus || '',
+        phone: member.phone || '',
+        email: member.email || '',
+        address: member.address || '',
+        nationality: member.nationality || '',
+        policyNumber: member.policyNumber || '',
+        benefitPackageId: member.benefitPackageId || '',
+        insuranceCompanyId: member.insuranceCompanyId || '',
+        employeeNumber: member.employeeNumber || '',
+        joinDate: member.joinDate || null,
+        occupation: member.occupation || '',
+        status: member.status || '',
+        startDate: member.startDate || null,
+        endDate: member.endDate || null,
+        cardStatus: member.cardStatus || '',
+        blockedReason: member.blockedReason || '',
+        notes: member.notes || '',
+        active: member.active ?? true,
+        familyMembers: member.familyMembers || []
+      });
+
+      // Load Selectors
+      await loadSelectors();
+    } catch (err) {
+      console.error('[MemberEdit] Failed to load member:', err);
+      setLoadError(err.response?.data?.message || 'Failed to load member');
+    } finally {
+      setLoading(false);
     }
-  }, [memberData]);
+  };
 
+  const loadSelectors = async () => {
+    try {
+      const [employersRes, insuranceRes, packagesRes] = await Promise.all([
+        axiosClient.get('/employers/selector'),
+        axiosClient.get('/insurance-companies/selector'),
+        axiosClient.get('/benefit-packages/selector')
+      ]);
+
+      setEmployers(employersRes.data?.data || []);
+      setInsuranceCompanies(insuranceRes.data?.data || []);
+      setBenefitPackages(packagesRes.data?.data || []);
+    } catch (err) {
+      console.error('[MemberEdit] Failed to load selectors:', err);
+    }
+  };
+
+  // Field Handlers
   const handleChange = (field) => (event) => {
-    const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
-    setMember((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: event.target.value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }));
     }
   };
 
-  const validate = () => {
-    if (!member) return false;
-    const newErrors = {};
-    // Required fields
-    if (!member.nationalId) newErrors.nationalId = intl.formatMessage({ id: 'validation.required' }) || 'Required';
-    if (!member.fullNameAr) newErrors.fullNameAr = intl.formatMessage({ id: 'validation.required' }) || 'Required';
-    if (!member.birthDate) newErrors.birthDate = intl.formatMessage({ id: 'validation.required' }) || 'Required';
-    if (!member.employerId) newErrors.employerId = intl.formatMessage({ id: 'validation.required' }) || 'Required';
-    if (!member.insuranceCompanyId)
-      newErrors.insuranceCompanyId = intl.formatMessage({ id: 'validation.required' }) || 'Required';
-    if (!member.memberCode) newErrors.memberCode = intl.formatMessage({ id: 'validation.required' }) || 'Required';
+  const handleDateChange = (field) => (date) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: date ? date.format('YYYY-MM-DD') : null
+    }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: null }));
+    }
+  };
 
-    // Email format validation
-    if (member.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.email)) {
-      newErrors.email = intl.formatMessage({ id: 'validation.email-invalid' }) || 'Invalid email';
+  // Family Member Handlers
+  const handleFamilyDraftChange = (field) => (event) => {
+    setFamilyDraft((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleFamilyDateChange = (date) => {
+    setFamilyDraft((prev) => ({
+      ...prev,
+      birthDate: date ? date.format('YYYY-MM-DD') : null
+    }));
+  };
+
+  const addFamilyMember = () => {
+    if (!familyDraft.fullNameArabic) {
+      openSnackbar({ message: 'Full name (Arabic) is required', variant: 'error' });
+      return;
+    }
+    if (!familyDraft.civilId) {
+      openSnackbar({ message: 'Civil ID is required', variant: 'error' });
+      return;
+    }
+    if (!familyDraft.birthDate) {
+      openSnackbar({ message: 'Birth date is required', variant: 'error' });
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      familyMembers: [...prev.familyMembers, { ...familyDraft }]
+    }));
+
+    setFamilyDraft({
+      fullNameArabic: '',
+      fullNameEnglish: '',
+      civilId: '',
+      birthDate: null,
+      gender: 'MALE',
+      relationship: 'SON',
+      active: true
+    });
+
+    openSnackbar({ message: 'Family member added', variant: 'success' });
+  };
+
+  const removeFamilyMember = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      familyMembers: prev.familyMembers.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Validation
+  const validate = () => {
+    const newErrors = {};
+
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = 'Invalid email format';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validate()) {
-      alert(intl.formatMessage({ id: 'validation.fix-errors' }) || 'Please fix validation errors');
+      openSnackbar({ message: 'Please fix validation errors', variant: 'error' });
       return;
     }
 
     try {
       setSaving(true);
-      await membersService.updateMember(id, member);
+
+      // Prepare payload (MemberUpdateDto structure)
+      const payload = {
+        fullNameArabic: form.fullNameArabic || null,
+        fullNameEnglish: form.fullNameEnglish || null,
+        cardNumber: form.cardNumber || null,
+        birthDate: form.birthDate || null,
+        gender: form.gender || null,
+        maritalStatus: form.maritalStatus || null,
+        phone: form.phone || null,
+        email: form.email || null,
+        address: form.address || null,
+        nationality: form.nationality || null,
+        policyNumber: form.policyNumber || null,
+        benefitPackageId: form.benefitPackageId || null,
+        insuranceCompanyId: form.insuranceCompanyId || null,
+        employeeNumber: form.employeeNumber || null,
+        joinDate: form.joinDate || null,
+        occupation: form.occupation || null,
+        status: form.status || null,
+        startDate: form.startDate || null,
+        endDate: form.endDate || null,
+        cardStatus: form.cardStatus || null,
+        blockedReason: form.blockedReason || null,
+        notes: form.notes || null,
+        active: form.active,
+        familyMembers: form.familyMembers.map((fm) => ({
+          id: fm.id || null,
+          relationship: fm.relationship,
+          fullNameArabic: fm.fullNameArabic,
+          fullNameEnglish: fm.fullNameEnglish || null,
+          civilId: fm.civilId,
+          birthDate: fm.birthDate,
+          gender: fm.gender,
+          active: fm.active ?? true
+        }))
+      };
+
+      await updateMember(id, payload);
+
+      openSnackbar({ message: 'Member updated successfully', variant: 'success' });
       navigate('/members');
     } catch (err) {
-      console.error('Failed to update member', err);
-      alert(intl.formatMessage({ id: 'common.error' }) || 'Failed to save');
+      console.error('[MemberEdit] Submit failed:', err);
+      openSnackbar({
+        message: err.response?.data?.message || 'Failed to update member',
+        variant: 'error'
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loadingMember || !member) {
+  if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
       </Box>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <>
+        <ModernPageHeader
+          title="Edit Member"
+          subtitle="Update member information"
+          icon={PeopleAltIcon}
+          breadcrumbs={[
+            { label: 'Members', path: '/members' },
+            { label: 'Edit Member', path: `/members/edit/${id}` }
+          ]}
+        />
+        <MainCard>
+          <Alert severity="error">{loadError}</Alert>
+          <Box sx={{ mt: 2 }}>
+            <Button variant="outlined" onClick={() => navigate('/members')}>
+              Back to List
+            </Button>
+          </Box>
+        </MainCard>
+      </>
     );
   }
 
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'members.edit' }) || 'Edit Member'}
-        subtitle={member.fullNameAr || member.memberCode}
-        icon={EditIcon}
+        title="Edit Member"
+        subtitle="Update member information"
+        icon={PeopleAltIcon}
         breadcrumbs={[
-          { label: intl.formatMessage({ id: 'members.list' }) || 'Members', path: '/members' },
-          { label: intl.formatMessage({ id: 'members.edit' }) || 'Edit', path: `/members/edit/${id}` }
+          { label: 'Members', path: '/members' },
+          { label: 'Edit Member', path: `/members/edit/${id}` }
         ]}
         actions={
-          <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/members')} variant="outlined">
-            {intl.formatMessage({ id: 'common.back' }) || 'Back'}
+          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/members')}>
+            Back to List
           </Button>
         }
       />
 
-      <MainCard>
-        <Box component="form" onSubmit={handleSubmit}>
-          {/* Tabs Navigation */}
-          <Paper elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} variant="fullWidth">
-              <Tab icon={<PersonIcon />} label={intl.formatMessage({ id: 'members.personal-info' }) || 'Personal Info'} />
-              <Tab
-                icon={<CardMembershipIcon />}
-                label={intl.formatMessage({ id: 'members.insurance-info' }) || 'Insurance Details'}
-              />
-              <Tab icon={<ContactPhoneIcon />} label={intl.formatMessage({ id: 'members.contact-info' }) || 'Contact Info'} />
-              <Tab
-                icon={<FamilyRestroomIcon />}
-                label={intl.formatMessage({ id: 'members.family-info' }) || 'Family Members'}
-              />
-            </Tabs>
-          </Paper>
-
-          {/* Tab 1: Personal Info */}
-          <TabPanel value={activeTab} index={0}>
-            <Grid container spacing={2.5}>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  {intl.formatMessage({ id: 'members.personal-info-desc' }) ||
-                    'Update personal information of the member. Fields marked with * are required.'}
-                </Alert>
-              </Grid>
-
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={3}>
+          {/* Personal Information */}
+          <MainCard title="Personal Information">
+            <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  required
-                  label={intl.formatMessage({ id: 'members.national-id' }) || 'National ID'}
-                  value={member.nationalId || ''}
-                  onChange={handleChange('nationalId')}
-                  error={!!errors.nationalId}
-                  helperText={errors.nationalId}
+                  label="Full Name (Arabic)"
+                  value={form.fullNameArabic}
+                  onChange={handleChange('fullNameArabic')}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  required
-                  label={intl.formatMessage({ id: 'members.full-name-ar' }) || 'Full Name (Arabic)'}
-                  value={member.fullNameAr || ''}
-                  onChange={handleChange('fullNameAr')}
-                  error={!!errors.fullNameAr}
-                  helperText={errors.fullNameAr}
+                  label="Full Name (English)"
+                  value={form.fullNameEnglish}
+                  onChange={handleChange('fullNameEnglish')}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.full-name-en' }) || 'Full Name (English)'}
-                  value={member.fullNameEn || ''}
-                  onChange={handleChange('fullNameEn')}
-                />
+                <TextField fullWidth disabled label="Civil ID" value={form.civilId || 'N/A'} />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  required
-                  type="date"
-                  label={intl.formatMessage({ id: 'members.birth-date' }) || 'Birth Date'}
-                  value={member.birthDate || ''}
-                  onChange={handleChange('birthDate')}
-                  error={!!errors.birthDate}
-                  helperText={errors.birthDate}
-                  InputLabelProps={{ shrink: true }}
-                />
+                <TextField fullWidth label="Card Number" value={form.cardNumber} onChange={handleChange('cardNumber')} />
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.gender' }) || 'Gender'}
-                  value={member.gender || ''}
-                  onChange={handleChange('gender')}
-                >
-                  <MenuItem value="">
-                    <em>{intl.formatMessage({ id: 'common.select' }) || 'Select'}</em>
-                  </MenuItem>
-                  <MenuItem value="MALE">{intl.formatMessage({ id: 'common.male' }) || 'Male'}</MenuItem>
-                  <MenuItem value="FEMALE">{intl.formatMessage({ id: 'common.female' }) || 'Female'}</MenuItem>
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.marital-status' }) || 'Marital Status'}
-                  value={member.maritalStatus || ''}
-                  onChange={handleChange('maritalStatus')}
-                >
-                  <MenuItem value="">
-                    <em>{intl.formatMessage({ id: 'common.select' }) || 'Select'}</em>
-                  </MenuItem>
-                  <MenuItem value="SINGLE">{intl.formatMessage({ id: 'common.single' }) || 'Single'}</MenuItem>
-                  <MenuItem value="MARRIED">{intl.formatMessage({ id: 'common.married' }) || 'Married'}</MenuItem>
-                  <MenuItem value="DIVORCED">{intl.formatMessage({ id: 'common.divorced' }) || 'Divorced'}</MenuItem>
-                  <MenuItem value="WIDOWED">{intl.formatMessage({ id: 'common.widowed' }) || 'Widowed'}</MenuItem>
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.nationality' }) || 'Nationality'}
-                  value={member.nationality || ''}
-                  onChange={handleChange('nationality')}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.occupation' }) || 'Occupation'}
-                  value={member.occupation || ''}
-                  onChange={handleChange('occupation')}
+              <Grid item xs={12} md={4}>
+                <DatePicker
+                  label="Birth Date"
+                  value={form.birthDate ? dayjs(form.birthDate) : null}
+                  onChange={handleDateChange('birthDate')}
+                  slotProps={{ textField: { fullWidth: true } }}
                 />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField
-                  select
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.blood-type' }) || 'Blood Type'}
-                  value={member.bloodType || ''}
-                  onChange={handleChange('bloodType')}
-                >
-                  <MenuItem value="">
-                    <em>{intl.formatMessage({ id: 'common.select' }) || 'Select'}</em>
-                  </MenuItem>
-                  <MenuItem value="A+">A+</MenuItem>
-                  <MenuItem value="A-">A-</MenuItem>
-                  <MenuItem value="B+">B+</MenuItem>
-                  <MenuItem value="B-">B-</MenuItem>
-                  <MenuItem value="AB+">AB+</MenuItem>
-                  <MenuItem value="AB-">AB-</MenuItem>
-                  <MenuItem value="O+">O+</MenuItem>
-                  <MenuItem value="O-">O-</MenuItem>
-                </TextField>
+                <FormControl fullWidth>
+                  <InputLabel>Gender</InputLabel>
+                  <Select value={form.gender} onChange={handleChange('gender')} label="Gender">
+                    <MenuItem value="MALE">Male</MenuItem>
+                    <MenuItem value="FEMALE">Female</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label={intl.formatMessage({ id: 'members.height' }) || 'Height (cm)'}
-                  value={member.height || ''}
-                  onChange={handleChange('height')}
-                  inputProps={{ min: 0, max: 300 }}
-                />
+                <FormControl fullWidth>
+                  <InputLabel>Marital Status</InputLabel>
+                  <Select value={form.maritalStatus} onChange={handleChange('maritalStatus')} label="Marital Status">
+                    <MenuItem value="">None</MenuItem>
+                    <MenuItem value="SINGLE">Single</MenuItem>
+                    <MenuItem value="MARRIED">Married</MenuItem>
+                    <MenuItem value="DIVORCED">Divorced</MenuItem>
+                    <MenuItem value="WIDOWED">Widowed</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
 
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label={intl.formatMessage({ id: 'members.weight' }) || 'Weight (kg)'}
-                  value={member.weight || ''}
-                  onChange={handleChange('weight')}
-                  inputProps={{ min: 0, max: 500 }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label={intl.formatMessage({ id: 'members.chronic-diseases' }) || 'Chronic Diseases'}
-                  value={member.chronicDiseases || ''}
-                  onChange={handleChange('chronicDiseases')}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label={intl.formatMessage({ id: 'members.allergies' }) || 'Allergies'}
-                  value={member.allergies || ''}
-                  onChange={handleChange('allergies')}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label={intl.formatMessage({ id: 'members.notes' }) || 'Notes'}
-                  value={member.notes || ''}
-                  onChange={handleChange('notes')}
-                />
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Nationality" value={form.nationality} onChange={handleChange('nationality')} />
               </Grid>
             </Grid>
-          </TabPanel>
+          </MainCard>
 
-          {/* Tab 2: Insurance Details */}
-          <TabPanel value={activeTab} index={1}>
-            <Grid container spacing={2.5}>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  {intl.formatMessage({ id: 'members.insurance-info-desc' }) ||
-                    'Update insurance coverage details. Fields marked with * are required.'}
-                </Alert>
+          {/* Contact Information */}
+          <MainCard title="Contact Information">
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Phone" value={form.phone} onChange={handleChange('phone')} />
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  required
-                  label={intl.formatMessage({ id: 'members.member-code' }) || 'Member Code'}
-                  value={member.memberCode || ''}
-                  onChange={handleChange('memberCode')}
-                  error={!!errors.memberCode}
-                  helperText={errors.memberCode}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  required
-                  label={intl.formatMessage({ id: 'members.employer' }) || 'Employer'}
-                  value={member.employerId || ''}
-                  onChange={handleChange('employerId')}
-                  error={!!errors.employerId}
-                  helperText={errors.employerId}
-                  disabled={loadingDropdowns}
-                >
-                  <MenuItem value="">
-                    <em>{intl.formatMessage({ id: 'common.select' }) || 'Select'}</em>
-                  </MenuItem>
-                  {employers.map((emp) => (
-                    <MenuItem key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  required
-                  label={intl.formatMessage({ id: 'members.insurance-company' }) || 'Insurance Company'}
-                  value={member.insuranceCompanyId || ''}
-                  onChange={handleChange('insuranceCompanyId')}
-                  error={!!errors.insuranceCompanyId}
-                  helperText={errors.insuranceCompanyId}
-                  disabled={loadingDropdowns}
-                >
-                  <MenuItem value="">
-                    <em>{intl.formatMessage({ id: 'common.select' }) || 'Select'}</em>
-                  </MenuItem>
-                  {insuranceCompanies.map((ins) => (
-                    <MenuItem key={ins.id} value={ins.id}>
-                      {ins.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.policy-number' }) || 'Policy Number'}
-                  value={member.policyNumber || ''}
-                  onChange={handleChange('policyNumber')}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label={intl.formatMessage({ id: 'members.coverage-start-date' }) || 'Coverage Start Date'}
-                  value={member.coverageStartDate || ''}
-                  onChange={handleChange('coverageStartDate')}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label={intl.formatMessage({ id: 'members.coverage-end-date' }) || 'Coverage End Date'}
-                  value={member.coverageEndDate || ''}
-                  onChange={handleChange('coverageEndDate')}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.dependent-type' }) || 'Dependent Type'}
-                  value={member.dependentType || 'PRIMARY'}
-                  onChange={handleChange('dependentType')}
-                >
-                  <MenuItem value="PRIMARY">{intl.formatMessage({ id: 'members.primary' }) || 'Primary'}</MenuItem>
-                  <MenuItem value="SPOUSE">{intl.formatMessage({ id: 'members.spouse' }) || 'Spouse'}</MenuItem>
-                  <MenuItem value="CHILD">{intl.formatMessage({ id: 'members.child' }) || 'Child'}</MenuItem>
-                  <MenuItem value="PARENT">{intl.formatMessage({ id: 'members.parent' }) || 'Parent'}</MenuItem>
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label={intl.formatMessage({ id: 'members.max-coverage-amount' }) || 'Max Coverage Amount'}
-                  value={member.maxCoverageAmount || ''}
-                  onChange={handleChange('maxCoverageAmount')}
-                  inputProps={{ min: 0, step: 0.01 }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label={intl.formatMessage({ id: 'members.copayment-percentage' }) || 'Copayment (%)'}
-                  value={member.copaymentPercentage || ''}
-                  onChange={handleChange('copaymentPercentage')}
-                  inputProps={{ min: 0, max: 100, step: 0.1 }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Switch checked={member.active || false} onChange={handleChange('active')} color="primary" />}
-                  label={intl.formatMessage({ id: 'common.active' }) || 'Active'}
-                />
-              </Grid>
-            </Grid>
-          </TabPanel>
-
-          {/* Tab 3: Contact Info */}
-          <TabPanel value={activeTab} index={2}>
-            <Grid container spacing={2.5}>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  {intl.formatMessage({ id: 'members.contact-info-desc' }) ||
-                    'Update contact information for the member. Valid email format is required.'}
-                </Alert>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   fullWidth
                   type="email"
-                  label={intl.formatMessage({ id: 'members.email' }) || 'Email'}
-                  value={member.email || ''}
+                  label="Email"
+                  value={form.email}
                   onChange={handleChange('email')}
                   error={!!errors.email}
                   helperText={errors.email}
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.phone' }) || 'Phone'}
-                  value={member.phone || ''}
-                  onChange={handleChange('phone')}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.mobile-phone' }) || 'Mobile Phone'}
-                  value={member.mobilePhone || ''}
-                  onChange={handleChange('mobilePhone')}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.city' }) || 'City'}
-                  value={member.city || ''}
-                  onChange={handleChange('city')}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label={intl.formatMessage({ id: 'members.district' }) || 'District'}
-                  value={member.district || ''}
-                  onChange={handleChange('district')}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label={intl.formatMessage({ id: 'members.address' }) || 'Address'}
-                  value={member.address || ''}
-                  onChange={handleChange('address')}
-                />
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Address" value={form.address} onChange={handleChange('address')} />
               </Grid>
             </Grid>
-          </TabPanel>
+          </MainCard>
 
-          {/* Tab 4: Family Members (Placeholder) */}
-          <TabPanel value={activeTab} index={3}>
-            <Grid container spacing={2.5}>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  {intl.formatMessage({ id: 'members.family-info-desc' }) ||
-                    'Family members and dependents management will be available soon.'}
-                </Alert>
+          {/* Employment Information */}
+          <MainCard title="Employment Information">
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Employee Number" value={form.employeeNumber} onChange={handleChange('employeeNumber')} />
               </Grid>
-              <Grid item xs={12}>
-                <Paper elevation={0} sx={{ p: 3, textAlign: 'center', border: '1px dashed', borderColor: 'divider' }}>
-                  <FamilyRestroomIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    {intl.formatMessage({ id: 'members.no-dependents' }) || 'No dependents added yet'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {intl.formatMessage({ id: 'members.family-management-coming-soon' }) ||
-                      'Family management feature coming soon'}
-                  </Typography>
-                </Paper>
+
+              <Grid item xs={12} md={6}>
+                <DatePicker
+                  label="Join Date"
+                  value={form.joinDate ? dayjs(form.joinDate) : null}
+                  onChange={handleDateChange('joinDate')}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Occupation" value={form.occupation} onChange={handleChange('occupation')} />
               </Grid>
             </Grid>
-          </TabPanel>
+          </MainCard>
 
-          {/* Form Actions */}
-          <Divider sx={{ my: 3 }} />
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="outlined" onClick={() => navigate('/members')} disabled={saving}>
-              {intl.formatMessage({ id: 'common.cancel' }) || 'Cancel'}
-            </Button>
-            <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={saving}>
-              {saving ? intl.formatMessage({ id: 'common.saving' }) || 'Saving...' : intl.formatMessage({ id: 'common.save' }) || 'Save'}
-            </Button>
-          </Stack>
-        </Box>
-      </MainCard>
+          {/* Insurance Information */}
+          <MainCard title="Insurance Information">
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Policy Number" value={form.policyNumber} onChange={handleChange('policyNumber')} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Insurance Company</InputLabel>
+                  <Select
+                    value={form.insuranceCompanyId}
+                    onChange={handleChange('insuranceCompanyId')}
+                    label="Insurance Company"
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {insuranceCompanies.map((ins) => (
+                      <MenuItem key={ins.id} value={ins.id}>
+                        {ins.nameAr}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Benefit Package</InputLabel>
+                  <Select value={form.benefitPackageId} onChange={handleChange('benefitPackageId')} label="Benefit Package">
+                    <MenuItem value="">None</MenuItem>
+                    {benefitPackages.map((pkg) => (
+                      <MenuItem key={pkg.id} value={pkg.id}>
+                        {pkg.nameAr}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </MainCard>
+
+          {/* Membership Period & Status */}
+          <MainCard title="Membership Period & Status">
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Member Status</InputLabel>
+                  <Select value={form.status} onChange={handleChange('status')} label="Member Status">
+                    <MenuItem value="">None</MenuItem>
+                    <MenuItem value="ACTIVE">Active</MenuItem>
+                    <MenuItem value="SUSPENDED">Suspended</MenuItem>
+                    <MenuItem value="TERMINATED">Terminated</MenuItem>
+                    <MenuItem value="PENDING">Pending</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Card Status</InputLabel>
+                  <Select value={form.cardStatus} onChange={handleChange('cardStatus')} label="Card Status">
+                    <MenuItem value="">None</MenuItem>
+                    <MenuItem value="ACTIVE">Active</MenuItem>
+                    <MenuItem value="INACTIVE">Inactive</MenuItem>
+                    <MenuItem value="BLOCKED">Blocked</MenuItem>
+                    <MenuItem value="EXPIRED">Expired</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <DatePicker
+                  label="Start Date"
+                  value={form.startDate ? dayjs(form.startDate) : null}
+                  onChange={handleDateChange('startDate')}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <DatePicker
+                  label="End Date"
+                  value={form.endDate ? dayjs(form.endDate) : null}
+                  onChange={handleDateChange('endDate')}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField fullWidth multiline rows={3} label="Notes" value={form.notes} onChange={handleChange('notes')} />
+              </Grid>
+            </Grid>
+          </MainCard>
+
+          {/* Family Members */}
+          <MainCard title="Family Members">
+            <Stack spacing={2}>
+              {form.familyMembers.length > 0 && (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Full Name (AR)</TableCell>
+                        <TableCell>Civil ID</TableCell>
+                        <TableCell>Birth Date</TableCell>
+                        <TableCell>Gender</TableCell>
+                        <TableCell>Relationship</TableCell>
+                        <TableCell align="center">Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {form.familyMembers.map((fm, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{fm.fullNameArabic}</TableCell>
+                          <TableCell>{fm.civilId}</TableCell>
+                          <TableCell>{fm.birthDate}</TableCell>
+                          <TableCell>{fm.gender}</TableCell>
+                          <TableCell>{fm.relationship}</TableCell>
+                          <TableCell align="center">
+                            <IconButton size="small" color="error" onClick={() => removeFamilyMember(index)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              <Divider />
+              <Typography variant="h6">Add Family Member</Typography>
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Full Name (Arabic)"
+                    value={familyDraft.fullNameArabic}
+                    onChange={handleFamilyDraftChange('fullNameArabic')}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Full Name (English)"
+                    value={familyDraft.fullNameEnglish}
+                    onChange={handleFamilyDraftChange('fullNameEnglish')}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Civil ID"
+                    value={familyDraft.civilId}
+                    onChange={handleFamilyDraftChange('civilId')}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <DatePicker
+                    label="Birth Date"
+                    value={familyDraft.birthDate ? dayjs(familyDraft.birthDate) : null}
+                    onChange={handleFamilyDateChange}
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Gender</InputLabel>
+                    <Select value={familyDraft.gender} onChange={handleFamilyDraftChange('gender')} label="Gender">
+                      <MenuItem value="MALE">Male</MenuItem>
+                      <MenuItem value="FEMALE">Female</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Relationship</InputLabel>
+                    <Select
+                      value={familyDraft.relationship}
+                      onChange={handleFamilyDraftChange('relationship')}
+                      label="Relationship"
+                    >
+                      <MenuItem value="WIFE">Wife</MenuItem>
+                      <MenuItem value="HUSBAND">Husband</MenuItem>
+                      <MenuItem value="SON">Son</MenuItem>
+                      <MenuItem value="DAUGHTER">Daughter</MenuItem>
+                      <MenuItem value="FATHER">Father</MenuItem>
+                      <MenuItem value="MOTHER">Mother</MenuItem>
+                      <MenuItem value="BROTHER">Brother</MenuItem>
+                      <MenuItem value="SISTER">Sister</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <Button fullWidth variant="outlined" startIcon={<AddIcon />} onClick={addFamilyMember}>
+                    Add
+                  </Button>
+                </Grid>
+              </Grid>
+            </Stack>
+          </MainCard>
+
+          {/* Submit Actions */}
+          <MainCard>
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button variant="outlined" onClick={() => navigate('/members')} disabled={saving}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={saving}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </Stack>
+          </MainCard>
+        </Stack>
+      </form>
     </>
   );
 };

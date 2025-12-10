@@ -1,11 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
-import { membersService } from 'services/api/members.service';
+import { getMembers, getMemberById } from 'services/api/members.service';
 
+/**
+ * Hook for fetching paginated members list
+ * @param {Object} initialParams - Initial query parameters
+ * @returns {Object} { data, loading, error, params, setParams, refresh }
+ */
 export const useMembersList = (initialParams = {}) => {
   const [params, setParams] = useState({
     page: 1,
-    size: 10,
-    sortBy: 'id',
+    size: 20,
+    sortBy: 'createdAt',
     sortDir: 'desc',
     search: '',
     ...initialParams
@@ -15,7 +20,7 @@ export const useMembersList = (initialParams = {}) => {
     items: [],
     total: 0,
     page: 1,
-    size: 10
+    size: 20
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,15 +30,19 @@ export const useMembersList = (initialParams = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await membersService.getMembers(params);
+      const response = await getMembers(params);
+      
+      // Handle both direct pagination response or wrapped data
+      const paginationData = response?.items ? response : response;
+      
       setData({
-        items: response.items ?? [],
-        total: response.total ?? 0,
-        page: response.page ?? params.page,
-        size: response.size ?? params.size
+        items: paginationData.items || [],
+        total: paginationData.total || 0,
+        page: paginationData.page || params.page,
+        size: paginationData.size || params.size
       });
     } catch (err) {
-      console.error('Failed to load members list', err);
+      console.error('[useMembers] Failed to load members list:', err);
       setError(err);
       setData({ items: [], total: 0, page: params.page, size: params.size });
     } finally {
@@ -59,6 +68,11 @@ export const useMembersList = (initialParams = {}) => {
   };
 };
 
+/**
+ * Hook for fetching single member details
+ * @param {number} id - Member ID
+ * @returns {Object} { data, loading, error, refresh }
+ */
 export const useMemberDetails = (id) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -66,13 +80,32 @@ export const useMemberDetails = (id) => {
 
   const load = useCallback(async () => {
     if (!id) return;
+    
     try {
       setLoading(true);
       setError(null);
-      const response = await membersService.getMemberById(id);
-      setData(response);
+      const response = await getMemberById(id);
+      
+      // Transform MemberViewDto to form-friendly format
+      const memberData = {
+        ...response,
+        // Ensure dates are in correct format for date pickers
+        birthDate: response.birthDate || null,
+        joinDate: response.joinDate || null,
+        startDate: response.startDate || null,
+        endDate: response.endDate || null,
+        // Ensure enums are uppercase strings
+        gender: response.gender || '',
+        maritalStatus: response.maritalStatus || '',
+        status: response.status || '',
+        cardStatus: response.cardStatus || '',
+        // Ensure family members array exists
+        familyMembers: response.familyMembers || []
+      };
+      
+      setData(memberData);
     } catch (err) {
-      console.error('Failed to load member details', err);
+      console.error('[useMembers] Failed to load member details:', err);
       setError(err);
       setData(null);
     } finally {

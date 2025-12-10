@@ -1,5 +1,5 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useIntl } from 'react-intl';
 import {
   Box,
   Button,
@@ -7,253 +7,257 @@ import {
   CircularProgress,
   Divider,
   Grid,
-  Paper,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
+  Paper,
   Alert
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
-  Visibility as VisibilityIcon,
+  PeopleAlt as PeopleAltIcon,
   Person as PersonIcon,
-  CardMembership as CardMembershipIcon,
-  ContactPhone as ContactPhoneIcon,
+  Phone as PhoneIcon,
+  Work as WorkIcon,
+  LocalHospital as LocalHospitalIcon,
+  CalendarMonth as CalendarMonthIcon,
   FamilyRestroom as FamilyRestroomIcon
 } from '@mui/icons-material';
+
 import MainCard from 'components/MainCard';
 import ModernPageHeader from 'components/tba/ModernPageHeader';
-import { useMemberDetails } from 'hooks/useMembers';
+import { getMemberById } from 'services/api/members.service';
 
-const InfoRow = ({ label, value, type = 'text' }) => {
-  const renderValue = () => {
-    if (value === null || value === undefined || value === '') {
-      return <Typography color="text.disabled">-</Typography>;
-    }
-
-    if (type === 'boolean') {
-      return <Chip label={value ? 'Yes' : 'No'} size="small" color={value ? 'success' : 'default'} />;
-    }
-
-    if (type === 'status') {
-      return <Chip label={value ? 'Active' : 'Inactive'} size="small" color={value ? 'success' : 'error'} />;
-    }
-
-    return <Typography fontWeight={500}>{value}</Typography>;
-  };
-
-  return (
-    <Grid container spacing={1}>
-      <Grid item xs={12} sm={5}>
-        <Typography color="text.secondary">{label}</Typography>
-      </Grid>
-      <Grid item xs={12} sm={7}>
-        {renderValue()}
-      </Grid>
-    </Grid>
-  );
-};
-
-const SectionCard = ({ title, icon: Icon, children }) => {
-  return (
-    <Paper elevation={0} sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-      <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-        <Icon color="primary" />
-        <Typography variant="h6">{title}</Typography>
-      </Stack>
-      <Divider sx={{ mb: 2 }} />
-      <Stack spacing={2}>{children}</Stack>
-    </Paper>
-  );
-};
-
+/**
+ * Member View Page (Read-Only)
+ * Backend: MemberController.get → MemberViewDto
+ */
 const MemberView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const intl = useIntl();
-  const { data: member, loading, error } = useMemberDetails(id);
+
+  const [member, setMember] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadMember();
+  }, [id]);
+
+  const loadMember = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getMemberById(id);
+      setMember(data);
+    } catch (err) {
+      console.error('[MemberView] Failed to load member:', err);
+      setError(err.response?.data?.message || 'Failed to load member');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
       </Box>
     );
   }
 
-  if (error || !member) {
+  if (error) {
     return (
-      <MainCard>
-        <Alert severity="error">
-          {intl.formatMessage({ id: 'common.error' }) || 'Error'}: {error?.message || 'Member not found'}
-        </Alert>
-      </MainCard>
+      <>
+        <ModernPageHeader
+          title="Member Details"
+          subtitle="View member information"
+          icon={PeopleAltIcon}
+          breadcrumbs={[
+            { label: 'Members', path: '/members' },
+            { label: 'View Member', path: `/members/view/${id}` }
+          ]}
+        />
+        <MainCard>
+          <Alert severity="error">{error}</Alert>
+          <Box sx={{ mt: 2 }}>
+            <Button variant="outlined" onClick={() => navigate('/members')}>
+              Back to List
+            </Button>
+          </Box>
+        </MainCard>
+      </>
     );
   }
+
+  if (!member) {
+    return null;
+  }
+
+  const InfoRow = ({ label, value }) => (
+    <Grid container spacing={2} sx={{ py: 1 }}>
+      <Grid item xs={12} sm={4}>
+        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+          {label}
+        </Typography>
+      </Grid>
+      <Grid item xs={12} sm={8}>
+        <Typography variant="body2">{value || '-'}</Typography>
+      </Grid>
+    </Grid>
+  );
+
+  const SectionCard = ({ title, icon, children }) => (
+    <MainCard
+      title={
+        <Stack direction="row" spacing={1} alignItems="center">
+          {icon}
+          <Typography variant="h5">{title}</Typography>
+        </Stack>
+      }
+    >
+      {children}
+    </MainCard>
+  );
 
   return (
     <>
       <ModernPageHeader
-        title={intl.formatMessage({ id: 'members.view' }) || 'View Member'}
-        subtitle={member.fullNameAr || member.memberCode}
-        icon={VisibilityIcon}
+        title={member.fullNameArabic || member.fullNameEnglish || 'Member Details'}
+        subtitle={`Civil ID: ${member.civilId || 'N/A'}`}
+        icon={PeopleAltIcon}
         breadcrumbs={[
-          { label: intl.formatMessage({ id: 'members.list' }) || 'Members', path: '/members' },
-          { label: intl.formatMessage({ id: 'members.view' }) || 'View', path: `/members/view/${id}` }
+          { label: 'Members', path: '/members' },
+          { label: 'View Member', path: `/members/view/${id}` }
         ]}
         actions={
           <Stack direction="row" spacing={2}>
-            <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/members')} variant="outlined">
-              {intl.formatMessage({ id: 'common.back' }) || 'Back'}
+            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/members')}>
+              Back to List
             </Button>
-            <Button startIcon={<EditIcon />} onClick={() => navigate(`/members/edit/${id}`)} variant="contained">
-              {intl.formatMessage({ id: 'common.edit' }) || 'Edit'}
+            <Button variant="contained" startIcon={<EditIcon />} onClick={() => navigate(`/members/edit/${id}`)}>
+              Edit Member
             </Button>
           </Stack>
         }
       />
 
-      <Grid container spacing={3}>
-        {/* Section 1: Personal Info */}
-        <Grid item xs={12} md={6}>
-          <SectionCard title={intl.formatMessage({ id: 'members.personal-info' }) || 'Personal Information'} icon={PersonIcon}>
-            <InfoRow label={intl.formatMessage({ id: 'common.id' }) || 'ID'} value={member.id} />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.national-id' }) || 'National ID'}
-              value={member.nationalId}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.full-name-ar' }) || 'Full Name (Arabic)'}
-              value={member.fullNameAr}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.full-name-en' }) || 'Full Name (English)'}
-              value={member.fullNameEn}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.birth-date' }) || 'Birth Date'}
-              value={member.birthDate}
-            />
-            <InfoRow label={intl.formatMessage({ id: 'members.gender' }) || 'Gender'} value={member.gender} />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.marital-status' }) || 'Marital Status'}
-              value={member.maritalStatus}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.nationality' }) || 'Nationality'}
-              value={member.nationality}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.occupation' }) || 'Occupation'}
-              value={member.occupation}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.blood-type' }) || 'Blood Type'}
-              value={member.bloodType}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.height' }) || 'Height (cm)'}
-              value={member.height}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.weight' }) || 'Weight (kg)'}
-              value={member.weight}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.chronic-diseases' }) || 'Chronic Diseases'}
-              value={member.chronicDiseases}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.allergies' }) || 'Allergies'}
-              value={member.allergies}
-            />
-            <InfoRow label={intl.formatMessage({ id: 'members.notes' }) || 'Notes'} value={member.notes} />
-          </SectionCard>
-        </Grid>
-
-        {/* Section 2: Insurance Details */}
-        <Grid item xs={12} md={6}>
-          <SectionCard
-            title={intl.formatMessage({ id: 'members.insurance-info' }) || 'Insurance Details'}
-            icon={CardMembershipIcon}
-          >
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.member-code' }) || 'Member Code'}
-              value={member.memberCode}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.employer' }) || 'Employer'}
-              value={member.employerName}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.insurance-company' }) || 'Insurance Company'}
-              value={member.insuranceCompanyName}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.policy-number' }) || 'Policy Number'}
-              value={member.policyNumber}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.coverage-start-date' }) || 'Coverage Start Date'}
-              value={member.coverageStartDate}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.coverage-end-date' }) || 'Coverage End Date'}
-              value={member.coverageEndDate}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.dependent-type' }) || 'Dependent Type'}
-              value={member.dependentType}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.max-coverage-amount' }) || 'Max Coverage Amount'}
-              value={member.maxCoverageAmount}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.copayment-percentage' }) || 'Copayment (%)'}
-              value={member.copaymentPercentage}
-            />
-            <InfoRow
-              label={intl.formatMessage({ id: 'common.status' }) || 'Status'}
-              value={member.active}
-              type="status"
-            />
-          </SectionCard>
-        </Grid>
-
-        {/* Section 3: Contact Info */}
-        <Grid item xs={12} md={6}>
-          <SectionCard
-            title={intl.formatMessage({ id: 'members.contact-info' }) || 'Contact Information'}
-            icon={ContactPhoneIcon}
-          >
-            <InfoRow label={intl.formatMessage({ id: 'members.email' }) || 'Email'} value={member.email} />
-            <InfoRow label={intl.formatMessage({ id: 'members.phone' }) || 'Phone'} value={member.phone} />
-            <InfoRow
-              label={intl.formatMessage({ id: 'members.mobile-phone' }) || 'Mobile Phone'}
-              value={member.mobilePhone}
-            />
-            <InfoRow label={intl.formatMessage({ id: 'members.city' }) || 'City'} value={member.city} />
-            <InfoRow label={intl.formatMessage({ id: 'members.district' }) || 'District'} value={member.district} />
-            <InfoRow label={intl.formatMessage({ id: 'members.address' }) || 'Address'} value={member.address} />
-          </SectionCard>
-        </Grid>
-
-        {/* Section 4: Family Members (Placeholder) */}
-        <Grid item xs={12} md={6}>
-          <SectionCard
-            title={intl.formatMessage({ id: 'members.family-info' }) || 'Family Members'}
-            icon={FamilyRestroomIcon}
-          >
-            <Paper elevation={0} sx={{ p: 3, textAlign: 'center', border: '1px dashed', borderColor: 'divider' }}>
-              <FamilyRestroomIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-              <Typography variant="body2" color="text.secondary">
-                {intl.formatMessage({ id: 'members.no-dependents' }) || 'No dependents added yet'}
+      <Stack spacing={3}>
+        {/* Personal Information */}
+        <SectionCard title="Personal Information" icon={<PersonIcon color="primary" />}>
+          <InfoRow label="Full Name (Arabic)" value={member.fullNameArabic} />
+          <InfoRow label="Full Name (English)" value={member.fullNameEnglish} />
+          <Divider />
+          <InfoRow label="Civil ID" value={member.civilId} />
+          <InfoRow label="Card Number" value={member.cardNumber} />
+          <Divider />
+          <InfoRow label="Birth Date" value={member.birthDate} />
+          <InfoRow label="Gender" value={member.gender} />
+          <InfoRow label="Marital Status" value={member.maritalStatus} />
+          <InfoRow label="Nationality" value={member.nationality} />
+          <Divider />
+          <Grid container spacing={2} sx={{ py: 1 }}>
+            <Grid item xs={12} sm={4}>
+              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                Status
               </Typography>
-            </Paper>
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <Chip label={member.active ? 'Active' : 'Inactive'} color={member.active ? 'success' : 'error'} size="small" />
+            </Grid>
+          </Grid>
+        </SectionCard>
+
+        {/* Contact Information */}
+        <SectionCard title="Contact Information" icon={<PhoneIcon color="primary" />}>
+          <InfoRow label="Phone" value={member.phone} />
+          <InfoRow label="Email" value={member.email} />
+          <InfoRow label="Address" value={member.address} />
+        </SectionCard>
+
+        {/* Employment Information */}
+        <SectionCard title="Employment Information" icon={<WorkIcon color="primary" />}>
+          <InfoRow label="Employer" value={member.employerName} />
+          <InfoRow label="Employee Number" value={member.employeeNumber} />
+          <InfoRow label="Join Date" value={member.joinDate} />
+          <InfoRow label="Occupation" value={member.occupation} />
+        </SectionCard>
+
+        {/* Insurance Information */}
+        <SectionCard title="Insurance Information" icon={<LocalHospitalIcon color="primary" />}>
+          <InfoRow label="Policy Number" value={member.policyNumber} />
+          <InfoRow label="Insurance Company" value={member.insuranceCompanyName} />
+          <InfoRow label="Benefit Package ID" value={member.benefitPackageId} />
+        </SectionCard>
+
+        {/* Membership Period & Status */}
+        <SectionCard title="Membership Period & Status" icon={<CalendarMonthIcon color="primary" />}>
+          <InfoRow label="Member Status" value={member.status} />
+          <InfoRow label="Card Status" value={member.cardStatus} />
+          <Divider />
+          <InfoRow label="Start Date" value={member.startDate} />
+          <InfoRow label="End Date" value={member.endDate} />
+          <Divider />
+          <InfoRow label="Blocked Reason" value={member.blockedReason} />
+          <InfoRow label="Eligibility Status" value={member.eligibilityStatus ? 'Eligible' : 'Not Eligible'} />
+          <Divider />
+          <InfoRow label="QR Code" value={member.qrCodeValue} />
+          <InfoRow label="Photo URL" value={member.photoUrl} />
+          <InfoRow label="Notes" value={member.notes} />
+        </SectionCard>
+
+        {/* Family Members */}
+        {member.familyMembers && member.familyMembers.length > 0 && (
+          <SectionCard title={`Family Members (${member.familyMembersCount || member.familyMembers.length})`} icon={<FamilyRestroomIcon color="primary" />}>
+            <TableContainer component={Paper} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Full Name (AR)</TableCell>
+                    <TableCell>Full Name (EN)</TableCell>
+                    <TableCell>Civil ID</TableCell>
+                    <TableCell>Birth Date</TableCell>
+                    <TableCell>Gender</TableCell>
+                    <TableCell>Relationship</TableCell>
+                    <TableCell>Card Number</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {member.familyMembers.map((fm, index) => (
+                    <TableRow key={fm.id || index}>
+                      <TableCell>{fm.fullNameArabic}</TableCell>
+                      <TableCell>{fm.fullNameEnglish || '-'}</TableCell>
+                      <TableCell>{fm.civilId}</TableCell>
+                      <TableCell>{fm.birthDate}</TableCell>
+                      <TableCell>{fm.gender}</TableCell>
+                      <TableCell>{fm.relationship}</TableCell>
+                      <TableCell>{fm.cardNumber || '-'}</TableCell>
+                      <TableCell>
+                        <Chip label={fm.active ? 'Active' : 'Inactive'} size="small" color={fm.active ? 'success' : 'default'} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </SectionCard>
-        </Grid>
-      </Grid>
+        )}
+
+        {/* Audit Information */}
+        <SectionCard title="Audit Information" icon={<CalendarMonthIcon color="primary" />}>
+          <InfoRow label="Created By" value={member.createdBy} />
+          <InfoRow label="Created At" value={member.createdAt ? new Date(member.createdAt).toLocaleString() : '-'} />
+          <InfoRow label="Updated By" value={member.updatedBy} />
+          <InfoRow label="Updated At" value={member.updatedAt ? new Date(member.updatedAt).toLocaleString() : '-'} />
+        </SectionCard>
+      </Stack>
     </>
   );
 };

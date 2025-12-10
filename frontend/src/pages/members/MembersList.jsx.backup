@@ -29,7 +29,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   PeopleAlt as PeopleAltIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Upload as UploadIcon
 } from '@mui/icons-material';
 
 import MainCard from 'components/MainCard';
@@ -37,24 +38,21 @@ import ModernPageHeader from 'components/tba/ModernPageHeader';
 import ModernEmptyState from 'components/tba/ModernEmptyState';
 import TableSkeleton from 'components/tba/LoadingSkeleton';
 import { useMembersList } from 'hooks/useMembers';
-import { deleteMember } from 'services/api/members.service';
+import { membersService } from 'services/api/members.service';
+import MembersBulkUploadDialog from 'components/members/MembersBulkUploadDialog';
 
-/**
- * Members List Page
- * Displays paginated list of members with search, sort, and CRUD operations
- * Backend: MemberController → MemberViewDto (list endpoint)
- */
 const MembersList = () => {
   const navigate = useNavigate();
   const intl = useIntl();
   const [searchInput, setSearchInput] = useState('');
-  const [orderBy, setOrderBy] = useState('createdAt');
+  const [orderBy, setOrderBy] = useState('id');
   const [order, setOrder] = useState('desc');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const { data, loading, error, params, setParams, refresh } = useMembersList({
     page: 1,
-    size: 20,
-    sortBy: 'createdAt',
+    size: 10,
+    sortBy: 'id',
     sortDir: 'desc'
   });
 
@@ -96,51 +94,37 @@ const MembersList = () => {
   const handleDelete = async (id) => {
     if (!window.confirm(intl.formatMessage({ id: 'members.delete-confirm' }) || 'Delete this member?')) return;
     try {
-      await deleteMember(id);
+      await membersService.deleteMember(id);
       refresh();
     } catch (err) {
-      console.error('[MembersList] Failed to delete member:', err);
-      alert(intl.formatMessage({ id: 'common.error' }) || 'Failed to delete member');
+      console.error('Failed to delete member', err);
+      alert(intl.formatMessage({ id: 'common.error' }) || 'Failed to delete');
     }
   };
 
   const handleRefresh = () => {
     setSearchInput('');
-    setParams({ page: 1, size: 20, sortBy: 'createdAt', sortDir: 'desc', search: '' });
+    setParams({ page: 1, size: 10, sortBy: 'id', sortDir: 'desc', search: '' });
     refresh();
   };
 
-  // Table columns based on MemberViewDto fields
   const headCells = [
     { id: 'id', label: intl.formatMessage({ id: 'common.id' }) || 'ID', sortable: true },
+    { id: 'memberCode', label: intl.formatMessage({ id: 'members.member-code' }) || 'Member Code', sortable: true },
+    { id: 'nationalId', label: intl.formatMessage({ id: 'members.national-id' }) || 'National ID', sortable: true },
     {
-      id: 'fullNameArabic',
-      label: intl.formatMessage({ id: 'members.full-name' }) || 'Full Name',
-      sortable: true
-    },
-    {
-      id: 'civilId',
-      label: intl.formatMessage({ id: 'members.civil-id' }) || 'Civil ID',
+      id: 'fullNameAr',
+      label: intl.formatMessage({ id: 'members.full-name-ar' }) || 'Full Name (AR)',
       sortable: true
     },
     {
       id: 'employerName',
-      label: intl.formatMessage({ id: 'members.employer' }) || 'Employer',
+      label: intl.formatMessage({ id: 'members.employer-name' }) || 'Employer',
       sortable: false
     },
     {
-      id: 'policyNumber',
-      label: intl.formatMessage({ id: 'members.policy-number' }) || 'Policy Number',
-      sortable: true
-    },
-    {
-      id: 'phone',
-      label: intl.formatMessage({ id: 'common.phone' }) || 'Phone',
-      sortable: false
-    },
-    {
-      id: 'email',
-      label: intl.formatMessage({ id: 'common.email' }) || 'Email',
+      id: 'insuranceCompany',
+      label: intl.formatMessage({ id: 'members.insurance-company' }) || 'Insurance Company',
       sortable: false
     },
     { id: 'active', label: intl.formatMessage({ id: 'common.status' }) || 'Status', sortable: true },
@@ -197,31 +181,21 @@ const MembersList = () => {
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2" fontWeight={500}>
-            {member.fullNameArabic || member.fullNameEnglish || '-'}
-          </Typography>
-          {member.fullNameEnglish && (
-            <Typography variant="caption" color="text.secondary" display="block">
-              {member.fullNameEnglish}
-            </Typography>
-          )}
+          <Chip label={member.memberCode || '-'} size="small" variant="outlined" color="primary" />
         </TableCell>
         <TableCell>
-          <Chip label={member.civilId || '-'} size="small" variant="outlined" color="primary" />
+          <Typography variant="body2">{member.nationalId || '-'}</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2" fontWeight={500}>
+            {member.fullNameAr || '-'}
+          </Typography>
         </TableCell>
         <TableCell>
           <Typography variant="body2">{member.employerName || '-'}</Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2">{member.policyNumber || '-'}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body2">{member.phone || '-'}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-            {member.email || '-'}
-          </Typography>
+          <Typography variant="body2">{member.insuranceCompanyName || '-'}</Typography>
         </TableCell>
         <TableCell>
           <Chip
@@ -271,6 +245,9 @@ const MembersList = () => {
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
+            <Button variant="outlined" startIcon={<UploadIcon />} onClick={() => setUploadDialogOpen(true)}>
+              {intl.formatMessage({ id: 'members.bulk-upload' }) || 'Upload Excel'}
+            </Button>
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/members/create')}>
               {intl.formatMessage({ id: 'members.add' }) || 'Add Member'}
             </Button>
@@ -333,7 +310,7 @@ const MembersList = () => {
         {/* Pagination */}
         {!loading && !error && data?.items && data.items.length > 0 && (
           <TablePagination
-            rowsPerPageOptions={[10, 20, 50, 100]}
+            rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
             count={data.total || 0}
             rowsPerPage={params.size}
@@ -344,6 +321,9 @@ const MembersList = () => {
           />
         )}
       </MainCard>
+
+      {/* Bulk Upload Dialog */}
+      <MembersBulkUploadDialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)} onSuccess={refresh} />
     </>
   );
 };
