@@ -66,37 +66,67 @@ export const useRBACStore = create((set, get) => ({
   },
 
   /**
-   * Initialize RBAC state from localStorage
+   * Initialize RBAC state from backend user data or localStorage
    * Called after login or on app startup
+   * @param {Object} userData - User data from backend (optional)
    */
-  initialize: () => {
+  initialize: (userData = null) => {
     try {
-      // Load roles
-      const rolesStr = localStorage.getItem(STORAGE_KEYS.ROLES);
-      const roles = rolesStr ? JSON.parse(rolesStr) : [];
+      let roles = [];
+      let user = null;
+      let employerId = null;
+      let permissions = [];
 
-      // Load user data
-      const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-      const user = userStr ? JSON.parse(userStr) : null;
+      if (userData) {
+        // Initialize from backend response (login)
+        roles = userData.roles || [];
+        user = userData;
+        permissions = userData.permissions || [];
+        
+        // Save to localStorage
+        localStorage.setItem(STORAGE_KEYS.ROLES, JSON.stringify(roles));
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        
+        // Set employer context
+        if (roles.includes('EMPLOYER') && user.employerId) {
+          // EMPLOYER role locked to their company
+          employerId = user.employerId;
+        } else {
+          // Other roles: try to restore from localStorage
+          const storedEmployerId = localStorage.getItem(STORAGE_KEYS.EMPLOYER_ID);
+          employerId = storedEmployerId ? parseInt(storedEmployerId, 10) : null;
+        }
+        
+        if (employerId) {
+          localStorage.setItem(STORAGE_KEYS.EMPLOYER_ID, employerId.toString());
+        }
+      } else {
+        // Initialize from localStorage (page refresh)
+        const rolesStr = localStorage.getItem(STORAGE_KEYS.ROLES);
+        roles = rolesStr ? JSON.parse(rolesStr) : [];
 
-      // Load employer context
-      let employerId = localStorage.getItem(STORAGE_KEYS.EMPLOYER_ID);
-      employerId = employerId ? parseInt(employerId, 10) : null;
+        const userStr = localStorage.getItem(STORAGE_KEYS.USER);
+        user = userStr ? JSON.parse(userStr) : null;
 
-      // EMPLOYER role MUST use their own employerId (locked)
-      if (roles.includes('EMPLOYER') && user?.employerId) {
-        employerId = user.employerId;
-        localStorage.setItem(STORAGE_KEYS.EMPLOYER_ID, user.employerId.toString());
+        const employerIdStr = localStorage.getItem(STORAGE_KEYS.EMPLOYER_ID);
+        employerId = employerIdStr ? parseInt(employerIdStr, 10) : null;
+
+        // EMPLOYER role MUST use their own employerId (locked)
+        if (roles.includes('EMPLOYER') && user?.employerId) {
+          employerId = user.employerId;
+          localStorage.setItem(STORAGE_KEYS.EMPLOYER_ID, user.employerId.toString());
+        }
       }
 
       set({
         roles,
+        permissions,
         user,
         employerId,
         isInitialized: true
       });
 
-      console.log('🔒 RBAC Initialized:', { roles, employerId, user: user?.username });
+      console.log('🔒 RBAC Initialized:', { roles, employerId, user: user?.username || user?.name });
     } catch (error) {
       console.error('Failed to initialize RBAC:', error);
       set({ isInitialized: true });
