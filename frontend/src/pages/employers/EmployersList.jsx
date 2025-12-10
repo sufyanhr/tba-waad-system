@@ -162,13 +162,16 @@ const EmployersList = () => {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>
-                    {intl.formatMessage({ id: 'employers.employer-code' }) || 'Employer Code'}
+                    {intl.formatMessage({ id: 'employers.code' }) || 'Code'}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>
                     {intl.formatMessage({ id: 'employers.name-ar' }) || 'Name (Arabic)'}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>
                     {intl.formatMessage({ id: 'employers.name-en' }) || 'Name (English)'}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    {intl.formatMessage({ id: 'common.phone' }) || 'Phone'}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>
                     {intl.formatMessage({ id: 'common.status' }) || 'Status'}
@@ -182,7 +185,7 @@ const EmployersList = () => {
                 {employers.map((employer) => (
                   <TableRow hover key={employer.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell>
-                      <Chip label={employer.employerCode || '-'} size="small" variant="outlined" color="primary" />
+                      <Chip label={employer.code || '-'} size="small" variant="outlined" color="primary" />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" fontWeight={500}>
@@ -191,6 +194,9 @@ const EmployersList = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">{employer.nameEn || '-'}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{employer.phone || '-'}</Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -234,7 +240,7 @@ const EmployersList = () => {
             {employerToDelete && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2" fontWeight={600}>
-                  {employerToDelete.nameAr || employerToDelete.employerCode}
+                  {employerToDelete.nameAr || employerToDelete.code}
                 </Typography>
               </Box>
             )}

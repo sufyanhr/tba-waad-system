@@ -915,7 +915,7 @@
 "@types/react-transition-group@^4.4.12":
   version "4.4.12"
 
-"@types/react@*", "@types/react@^17.0.0 || ^18.0.0 || ^19.0.0", "@types/react@16 || 17 || 18 || 19":
+"@types/react@*", "@types/react@^17.0.0 || ^18.0.0 || ^19.0.0", "@types/react@>=18.0.0", "@types/react@16 || 17 || 18 || 19":
   version "19.2.7"
   dependencies:
     csstype "^3.2.2"
@@ -2986,7 +2986,7 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-sync-external-store@^1.6.0:
+use-sync-external-store@^1.6.0, use-sync-external-store@>=1.2.0:
   version "1.6.0"
 
 util-deprecate@^1.0.1:
@@ -3102,3 +3102,8 @@ yup@1.7.1:
 
 "zod@^3.22.4 || ^4.0.0", "zod@^3.25.0 || ^4.0.0":
   version "4.1.13"
+
+zustand@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.npmjs.org/zustand/-/zustand-5.0.9.tgz"
+  integrity sha512-ALBtUj0AfjJt3uNRQoL1tL2tMvj6Gp/6e39dnfT6uzpelGru8v1tPOGBzayOWbPJvujM8JojDk3E1LxeFisBNg==

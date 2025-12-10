@@ -53,8 +53,8 @@ const EmployerEdit = () => {
   const validate = () => {
     if (!employer) return false;
     const newErrors = {};
-    if (!employer.employerCode?.trim()) {
-      newErrors.employerCode = intl.formatMessage({ id: 'validation.required' }) || 'Required';
+    if (!employer.code?.trim()) {
+      newErrors.code = intl.formatMessage({ id: 'validation.required' }) || 'Required';
     }
     if (!employer.nameAr?.trim()) {
       newErrors.nameAr = intl.formatMessage({ id: 'validation.required' }) || 'Required';
@@ -130,7 +130,7 @@ const EmployerEdit = () => {
     <>
       <ModernPageHeader
         title={intl.formatMessage({ id: 'employers.edit' }) || 'Edit Employer'}
-        subtitle={employer.nameAr || employer.employerCode}
+        subtitle={employer.nameAr || employer.code}
         icon={EditIcon}
         breadcrumbs={[
           { label: intl.formatMessage({ id: 'employers.list' }) || 'Employers', path: '/employers' },
@@ -152,10 +152,10 @@ const EmployerEdit = () => {
                 fullWidth
                 required
                 label={intl.formatMessage({ id: 'employers.employer-code' }) || 'Employer Code'}
-                value={employer.employerCode || ''}
-                onChange={handleChange('employerCode')}
-                error={!!errors.employerCode}
-                helperText={errors.employerCode}
+                value={employer.code || ''}
+                onChange={handleChange('code')}
+                error={!!errors.code}
+                helperText={errors.code}
                 placeholder={intl.formatMessage({ id: 'employers.employer-code-placeholder' }) || 'Enter employer code'}
               />
             </Grid>
