@@ -152,34 +152,52 @@ export const useRBACStore = create((set, get) => ({
   },
 
   /**
+   * Check if user has SUPER_ADMIN role (bypass all checks)
+   * @returns {boolean}
+   */
+  isSuperAdmin: () => {
+    const { roles } = get();
+    return roles.includes('SUPER_ADMIN');
+  },
+
+  /**
    * Check if user has any of the required roles
+   * SUPER_ADMIN bypasses all role checks
    * @param {string[]} requiredRoles - Array of role names
    * @returns {boolean}
    */
   hasAnyRole: (requiredRoles) => {
     const { roles } = get();
+    // SUPER_ADMIN bypasses all checks
+    if (roles.includes('SUPER_ADMIN')) return true;
     if (!requiredRoles || requiredRoles.length === 0) return true;
     return roles.some((role) => requiredRoles.includes(role));
   },
 
   /**
    * Check if user has all required roles
+   * SUPER_ADMIN bypasses all role checks
    * @param {string[]} requiredRoles - Array of role names
    * @returns {boolean}
    */
   hasAllRoles: (requiredRoles) => {
     const { roles } = get();
+    // SUPER_ADMIN bypasses all checks
+    if (roles.includes('SUPER_ADMIN')) return true;
     if (!requiredRoles || requiredRoles.length === 0) return true;
     return requiredRoles.every((role) => roles.includes(role));
   },
 
   /**
    * Check if user has specific permission
+   * SUPER_ADMIN bypasses all permission checks
    * @param {string} permission - Permission name
    * @returns {boolean}
    */
   hasPermission: (permission) => {
-    const { permissions } = get();
+    const { roles, permissions } = get();
+    // SUPER_ADMIN bypasses all checks
+    if (roles.includes('SUPER_ADMIN')) return true;
     return permissions.includes(permission);
   },
 
@@ -250,6 +268,7 @@ export const useRBAC = () => {
   const hasAnyRole = useRBACStore((state) => state.hasAnyRole);
   const hasAllRoles = useRBACStore((state) => state.hasAllRoles);
   const hasPermission = useRBACStore((state) => state.hasPermission);
+  const isSuperAdmin = useRBACStore((state) => state.isSuperAdmin);
   const isEmployerRole = useRBACStore((state) => state.isEmployerRole);
   const canSwitchEmployer = useRBACStore((state) => state.canSwitchEmployer);
 
@@ -262,6 +281,7 @@ export const useRBAC = () => {
     hasAnyRole,
     hasAllRoles,
     hasPermission,
+    isSuperAdmin: isSuperAdmin(),
     isEmployerRole: isEmployerRole(),
     canSwitch: canSwitchEmployer()
   };

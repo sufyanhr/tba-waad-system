@@ -20,7 +20,7 @@ import { useRBAC } from 'api/rbac';
  * @returns {React.ReactNode}
  */
 const RouteGuard = ({ allowedRoles = [], children }) => {
-  const { roles, isInitialized } = useRBAC();
+  const { roles, isInitialized, isSuperAdmin } = useRBAC();
 
   // FIX #1: Show loading spinner instead of null
   if (!isInitialized) {
@@ -48,6 +48,12 @@ const RouteGuard = ({ allowedRoles = [], children }) => {
   if (!roles || roles.length === 0) {
     console.warn('🚫 RouteGuard: No roles found (user not logged in), redirecting to /login');
     return <Navigate to="/login" replace />;
+  }
+
+  // SUPER_ADMIN BYPASS: Full unrestricted access
+  if (isSuperAdmin) {
+    console.log('👑 RouteGuard: SUPER_ADMIN detected - Bypassing all checks');
+    return children;
   }
 
   // FIX #3: If no specific roles required, allow access (authenticated route)

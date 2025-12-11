@@ -26,6 +26,13 @@
   "nav.profile": "Profile",
   "nav.audit": "Audit Log",
   "nav.logout": "Logout",
+  "nav.system-admin": "System Administration",
+  "nav.user-management": "User Management",
+  "nav.role-management": "Role Management",
+  "nav.permission-matrix": "Permission Matrix",
+  "nav.feature-flags": "Feature Flags",
+  "nav.module-access": "Module Access Control",
+  "nav.audit-log": "Audit Log",
   
   "dashboard.welcome": "Welcome to AlWahaCare System",
   "dashboard.welcome-description": "Comprehensive management system for insurance and medical services with advanced features for managing members, claims, and reports",

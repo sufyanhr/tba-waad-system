@@ -26,6 +26,13 @@
   "nav.profile": "الملف الشخصي",
   "nav.audit": "سجل التدقيق",
   "nav.logout": "تسجيل الخروج",
+  "nav.system-admin": "إدارة النظام",
+  "nav.user-management": "إدارة المستخدمين",
+  "nav.role-management": "إدارة الأدوار",
+  "nav.permission-matrix": "مصفوفة الصلاحيات",
+  "nav.feature-flags": "التحكم بالميزات",
+  "nav.module-access": "التحكم بالوحدات",
+  "nav.audit-log": "سجل التدقيق الشامل",
   
   "dashboard.welcome": "مرحباً بك في نظام الواحة كير",
   "dashboard.welcome-description": "نظام إدارة شامل للتأمين والخدمات الطبية مع ميزات متقدمة لإدارة الأعضاء والمطالبات والتقارير",

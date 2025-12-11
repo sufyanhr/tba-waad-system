@@ -12,7 +12,13 @@ import {
   Category,
   LocalOffer,
   AssignmentInd,
-  Description
+  Description,
+  AdminPanelSettings,
+  ManageAccounts,
+  Shield,
+  ViewModule,
+  ToggleOn,
+  Assignment
 } from '@mui/icons-material';
 import useAuth from './useAuth';
 import axios from 'utils/axios';
@@ -188,6 +194,66 @@ const useRBACSidebar = () => {
         path: '/audit',
         roles: ['SUPER_ADMIN', 'INSURANCE_ADMIN'],
         permissions: []
+      },
+      // ==================== SYSTEM ADMINISTRATION (SUPER_ADMIN ONLY) ====================
+      {
+        id: 'system-admin',
+        label: 'nav.system-admin',
+        icon: AdminPanelSettings,
+        path: '/system-admin',
+        roles: ['SUPER_ADMIN'],
+        permissions: [],
+        isGroup: true,
+        children: [
+          {
+            id: 'user-management',
+            label: 'nav.user-management',
+            icon: ManageAccounts,
+            path: '/system-admin/users',
+            roles: ['SUPER_ADMIN'],
+            permissions: []
+          },
+          {
+            id: 'role-management',
+            label: 'nav.role-management',
+            icon: Shield,
+            path: '/system-admin/roles',
+            roles: ['SUPER_ADMIN'],
+            permissions: []
+          },
+          {
+            id: 'permission-matrix',
+            label: 'nav.permission-matrix',
+            icon: Security,
+            path: '/system-admin/permissions',
+            roles: ['SUPER_ADMIN'],
+            permissions: []
+          },
+          {
+            id: 'feature-flags',
+            label: 'nav.feature-flags',
+            icon: ToggleOn,
+            path: '/system-admin/features',
+            roles: ['SUPER_ADMIN'],
+            permissions: []
+          },
+          {
+            id: 'module-access',
+            label: 'nav.module-access',
+            icon: ViewModule,
+            path: '/system-admin/modules',
+            roles: ['SUPER_ADMIN'],
+            permissions: []
+          },
+          {
+            id: 'audit-log',
+            label: 'nav.audit-log',
+            icon: Assignment,
+            path: '/system-admin/audit',
+            roles: ['SUPER_ADMIN'],
+            permissions: []
+          }
+        ]
       }
     ];
 
