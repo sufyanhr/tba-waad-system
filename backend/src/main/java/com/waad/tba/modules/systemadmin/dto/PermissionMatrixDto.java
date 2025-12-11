@@ -1,12 +1,12 @@
 package com.waad.tba.modules.systemadmin.dto;
 
+import java.util.List;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * DTO for Permission Matrix (Roles × Permissions)

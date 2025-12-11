@@ -1,12 +1,13 @@
 package com.waad.tba.modules.systemadmin.repository;
 
-import com.waad.tba.modules.systemadmin.entity.FeatureFlag;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.waad.tba.modules.systemadmin.entity.FeatureFlag;
 
 /**
  * Repository for Feature Flag Entity

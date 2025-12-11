@@ -1,5 +1,13 @@
 package com.waad.tba.modules.systemadmin.service;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.waad.tba.common.exception.ResourceNotFoundException;
 import com.waad.tba.modules.rbac.entity.Permission;
 import com.waad.tba.modules.rbac.entity.Role;
@@ -10,15 +18,9 @@ import com.waad.tba.modules.rbac.repository.UserRepository;
 import com.waad.tba.modules.systemadmin.dto.RoleCreateDto;
 import com.waad.tba.modules.systemadmin.dto.RoleUpdateDto;
 import com.waad.tba.modules.systemadmin.dto.RoleViewDto;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Role Management Service
