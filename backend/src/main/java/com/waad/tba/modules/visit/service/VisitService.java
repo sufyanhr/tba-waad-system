@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.waad.tba.common.exception.ResourceNotFoundException;
-import com.waad.tba.modules.audit.service.AuditTrailService;
 import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.repository.MemberRepository;
 import com.waad.tba.modules.rbac.entity.User;
+import com.waad.tba.modules.systemadmin.service.AuditLogService;
 import com.waad.tba.modules.visit.dto.VisitCreateDto;
 import com.waad.tba.modules.visit.dto.VisitResponseDto;
 import com.waad.tba.modules.visit.entity.Visit;
@@ -34,7 +34,7 @@ public class VisitService {
     private final MemberRepository memberRepository;
     private final VisitMapper mapper;
     private final AuthorizationService authorizationService;
-    private final AuditTrailService auditTrailService;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<VisitResponseDto> findAll() {
@@ -133,7 +133,9 @@ public class VisitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", id));
         
         // Audit log: Visit viewed
-        auditTrailService.logView("Visit", id, currentUser);
+        auditLogService.createAuditLog("VIEW", "VISIT", id, 
+            "Visit viewed by " + currentUser.getUsername(),
+            currentUser.getId(), currentUser.getUsername(), null, null);
         
         log.debug("Visit {} accessed successfully by user {}", id, currentUser.getUsername());
         return mapper.toResponseDto(entity);

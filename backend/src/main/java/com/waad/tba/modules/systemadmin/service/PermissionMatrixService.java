@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Permission Service
+ * Permission Matrix Service
  * Phase 2 - System Administration
  * 
  * Manages permission matrix and permission-role assignments (SUPER_ADMIN only)
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PermissionService {
+public class PermissionMatrixService {
 
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
