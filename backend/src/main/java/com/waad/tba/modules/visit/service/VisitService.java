@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.waad.tba.common.exception.ResourceNotFoundException;
-import com.waad.tba.modules.member.entity.Member;
 import com.waad.tba.modules.member.repository.MemberRepository;
 import com.waad.tba.modules.rbac.entity.User;
+import com.waad.tba.modules.systemadmin.service.AuditLogService;
 import com.waad.tba.modules.systemadmin.service.AuditLogService;
 import com.waad.tba.modules.visit.dto.VisitCreateDto;
 import com.waad.tba.modules.visit.dto.VisitResponseDto;
