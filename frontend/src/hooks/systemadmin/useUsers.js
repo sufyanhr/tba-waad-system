@@ -107,11 +107,11 @@ export const useUsers = () => {
   };
 
   // Toggle user status
-  const toggleUserStatus = async (id, active) => {
+  const toggleUserStatus = async (id) => {
     setLoading(true);
     setError(null);
     try {
-      await usersService.toggleUserStatus(id, active);
+      await usersService.toggleUserStatus(id);
       await fetchUsers(pagination.page, pagination.size);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to toggle user status');

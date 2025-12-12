@@ -281,7 +281,7 @@ export default function UserManagement() {
 
   const handleToggleStatus = async (user) => {
     try {
-      await toggleUserStatus(user.id, !user.active);
+      await toggleUserStatus(user.id);
       openSnackbar({
         open: true,
         message: `User ${!user.active ? 'activated' : 'deactivated'} successfully`,
