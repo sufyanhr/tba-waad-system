@@ -33,8 +33,8 @@ import {
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 import MainCard from 'components/MainCard';
-import { useUsers } from '../../../hooks/systemadmin/useUsers';
-import { useRoles } from '../../../hooks/systemadmin/useRoles';
+import { useUsers } from 'hooks/systemadmin/useUsers';
+import { useRoles } from 'hooks/systemadmin/useRoles';
 import { openSnackbar } from 'api/snackbar';
 
 // Validation schemas
