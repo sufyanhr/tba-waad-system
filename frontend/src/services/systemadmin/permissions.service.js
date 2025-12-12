@@ -7,7 +7,7 @@
  * This service now acts as a proxy to maintain backward compatibility.
  */
 
-import permissionsService from '../rbac/permissions.service';
+import rbacPermissionsService from '../rbac/permissions.service';
 import permissionMatrixService from './permissionMatrix.service';
 
 // Re-export RBAC permission CRUD operations
@@ -19,7 +19,7 @@ export const {
   updatePermission,
   deletePermission,
   getPermissionsPaginated
-} = permissionsService;
+} = rbacPermissionsService;
 
 // Re-export permission matrix operations
 export const {
@@ -36,10 +36,16 @@ export const {
 export const bulkAssign = bulkAssignPermissions;
 export const bulkRemove = bulkRemovePermissions;
 
-// Default export for backward compatibility
-export default {
-  ...permissionsService,
+// Combined service object
+const combinedService = {
+  ...rbacPermissionsService,
   ...permissionMatrixService,
   bulkAssign,
   bulkRemove
 };
+
+// Named export for hooks compatibility
+export { combinedService as permissionsService };
+
+// Default export for backward compatibility
+export default combinedService;

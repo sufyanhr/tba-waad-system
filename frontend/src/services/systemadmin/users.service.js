@@ -7,7 +7,7 @@
  * This service now acts as a proxy to maintain backward compatibility.
  */
 
-import usersService from '../rbac/users.service';
+import rbacUsersService from '../rbac/users.service';
 import userManagementService from './userManagement.service';
 
 // Re-export RBAC user CRUD operations
@@ -19,7 +19,7 @@ export const {
   updateUser,
   deleteUser,
   getUsersPaginated
-} = usersService;
+} = rbacUsersService;
 
 // Re-export user management operations
 export const {
@@ -29,8 +29,14 @@ export const {
   removeRoles
 } = userManagementService;
 
-// Default export for backward compatibility
-export default {
-  ...usersService,
+// Combined service object
+const combinedService = {
+  ...rbacUsersService,
   ...userManagementService
 };
+
+// Named export for hooks compatibility
+export { combinedService as usersService };
+
+// Default export for backward compatibility
+export default combinedService;

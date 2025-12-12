@@ -10,6 +10,31 @@ import authReducer from 'contexts/auth-reducer/auth';
 import Loader from 'components/Loader';
 import axios from 'utils/axios';
 import { useRBACStore } from 'api/rbac';
+const isDevAuth = import.meta.env.VITE_DEV_AUTH === 'true';
+
+useEffect(() => {
+  if (isDevAuth) {
+    dispatch({
+      type: LOGIN,
+      payload: {
+        user: {
+          id: 1,
+          email: 'admin@dev.local',
+          name: 'SUPER ADMIN',
+          roles: ['SUPER_ADMIN'],
+          companyId: 1
+        },
+        token: 'DEV_TOKEN'
+      }
+    });
+
+    setInitialized(true);
+    console.warn('⚠️ DEV AUTH MODE ENABLED (SUPER_ADMIN)');
+    return;
+  }
+
+  // 👇 الكود الحقيقي يبقى كما هو
+}, []);
 
 // ==============================|| INITIAL STATE ||============================== //
 

@@ -1,4 +1,5 @@
 import { RouterProvider } from 'react-router-dom';
+import { Suspense } from 'react';
 
 // project imports
 import router from 'routes';
@@ -10,6 +11,7 @@ import ScrollTop from 'components/ScrollTop';
 import Snackbar from 'components/@extended/Snackbar';
 import Notistack from 'components/third-party/Notistack';
 import Metrics from 'metrics';
+import Loader from 'components/Loader';
 
 // auth-provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
@@ -26,12 +28,12 @@ export default function App() {
             <ScrollTop>
               <AuthProvider>
                 <CompanyProvider>
-                  <>
-                    <Notistack>
+                  <Notistack>
+                    <Suspense fallback={<Loader />}>
                       <RouterProvider router={router} />
-                      <Snackbar />
-                    </Notistack>
-                  </>
+                    </Suspense>
+                    <Snackbar />
+                  </Notistack>
                 </CompanyProvider>
               </AuthProvider>
             </ScrollTop>

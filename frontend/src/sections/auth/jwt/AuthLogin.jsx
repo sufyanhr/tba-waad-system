@@ -25,8 +25,6 @@ import AnimateButton from 'components/@extended/AnimateButton';
 
 import useAuth from 'hooks/useAuth';
 
-import { fetcher } from 'utils/axios';
-
 // assets
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
 import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';

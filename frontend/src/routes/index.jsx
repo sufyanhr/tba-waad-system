@@ -15,10 +15,10 @@ import LoginRoutes from './LoginRoutes';
 const router = createBrowserRouter(
   [
     // STEP 1: Redirect root to login (safe public route)
-    {
-      path: '/',
-      element: <Navigate to="/login" replace />
-    },
+    // {
+    //   path: '/',
+    //   element: <Navigate to="/login" replace />
+    // },
     
     // STEP 2: LoginRoutes FIRST (public routes)
     LoginRoutes,

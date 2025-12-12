@@ -7,7 +7,7 @@
  * This service now acts as a proxy to maintain backward compatibility.
  */
 
-import rolesService from '../rbac/roles.service';
+import rbacRolesService from '../rbac/roles.service';
 import roleManagementService from './roleManagement.service';
 
 // Re-export RBAC role CRUD operations
@@ -21,15 +21,21 @@ export const {
   getRolesPaginated,
   assignPermissions,
   removePermissions
-} = rolesService;
+} = rbacRolesService;
 
 // Re-export role management operations
 export const {
   getUsersWithRole
 } = roleManagementService;
 
-// Default export for backward compatibility
-export default {
-  ...rolesService,
+// Combined service object
+const combinedService = {
+  ...rbacRolesService,
   ...roleManagementService
 };
+
+// Named export for hooks compatibility
+export { combinedService as rolesService };
+
+// Default export for backward compatibility
+export default combinedService;

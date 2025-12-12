@@ -241,7 +241,6 @@ export const JWTProvider = ({ children }) => {
 
   // CRITICAL FIX: Show loader with timeout warning
   if (!state.isInitialized) {
-    console.log('🔄 JWTContext: Showing loader (waiting for initialization)...');
     return <Loader />;
   }
 

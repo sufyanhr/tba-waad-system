@@ -26,6 +26,10 @@ const LoginRoutes = {
   children: [
     // PUBLIC AUTH ROUTES (NO RouteGuard)
     {
+      index: true,
+      element: <JwtAuthLogin />
+    },
+    {
       path: 'login',
       element: <JwtAuthLogin />
     },
