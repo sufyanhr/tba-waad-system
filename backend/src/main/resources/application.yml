@@ -16,7 +16,7 @@ spring:
             required: true
       debug: false
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/tba_waad_system}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tba_waad_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:12345}
     driver-class-name: org.postgresql.Driver
@@ -25,7 +25,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
