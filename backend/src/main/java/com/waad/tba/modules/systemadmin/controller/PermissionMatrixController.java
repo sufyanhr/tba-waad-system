@@ -28,12 +28,15 @@ import lombok.extern.slf4j.Slf4j;
  * Permission Matrix Controller
  * Phase 2 - System Administration
  * 
- * REST API for permission matrix and permission assignments (SUPER_ADMIN only)
- * Base path: /api/admin/permissions
+ * REST API for permission matrix and role-permission assignments (SUPER_ADMIN only)
+ * Base path: /api/admin/permission-matrix
+ * 
+ * NOTE: This controller manages ONLY permission-role relationships and matrix views.
+ * For Permission CRUD operations, use /api/admin/permissions (PermissionController in RBAC module).
  */
 @RestController
-@RequestMapping("/api/admin/permissions")
-@Tag(name = "Permission Matrix", description = "Permission matrix and assignments (SUPER_ADMIN only)")
+@RequestMapping("/api/admin/permission-matrix")
+@Tag(name = "Permission Matrix", description = "Permission matrix and role-permission assignments (SUPER_ADMIN only)")
 @Slf4j
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -42,55 +45,23 @@ public class PermissionMatrixController {
     private final PermissionMatrixService permissionService;
 
     /**
-     * GET /api/admin/permissions
-     * Get all permissions
-     */
-    @GetMapping
-    @Operation(summary = "Get all permissions", description = "Retrieve all permissions in the system")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Permissions retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - SUPER_ADMIN only")
-    })
-    public ApiResponse<List<Map<String, Object>>> getAllPermissions() {
-        log.info("GET /api/admin/permissions");
-        List<Map<String, Object>> permissions = permissionService.getAllPermissions();
-        return ApiResponse.success("Permissions retrieved successfully", permissions);
-    }
-
-    /**
-     * GET /api/admin/permissions/matrix
+     * GET /api/admin/permission-matrix
      * Get permission matrix (roles × permissions)
      */
-    @GetMapping("/matrix")
+    @GetMapping
     @Operation(summary = "Get permission matrix", description = "Build complete permission matrix (all roles × all permissions)")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Permission matrix built successfully"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - SUPER_ADMIN only")
     })
     public ApiResponse<PermissionMatrixDto> getPermissionMatrix() {
-        log.info("GET /api/admin/permissions/matrix");
+        log.info("GET /api/admin/permission-matrix");
         PermissionMatrixDto matrix = permissionService.getPermissionMatrix();
         return ApiResponse.success("Permission matrix built successfully", matrix);
     }
 
     /**
-     * GET /api/admin/permissions/search
-     * Search permissions
-     */
-    @GetMapping("/search")
-    @Operation(summary = "Search permissions", description = "Search permissions by name or description")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Search completed successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - SUPER_ADMIN only")
-    })
-    public ApiResponse<List<Map<String, Object>>> searchPermissions(@RequestParam String q) {
-        log.info("GET /api/admin/permissions/search?q={}", q);
-        List<Map<String, Object>> permissions = permissionService.searchPermissions(q);
-        return ApiResponse.success("Search completed successfully", permissions);
-    }
-
-    /**
-     * POST /api/admin/permissions/assign
+     * POST /api/admin/permission-matrix/assign
      * Assign permission to role
      */
     @PostMapping("/assign")
@@ -102,7 +73,7 @@ public class PermissionMatrixController {
     })
     public ApiResponse<Void> assignPermissionToRole(@RequestBody Map<String, Long> payload,
                                                      Authentication authentication) {
-        log.info("POST /api/admin/permissions/assign");
+        log.info("POST /api/admin/permission-matrix/assign");
         Long roleId = payload.get("roleId");
         Long permissionId = payload.get("permissionId");
         
@@ -116,7 +87,7 @@ public class PermissionMatrixController {
     }
 
     /**
-     * POST /api/admin/permissions/remove
+     * POST /api/admin/permission-matrix/remove
      * Remove permission from role
      */
     @PostMapping("/remove")
@@ -128,7 +99,7 @@ public class PermissionMatrixController {
     })
     public ApiResponse<Void> removePermissionFromRole(@RequestBody Map<String, Long> payload,
                                                        Authentication authentication) {
-        log.info("POST /api/admin/permissions/remove");
+        log.info("POST /api/admin/permission-matrix/remove");
         Long roleId = payload.get("roleId");
         Long permissionId = payload.get("permissionId");
         
@@ -142,7 +113,7 @@ public class PermissionMatrixController {
     }
 
     /**
-     * GET /api/admin/permissions/role/{roleId}
+     * GET /api/admin/permission-matrix/role/{roleId}
      * Get permissions for specific role
      */
     @GetMapping("/role/{roleId}")
@@ -153,13 +124,13 @@ public class PermissionMatrixController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - SUPER_ADMIN only")
     })
     public ApiResponse<List<Map<String, Object>>> getPermissionsForRole(@PathVariable Long roleId) {
-        log.info("GET /api/admin/permissions/role/{}", roleId);
+        log.info("GET /api/admin/permission-matrix/role/{}", roleId);
         List<Map<String, Object>> permissions = permissionService.getPermissionsForRole(roleId);
         return ApiResponse.success("Permissions retrieved successfully", permissions);
     }
 
     /**
-     * GET /api/admin/permissions/user/{userId}
+     * GET /api/admin/permission-matrix/user/{userId}
      * Get effective permissions for user
      */
     @GetMapping("/user/{userId}")
@@ -171,13 +142,13 @@ public class PermissionMatrixController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - SUPER_ADMIN only")
     })
     public ApiResponse<Set<String>> getEffectivePermissionsForUser(@PathVariable Long userId) {
-        log.info("GET /api/admin/permissions/user/{}", userId);
+        log.info("GET /api/admin/permission-matrix/user/{}", userId);
         Set<String> permissions = permissionService.getEffectivePermissionsForUser(userId);
         return ApiResponse.success("Effective permissions retrieved successfully", permissions);
     }
 
     /**
-     * POST /api/admin/permissions/bulk-assign
+     * POST /api/admin/permission-matrix/bulk-assign
      * Bulk assign permissions to role
      */
     @PostMapping("/bulk-assign")
@@ -189,12 +160,12 @@ public class PermissionMatrixController {
     })
     public ApiResponse<Void> bulkAssignPermissions(@RequestBody Map<String, Object> payload,
                                                    Authentication authentication) {
-        log.info("POST /api/admin/permissions/bulk-assign");
+        log.info("POST /api/admin/permission-matrix/bulk-assign");
         Long roleId = ((Number) payload.get("roleId")).longValue();
         @SuppressWarnings("unchecked")
         List<Number> permissionIds = (List<Number>) payload.get("permissionIds");
         
-        if (roleId == null || permissionIds == null || permissionIds.isEmpty()) {
+        if (permissionIds == null || permissionIds.isEmpty()) {
             return ApiResponse.error("roleId and permissionIds are required");
         }
         
@@ -208,7 +179,7 @@ public class PermissionMatrixController {
     }
 
     /**
-     * POST /api/admin/permissions/bulk-remove
+     * POST /api/admin/permission-matrix/bulk-remove
      * Bulk remove permissions from role
      */
     @PostMapping("/bulk-remove")
@@ -220,12 +191,12 @@ public class PermissionMatrixController {
     })
     public ApiResponse<Void> bulkRemovePermissions(@RequestBody Map<String, Object> payload,
                                                    Authentication authentication) {
-        log.info("POST /api/admin/permissions/bulk-remove");
+        log.info("POST /api/admin/permission-matrix/bulk-remove");
         Long roleId = ((Number) payload.get("roleId")).longValue();
         @SuppressWarnings("unchecked")
         List<Number> permissionIds = (List<Number>) payload.get("permissionIds");
         
-        if (roleId == null || permissionIds == null || permissionIds.isEmpty()) {
+        if (permissionIds == null || permissionIds.isEmpty()) {
             return ApiResponse.error("roleId and permissionIds are required");
         }
         
