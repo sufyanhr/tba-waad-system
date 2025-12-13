@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer, useCallback } from 'react';
+import { createContext, useEffect, useReducer, useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { jwtDecode } from 'jwt-decode';
 
@@ -208,54 +208,64 @@ export const JWTProvider = ({ children }) => {
     return '/profile';
   }, []);
 
-  // ==============================|| RBAC HELPER METHODS ||============================== //
+  // ==============================|| SIMPLIFIED RBAC HELPERS ||============================== //
 
-  const hasRole = (roleName) => {
-    if (!state.roles || state.roles.length === 0) return false;
-    return state.roles.includes(roleName);
+  /**
+   * Get user's primary role (simplified - each user has ONE role)
+   * @returns {string|null}
+   */
+  const getPrimaryRole = () => {
+    if (!state.roles || state.roles.length === 0) return null;
+    return state.roles[0];
   };
 
-  const hasAnyRole = (roleNames) => {
-    if (!state.roles || state.roles.length === 0) return false;
-    return roleNames.some((role) => state.roles.includes(role));
+  /**
+   * Check if user's role matches one of the allowed roles
+   * @param {string[]} allowedRoles - Array of allowed role names
+   * @returns {boolean}
+   */
+  const hasRole = (allowedRoles) => {
+    const primaryRole = getPrimaryRole();
+    if (!primaryRole) return false;
+    
+    // SUPER_ADMIN bypasses all checks
+    if (primaryRole === 'SUPER_ADMIN') return true;
+    
+    // Check if primary role is in allowed list
+    return allowedRoles.includes(primaryRole);
   };
 
-  const hasAllRoles = (roleNames) => {
-    if (!state.roles || state.roles.length === 0) return false;
-    return roleNames.every((role) => state.roles.includes(role));
-  };
-
-  const hasPermission = (permission) => {
-    if (!state.permissions || state.permissions.length === 0) return false;
-    return state.permissions.includes(permission);
-  };
-
+  /**
+   * Check if user is ADMIN
+   * @returns {boolean}
+   */
   const isAdmin = () => {
-    return hasRole('ADMIN');
+    return getPrimaryRole() === 'ADMIN';
   };
 
-  const isTBAStaff = () => {
-    if (!state.roles || state.roles.length === 0) return false;
-    return state.roles.some((role) => role.startsWith('TBA_'));
+  /**
+   * Check if user is SUPER_ADMIN
+   * @returns {boolean}
+   */
+  const isSuperAdmin = () => {
+    return getPrimaryRole() === 'SUPER_ADMIN';
   };
 
-  // CRITICAL FIX: Show loader with timeout warning
+  // Show loader during initialization
   if (!state.isInitialized) {
     return <Loader />;
   }
 
   return (
-    <JWTContext.Provider 
-      value={{ 
-        ...state, 
-        login, 
-        logout, 
-        hasRole, 
-        hasAnyRole, 
-        hasAllRoles, 
-        hasPermission,
+    <JWTContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+        hasRole,
+        getPrimaryRole,
         isAdmin,
-        isTBAStaff,
+        isSuperAdmin,
         getRedirectPath
       }}
     >
@@ -269,3 +279,17 @@ JWTProvider.propTypes = {
 };
 
 export default JWTContext;
+
+// ==============================|| HOOK ||============================== //
+
+/**
+ * Simplified useAuth hook
+ * @returns {Object} Auth context with simplified RBAC
+ */
+export const useAuth = () => {
+  const context = useContext(JWTContext);
+  if (!context) {
+    throw new Error('useAuth must be used within JWTProvider');
+  }
+  return context;
+};

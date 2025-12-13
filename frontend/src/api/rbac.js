@@ -161,44 +161,31 @@ export const useRBACStore = create((set, get) => ({
   },
 
   /**
-   * Check if user has any of the required roles
-   * SUPER_ADMIN bypasses all role checks
-   * @param {string[]} requiredRoles - Array of role names
-   * @returns {boolean}
+   * Get user's primary role (simplified - each user has ONE role)
+   * @returns {string|null}
    */
-  hasAnyRole: (requiredRoles) => {
+  getPrimaryRole: () => {
     const { roles } = get();
-    // SUPER_ADMIN bypasses all checks
-    if (roles.includes('SUPER_ADMIN')) return true;
-    if (!requiredRoles || requiredRoles.length === 0) return true;
-    return roles.some((role) => requiredRoles.includes(role));
+    return roles.length > 0 ? roles[0] : null;
   },
 
   /**
-   * Check if user has all required roles
-   * SUPER_ADMIN bypasses all role checks
-   * @param {string[]} requiredRoles - Array of role names
+   * Check if user's role matches one of the allowed roles (simplified)
+   * @param {string[]} allowedRoles - Array of allowed role names
    * @returns {boolean}
    */
-  hasAllRoles: (requiredRoles) => {
+  hasRole: (allowedRoles) => {
     const { roles } = get();
+    const primaryRole = roles[0];
+    
     // SUPER_ADMIN bypasses all checks
-    if (roles.includes('SUPER_ADMIN')) return true;
-    if (!requiredRoles || requiredRoles.length === 0) return true;
-    return requiredRoles.every((role) => roles.includes(role));
-  },
-
-  /**
-   * Check if user has specific permission
-   * SUPER_ADMIN bypasses all permission checks
-   * @param {string} permission - Permission name
-   * @returns {boolean}
-   */
-  hasPermission: (permission) => {
-    const { roles, permissions } = get();
-    // SUPER_ADMIN bypasses all checks
-    if (roles.includes('SUPER_ADMIN')) return true;
-    return permissions.includes(permission);
+    if (primaryRole === 'SUPER_ADMIN') return true;
+    
+    // If no specific roles required, authenticated is enough
+    if (!allowedRoles || allowedRoles.length === 0) return true;
+    
+    // Simple check: is primary role in allowed list?
+    return allowedRoles.includes(primaryRole);
   },
 
   /**
@@ -207,7 +194,7 @@ export const useRBACStore = create((set, get) => ({
    */
   isEmployerRole: () => {
     const { roles } = get();
-    return roles.includes('EMPLOYER');
+    return roles[0] === 'EMPLOYER';
   },
 
   /**
@@ -217,15 +204,24 @@ export const useRBACStore = create((set, get) => ({
    */
   canSwitchEmployer: () => {
     const { roles } = get();
-    return !roles.includes('EMPLOYER');
+    return roles[0] !== 'EMPLOYER';
   }
 }));
 
-// ==============================|| EXPORTED HOOKS ||============================== //
+// ==============================|| EXPORTED HOOKS - SIMPLIFIED ||============================== //
 
 /**
- * Hook to get user roles
- * @returns {string[]} Array of role names
+ * Hook to get user's primary role (simplified - each user has ONE role)
+ * @returns {string|null}
+ */
+export const useRole = () => {
+  const roles = useRBACStore((state) => state.roles);
+  return roles.length > 0 ? roles[0] : null;
+};
+
+/**
+ * Hook to get all user roles (for compatibility, but users should have ONE role)
+ * @returns {string[]}
  */
 export const useRoles = () => {
   return useRBACStore((state) => state.roles);
@@ -249,38 +245,34 @@ export const useEmployerContext = () => {
 
 /**
  * Hook to get current user data
- * @returns {Object|null} User object
+ * @returns {Object|null}
  */
 export const useUser = () => {
   return useRBACStore((state) => state.user);
 };
 
 /**
- * Hook to get complete RBAC state and methods
- * @returns {Object} Complete RBAC store
+ * Hook to get simplified RBAC state (no complex permission logic)
+ * @returns {Object}
  */
 export const useRBAC = () => {
   const roles = useRBACStore((state) => state.roles);
-  const permissions = useRBACStore((state) => state.permissions);
   const employerId = useRBACStore((state) => state.employerId);
   const user = useRBACStore((state) => state.user);
   const isInitialized = useRBACStore((state) => state.isInitialized);
-  const hasAnyRole = useRBACStore((state) => state.hasAnyRole);
-  const hasAllRoles = useRBACStore((state) => state.hasAllRoles);
-  const hasPermission = useRBACStore((state) => state.hasPermission);
+  const hasRole = useRBACStore((state) => state.hasRole);
+  const getPrimaryRole = useRBACStore((state) => state.getPrimaryRole);
   const isSuperAdmin = useRBACStore((state) => state.isSuperAdmin);
   const isEmployerRole = useRBACStore((state) => state.isEmployerRole);
   const canSwitchEmployer = useRBACStore((state) => state.canSwitchEmployer);
 
   return {
     roles,
-    permissions,
+    primaryRole: getPrimaryRole(),
     employerId,
     user,
     isInitialized,
-    hasAnyRole,
-    hasAllRoles,
-    hasPermission,
+    hasRole,
     isSuperAdmin: isSuperAdmin(),
     isEmployerRole: isEmployerRole(),
     canSwitch: canSwitchEmployer()

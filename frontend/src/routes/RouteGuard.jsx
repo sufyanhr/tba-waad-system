@@ -1,30 +1,29 @@
 import { Navigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useRBAC } from 'api/rbac';
+import { useAuth } from 'contexts/JWTContext';
 
-// ==============================|| ROUTE GUARD - RBAC PROTECTION - FIXED ||============================== //
+// ==============================|| SIMPLIFIED ROUTE GUARD ||============================== //
 
 /**
- * RouteGuard Component (FIXED)
- * Protects routes based on user roles (RBAC)
- * 
- * CRITICAL FIXES:
- * 1. Never return null (causes blank screen)
- * 2. Show proper loading state during RBAC initialization
- * 3. Add console logs for debugging
- * 4. Handle all edge cases
- * 
+ * RouteGuard Component - SIMPLIFIED
+ *
+ * Simplified Rules:
+ * 1. Check if user is authenticated
+ * 2. If allowedRoles specified, check if user's role is in the list
+ * 3. Frontend only hides/shows - Backend is the authority
+ * 4. Never return null (prevents blank screens)
+ * 5. Each user has ONE primary role (first role in array)
+ *
  * @param {Object} props
- * @param {string[]} props.allowedRoles - Array of role names that can access this route
+ * @param {string[]|null} props.allowedRoles - Array of allowed role names (optional)
  * @param {React.ReactNode} props.children - Component to render if authorized
  * @returns {React.ReactNode}
  */
-const RouteGuard = ({ allowedRoles = [], children }) => {
-  const { roles, isInitialized, isSuperAdmin } = useRBAC();
+const RouteGuard = ({ allowedRoles = null, children }) => {
+  const { isLoggedIn, isInitialized, user } = useAuth();
 
-  // FIX #1: Show loading spinner instead of null
+  // Loading state during initialization
   if (!isInitialized) {
-    console.log('🔄 RouteGuard: Waiting for RBAC initialization...');
     return (
       <Box
         sx={{
@@ -44,34 +43,37 @@ const RouteGuard = ({ allowedRoles = [], children }) => {
     );
   }
 
-  // FIX #2: Check for empty roles (not logged in)
-  if (!roles || roles.length === 0) {
-    console.warn('🚫 RouteGuard: No roles found (user not logged in), redirecting to /login');
+  // Not authenticated - redirect to login
+  if (!isLoggedIn || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // SUPER_ADMIN BYPASS: Full unrestricted access
-  if (isSuperAdmin) {
-    console.log('👑 RouteGuard: SUPER_ADMIN detected - Bypassing all checks');
-    return children;
-  }
+  // Get user's primary role (users have ONE role)
+  const userRole = user.roles?.[0] || null;
 
-  // FIX #3: If no specific roles required, allow access (authenticated route)
-  if (!allowedRoles || allowedRoles.length === 0) {
-    console.log('✅ RouteGuard: No specific roles required, access granted');
-    return children;
-  }
-
-  // FIX #4: Check if user has any of the required roles
-  const hasAccess = roles.some((role) => allowedRoles.includes(role));
-
-  if (!hasAccess) {
-    console.warn('🚫 RouteGuard: Access denied. User roles:', roles, 'Required:', allowedRoles);
+  if (!userRole) {
+    // User has no role - redirect to forbidden
     return <Navigate to="/403" replace />;
   }
 
-  // FIX #5: User has valid role, render protected component
-  console.log('✅ RouteGuard: Access granted. User roles:', roles);
+  // SUPER_ADMIN has unrestricted access
+  if (userRole === 'SUPER_ADMIN') {
+    return children;
+  }
+
+  // If no specific roles required, only authentication check needed
+  if (!allowedRoles || allowedRoles.length === 0) {
+    return children;
+  }
+
+  // Simple check: is user's role in allowed list?
+  const hasAccess = allowedRoles.includes(userRole);
+
+  if (!hasAccess) {
+    return <Navigate to="/403" replace />;
+  }
+
+  // Access granted
   return children;
 };
 
