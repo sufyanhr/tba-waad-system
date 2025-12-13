@@ -119,17 +119,6 @@ const AccountSettings = Loadable(lazy(() => import('pages/profile/AccountSetting
 
 const AuditLog = Loadable(lazy(() => import('pages/audit')));
 
-// ==============================|| LAZY LOADING - SYSTEM ADMINISTRATION ||============================== //
-// DISABLED: System Admin UI has been removed from frontend
-// Backend APIs remain available for direct access if needed
-
-// const UserManagement = Loadable(lazy(() => import('pages/system-admin/UserManagement')));
-// const RoleManagement = Loadable(lazy(() => import('pages/system-admin/RoleManagement')));
-// const PermissionMatrix = Loadable(lazy(() => import('pages/system-admin/PermissionMatrix')));
-// const FeatureFlags = Loadable(lazy(() => import('pages/system-admin/FeatureFlags')));
-// const ModuleAccess = Loadable(lazy(() => import('pages/system-admin/ModuleAccess')));
-// const SystemAuditLog = Loadable(lazy(() => import('pages/system-admin/AuditLog')));
-
 // ==============================|| LAZY LOADING - ERROR PAGES ||============================== //
 
 const NoAccess = Loadable(lazy(() => import('pages/errors/NoAccess')));
@@ -611,13 +600,6 @@ const MainRoutes = {
           <AuditLog />
         </RouteGuard>
       )
-    },
-
-    // System Administration Routes - DISABLED
-    // All system-admin/* routes now redirect to Access Denied page
-    {
-      path: 'system-admin/*',
-      element: <NoAccess />
     },
 
     // Error Pages

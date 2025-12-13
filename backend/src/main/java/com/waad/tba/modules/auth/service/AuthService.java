@@ -1,19 +1,10 @@
 package com.waad.tba.modules.auth.service;
 
-import com.waad.tba.common.exception.ResourceNotFoundException;
-import com.waad.tba.core.email.EmailService;
-import com.waad.tba.modules.auth.dto.LoginRequest;
-import com.waad.tba.modules.auth.dto.LoginResponse;
-import com.waad.tba.modules.auth.dto.RegisterRequest;
-import com.waad.tba.modules.auth.model.PasswordResetToken;
-import com.waad.tba.modules.auth.repository.PasswordResetTokenRepository;
-import com.waad.tba.modules.rbac.entity.Permission;
-import com.waad.tba.modules.rbac.entity.Role;
-import com.waad.tba.modules.rbac.entity.User;
-import com.waad.tba.modules.rbac.repository.UserRepository;
-import com.waad.tba.security.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,10 +12,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import com.waad.tba.common.exception.ResourceNotFoundException;
+import com.waad.tba.core.email.EmailService;
+import com.waad.tba.modules.auth.dto.LoginRequest;
+import com.waad.tba.modules.auth.dto.LoginResponse;
+import com.waad.tba.modules.auth.dto.RegisterRequest;
+import com.waad.tba.modules.auth.model.PasswordResetToken;
+import com.waad.tba.modules.auth.repository.PasswordResetTokenRepository;
+import com.waad.tba.modules.rbac.entity.Role;
+import com.waad.tba.modules.rbac.entity.User;
+import com.waad.tba.modules.rbac.repository.UserRepository;
+import com.waad.tba.security.JwtTokenProvider;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -65,15 +66,9 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Extract roles and permissions
+        // Extract roles only (no permissions)
         List<String> roles = user.getRoles().stream()
                 .map(Role::getName)
-                .collect(Collectors.toList());
-
-        List<String> permissions = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .map(Permission::getName)
-                .distinct()
                 .collect(Collectors.toList());
 
         // Generate JWT token
@@ -89,9 +84,8 @@ public class AuthService {
                         .fullName(user.getFullName())
                         .email(user.getEmail())
                         .roles(roles)
-                        .permissions(permissions)
-                        .employerId(user.getEmployerId())   // Phase 8: Add employer ID
-                        .companyId(user.getCompanyId())     // Phase 8: Add company ID
+                        .employerId(user.getEmployerId())
+                        .companyId(user.getCompanyId())
                         .build())
                 .build();
     }
@@ -129,6 +123,10 @@ public class AuthService {
         return login(loginRequest);
     }
 
+    /**
+     * Get current authenticated user info
+     * Simplified - Role-based only (no permissions)
+     */
     @Transactional(readOnly = true)
     public LoginResponse.UserInfo getCurrentUser(String token) {
         String username = jwtTokenProvider.getUsernameFromToken(token);
@@ -140,21 +138,14 @@ public class AuthService {
                 .map(Role::getName)
                 .collect(Collectors.toList());
 
-        List<String> permissions = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .map(Permission::getName)
-                .distinct()
-                .collect(Collectors.toList());
-
         return LoginResponse.UserInfo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .roles(roles)
-                .permissions(permissions)
-                .employerId(user.getEmployerId())   // Phase 8: Add employer ID
-                .companyId(user.getCompanyId())     // Phase 8: Add company ID
+                .employerId(user.getEmployerId())
+                .companyId(user.getCompanyId())
                 .build();
     }
 

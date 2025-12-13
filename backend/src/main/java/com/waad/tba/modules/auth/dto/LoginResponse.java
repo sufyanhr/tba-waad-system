@@ -15,6 +15,11 @@ public class LoginResponse {
     private String token;
     private UserInfo user;
     
+    /**
+     * Simplified UserInfo DTO - Role-Based Only
+     * Each user has exactly ONE role
+     * No permissions array (Backend is the authority)
+     */
     @Data
     @Builder
     @NoArgsConstructor
@@ -24,9 +29,8 @@ public class LoginResponse {
         private String username;
         private String fullName;
         private String email;
-        private List<String> roles;
-        private List<String> permissions;
-        private Long employerId;  // Phase 8: Employer ID for EMPLOYER_ADMIN
-        private Long companyId;   // Phase 8: Company ID for INSURANCE_ADMIN
+        private List<String> roles;      // User's roles (typically ONE role)
+        private Long employerId;         // For COMPANY_ADMIN role
+        private Long companyId;          // For INSURANCE_ADMIN role
     }
 }
